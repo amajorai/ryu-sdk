@@ -1,0 +1,9 @@
+[workspace]
+resolver = "2"
+members = [
+  "crates/core/kernel-contracts",
+  "crates/sdk/core",
+  "crates/sdk/ffi",
+  "crates/sdk/uniffi",
+  "crates/sdk/napi",
+]

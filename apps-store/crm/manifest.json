@@ -1,0 +1,552 @@
+{
+  "tags": ["crm", "contacts", "pipeline", "deals", "sales"],
+  "author": { "name": "Ryu", "url": "https://ryuhq.com" },
+  "repository": "https://github.com/amajorai/ryu-crm",
+  "homepage": "https://github.com/amajorai/ryu-crm",
+  "privacyPolicyUrl": "https://ryuhq.com/privacy",
+  "termsOfServiceUrl": "https://ryuhq.com/terms",
+  "id": "@ryu/crm",
+  "name": "Harbor",
+  "version": "0.1.14",
+  "stability": "experimental",
+  "category": "Productivity",
+  "description": "A CRM that starts as a data model rather than a fixed set of screens. Harbor ships the five objects every pipeline needs — companies, people, deals, notes, tasks — and then gets out of the way: add your own objects, give any of them typed fields (currency, status, rating, multi-select, or a relation to another object), and every view, filter, board, and report picks them up without a migration or a settings trip. Records are validated value bags, so a `stage` that used to be free text can become a status field with colours and the old rows keep working. Relations are materialised as real edges in both directions, which is why a company page can show its people, its open deals, and every note anyone wrote against any of them without you modelling the reverse side. Each record carries one unified timeline — notes, calls, meetings, tasks, and the field and stage changes the store writes itself — so \"what happened with this account\" is one read, not four. CSV import is a first-class flow, not an afterthought: drop a file, see inferred columns with sampled values, map each to an existing field or make a new one, pick a dedupe key, then read a dry run that tells you exactly how many rows would be created, updated, and skipped before anything is written. Duplicates get found and merged field by field, with activities, list memberships, and relation edges reparented onto the survivor. Everything lives in one SQLite database the node owns, indexed with FTS5 for search, and the whole app runs as a sidecar process reached over loopback — no cloud tenant, no seat count, and no third party holding your pipeline.",
+  "tagline": "Your pipeline, your schema, your machine",
+  "keywords": ["crm", "contacts", "pipeline", "deals", "sales"],
+  "icon": "user-group",
+  "iconDither": { "from": 205, "to": "transparent", "direction": "down" },
+  "surfaces": {
+    "gateway": { "support": "none" },
+    "core": { "support": "full" },
+    "desktop": { "support": "full" },
+    "island": { "support": "limited" },
+    "mobile": { "support": "limited" },
+    "extension": { "support": "none" },
+    "web": { "support": "full" },
+    "cli": { "support": "list" }
+  },
+  "engines": {
+    "ryu": ">=0.1.0"
+  },
+  "runnables": [
+    {
+      "id": "tool-crm-search",
+      "name": "Search CRM",
+      "kind": "tool",
+      "config": {
+        "slug": "crm.search",
+        "backend": "http",
+        "method": "POST",
+        "url": "core:/api/ext/@ryu/crm/tools/search",
+        "secret_headers": { "Authorization": "Bearer env:RYU_TOKEN" },
+        "fail_open": true,
+        "unwrap_body": true,
+        "description": "Full-text search across every CRM record on this node. Use it when you know roughly what you are looking for but not which object it lives on — it ranks hits across companies, people, deals and any custom object at once, and each hit names the field that matched with a snippet. Returns `{ok, hits:[{record_id, object, title, field, snippet}]}`. To look a record up by an exact field value instead (an email address, a domain), use `crm.find_record` — it is exact and this one is fuzzy.",
+        "input_schema": {
+          "type": "object",
+          "required": ["query"],
+          "properties": {
+            "query": { "type": "string", "description": "What to search for." },
+            "object": {
+              "type": "string",
+              "description": "Optional object slug to scope the search to, e.g. `company`, `person`, `deal`. Omit to search everything."
+            },
+            "limit": {
+              "type": "integer",
+              "description": "Max hits. Defaults to the node's page size; clamped to its ceiling."
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "tool-crm-find-record",
+      "name": "Find CRM Record",
+      "kind": "tool",
+      "config": {
+        "slug": "crm.find_record",
+        "backend": "http",
+        "method": "POST",
+        "url": "core:/api/ext/@ryu/crm/tools/find_record",
+        "secret_headers": { "Authorization": "Bearer env:RYU_TOKEN" },
+        "fail_open": true,
+        "unwrap_body": true,
+        "description": "Look records up by an EXACT field value on one object — the tool to reach for before creating anything, so you update the existing company instead of making a second one. With no `field` it matches against the object's title field. Returns `{ok, records:[…]}`, empty when nothing matches; an empty result is a normal answer, not an error.",
+        "input_schema": {
+          "type": "object",
+          "required": ["object", "value"],
+          "properties": {
+            "object": {
+              "type": "string",
+              "description": "Object slug, e.g. `company`, `person`, `deal`."
+            },
+            "field": {
+              "type": "string",
+              "description": "Field slug to match on, e.g. `email` or `domain`. Omit to match the object's title field."
+            },
+            "value": {
+              "type": "string",
+              "description": "The exact value to match."
+            },
+            "limit": {
+              "type": "integer",
+              "description": "Max records to return."
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "tool-crm-get-record",
+      "name": "Get CRM Record",
+      "kind": "tool",
+      "config": {
+        "slug": "crm.get_record",
+        "backend": "http",
+        "method": "POST",
+        "url": "core:/api/ext/@ryu/crm/tools/get_record",
+        "secret_headers": { "Authorization": "Bearer env:RYU_TOKEN" },
+        "fail_open": true,
+        "unwrap_body": true,
+        "description": "Read one record in full by id: every field value as the store normalized it, plus its related records and recent timeline. Values come back normalized rather than as they were written, so this is also how you check what an update actually stored.",
+        "input_schema": {
+          "type": "object",
+          "required": ["record_id"],
+          "properties": {
+            "record_id": {
+              "type": "string",
+              "description": "The record's id, as returned by search or find."
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "tool-crm-create-record",
+      "name": "Create CRM Record",
+      "kind": "tool",
+      "config": {
+        "slug": "crm.create_record",
+        "backend": "http",
+        "method": "POST",
+        "url": "core:/api/ext/@ryu/crm/tools/create_record",
+        "secret_headers": { "Authorization": "Bearer env:RYU_TOKEN" },
+        "fail_open": true,
+        "unwrap_body": true,
+        "description": "Create a record on an object. `values` is keyed by field slug and goes through the SAME validator the UI form uses, so a bad value is rejected rather than stored loosely — and every rejected field is reported at once, so one retry can fix them all instead of discovering them one at a time. Check for an existing record with `crm.find_record` first; this tool does not deduplicate for you. Returns `{ok:false, errors:{field: reason}}` on rejection.",
+        "input_schema": {
+          "type": "object",
+          "required": ["object", "values"],
+          "properties": {
+            "object": {
+              "type": "string",
+              "description": "Object slug, e.g. `company`, `person`, `deal`."
+            },
+            "values": {
+              "type": "object",
+              "description": "Field values keyed by field slug. Currency fields are integer cents. Dates and datetimes are RFC-3339 strings. A select or status field takes one of its declared option values.",
+              "additionalProperties": true
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "tool-crm-update-record",
+      "name": "Update CRM Record",
+      "kind": "tool",
+      "config": {
+        "slug": "crm.update_record",
+        "backend": "http",
+        "method": "POST",
+        "url": "core:/api/ext/@ryu/crm/tools/update_record",
+        "secret_headers": { "Authorization": "Bearer env:RYU_TOKEN" },
+        "fail_open": true,
+        "unwrap_body": true,
+        "description": "Merge new values into an existing record — fields you do not name are left alone, so this is safe to call with a partial set. The response names only the fields that actually CHANGED, so re-sending a value the record already had reports no change rather than pretending to have done something. Moving a status field through this tool raises the same stage-changed event a human dragging the card would.",
+        "input_schema": {
+          "type": "object",
+          "required": ["record_id", "values"],
+          "properties": {
+            "record_id": {
+              "type": "string",
+              "description": "The record to update."
+            },
+            "values": {
+              "type": "object",
+              "description": "Field values keyed by field slug. Only the fields present are touched.",
+              "additionalProperties": true
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "tool-crm-log-activity",
+      "name": "Log CRM Activity",
+      "kind": "tool",
+      "config": {
+        "slug": "crm.log_activity",
+        "backend": "http",
+        "method": "POST",
+        "url": "core:/api/ext/@ryu/crm/tools/log_activity",
+        "secret_headers": { "Authorization": "Bearer env:RYU_TOKEN" },
+        "fail_open": true,
+        "unwrap_body": true,
+        "description": "Append a note, call, or meeting to a record's timeline — how you write down what happened after a conversation so the next person reading the record sees it. Use `crm.create_task` for something still to be DONE; this is for something already done.",
+        "input_schema": {
+          "type": "object",
+          "required": ["record_id", "kind", "title"],
+          "properties": {
+            "record_id": {
+              "type": "string",
+              "description": "The record this happened against."
+            },
+            "kind": {
+              "type": "string",
+              "enum": ["note", "call", "meeting"],
+              "description": "What kind of entry this is. `field_change` and `stage_change` are written by the store itself and cannot be logged here."
+            },
+            "title": {
+              "type": "string",
+              "description": "One-line summary shown in the timeline."
+            },
+            "body": {
+              "type": "string",
+              "description": "Optional longer detail."
+            },
+            "assignee": {
+              "type": "string",
+              "description": "Optional person this is attributed to."
+            },
+            "due_at": {
+              "type": "string",
+              "description": "Ignored for notes/calls/meetings; use crm.create_task instead."
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "tool-crm-create-task",
+      "name": "Create CRM Task",
+      "kind": "tool",
+      "config": {
+        "slug": "crm.create_task",
+        "backend": "http",
+        "method": "POST",
+        "url": "core:/api/ext/@ryu/crm/tools/create_task",
+        "secret_headers": { "Authorization": "Bearer env:RYU_TOKEN" },
+        "fail_open": true,
+        "unwrap_body": true,
+        "description": "Create a follow-up task, optionally attached to a record. A task with a `due_at` is swept when it comes due and raises `task.due` exactly once, which is what makes it reachable by an automation — a task with no due time is just a to-do line and will never announce itself.",
+        "input_schema": {
+          "type": "object",
+          "required": ["title"],
+          "properties": {
+            "title": { "type": "string", "description": "What needs doing." },
+            "record_id": {
+              "type": "string",
+              "description": "Optional record to hang the task off. Omit for a standalone to-do."
+            },
+            "body": { "type": "string", "description": "Optional detail." },
+            "assignee": { "type": "string", "description": "Who owns it." },
+            "due_at": {
+              "type": "string",
+              "description": "RFC-3339 timestamp. Required if you want the task to raise `task.due` when it comes due."
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "tool-crm-pipeline",
+      "name": "CRM Pipeline Report",
+      "kind": "tool",
+      "config": {
+        "slug": "crm.pipeline",
+        "backend": "http",
+        "method": "POST",
+        "url": "core:/api/ext/@ryu/crm/tools/pipeline",
+        "secret_headers": { "Authorization": "Bearer env:RYU_TOKEN" },
+        "fail_open": true,
+        "unwrap_body": true,
+        "description": "Summarize a pipeline: record count and summed value per stage of a status field, with win rate and average age in stage. Defaults to the `deal` object and its own status and currency fields, so calling it with no arguments answers \"how is the pipeline doing\". Point `object_id` at any object that has a status field to get the same shape for it.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "object_id": {
+              "type": "string",
+              "description": "Object slug or id. Defaults to `deal`."
+            },
+            "field_id": {
+              "type": "string",
+              "description": "The status field to group by. Defaults to the object's own status field."
+            },
+            "value_field_id": {
+              "type": "string",
+              "description": "The currency/number field to sum per stage. Defaults to the object's amount field."
+            },
+            "include_closed": {
+              "type": "boolean",
+              "description": "Include stages marked as closed/won/lost. Defaults to false, i.e. open pipeline only."
+            }
+          }
+        }
+      }
+    }
+  ],
+  "sidecars": [
+    {
+      "name": "crm",
+      "process": {
+        "kind": "local",
+        "command": "ryu-crm",
+        "command_env": "RYU_CRM_BIN",
+        "port_env": "RYU_CRM_PORT"
+      },
+      "port": 8009,
+      "health_path": "/health",
+      "http": {
+        "mount": "/api/crm",
+        "public_mount": "/api/crm",
+        "routes": [
+          { "path": "/health" },
+          { "path": "/schema", "permission": "crm.admin" },
+          { "path": "/objects", "permission": "crm.view" },
+          { "path": "/objects/:object", "permission": "crm.view" },
+          { "path": "/objects/:object/fields", "permission": "crm.view" },
+          {
+            "path": "/objects/:object/fields/reorder",
+            "permission": "crm.admin"
+          },
+          { "path": "/fields/:field_id", "permission": "crm.admin" },
+          {
+            "path": "/objects/:object/records",
+            "method": "GET",
+            "permission": "crm.view"
+          },
+          {
+            "path": "/objects/:object/records",
+            "method": "POST",
+            "permission": "crm.edit"
+          },
+          {
+            "path": "/objects/:object/records/query",
+            "permission": "crm.view"
+          },
+          {
+            "path": "/objects/:object/records/validate",
+            "permission": "crm.edit"
+          },
+          { "path": "/objects/:object/duplicates", "permission": "crm.view" },
+          {
+            "path": "/records/:record_id",
+            "method": "GET",
+            "permission": "crm.view"
+          },
+          {
+            "path": "/records/:record_id",
+            "method": "PATCH",
+            "permission": "crm.edit"
+          },
+          { "path": "/records/:record_id/restore", "permission": "crm.edit" },
+          { "path": "/records/:record_id/links", "permission": "crm.edit" },
+          { "path": "/records/:record_id/unlink", "permission": "crm.edit" },
+          { "path": "/records/:record_id/related", "permission": "crm.view" },
+          { "path": "/merge/preview", "permission": "crm.admin" },
+          { "path": "/merge", "permission": "crm.admin" },
+          { "path": "/objects/:object/views", "permission": "crm.edit" },
+          { "path": "/views/:view_id", "permission": "crm.edit" },
+          { "path": "/views/:view_id/default", "permission": "crm.edit" },
+          { "path": "/views/:view_id/run", "permission": "crm.view" },
+          { "path": "/lists", "permission": "crm.edit" },
+          { "path": "/lists/:list_id", "permission": "crm.edit" },
+          { "path": "/lists/:list_id/fields", "permission": "crm.edit" },
+          { "path": "/lists/:list_id/entries", "permission": "crm.edit" },
+          { "path": "/lists/:list_id/entries/query", "permission": "crm.view" },
+          {
+            "path": "/lists/:list_id/entries/reorder",
+            "permission": "crm.edit"
+          },
+          { "path": "/list-entries/:entry_id", "permission": "crm.edit" },
+          {
+            "path": "/records/:record_id/activities",
+            "permission": "crm.edit"
+          },
+          { "path": "/activities", "permission": "crm.edit" },
+          { "path": "/activities/:activity_id", "permission": "crm.edit" },
+          {
+            "path": "/activities/:activity_id/complete",
+            "permission": "crm.edit"
+          },
+          { "path": "/tasks", "permission": "crm.edit" },
+          { "path": "/imports", "permission": "crm.admin" },
+          { "path": "/imports/:import_id", "permission": "crm.admin" },
+          { "path": "/imports/:import_id/mapping", "permission": "crm.admin" },
+          { "path": "/imports/:import_id/preview", "permission": "crm.admin" },
+          { "path": "/imports/:import_id/apply", "permission": "crm.admin" },
+          { "path": "/exports/views/:view_id", "permission": "crm.view" },
+          { "path": "/search", "permission": "crm.view" },
+          { "path": "/summary", "permission": "crm.view" },
+          { "path": "/reindex", "permission": "crm.admin" },
+          { "path": "/reports/pipeline", "permission": "crm.view" },
+          { "path": "/reports/funnel", "permission": "crm.view" },
+          { "path": "/tools/search", "permission": "crm.view" },
+          { "path": "/tools/find_record", "permission": "crm.view" },
+          { "path": "/tools/get_record", "permission": "crm.view" },
+          { "path": "/tools/create_record", "permission": "crm.edit" },
+          { "path": "/tools/update_record", "permission": "crm.edit" },
+          { "path": "/tools/log_activity", "permission": "crm.edit" },
+          { "path": "/tools/create_task", "permission": "crm.edit" },
+          { "path": "/tools/pipeline", "permission": "crm.view" }
+        ]
+      }
+    }
+  ],
+  "permission_grants": [
+    "crm:crud",
+    "tool:http-egress:127.0.0.1",
+    "ui:declarative-http"
+  ],
+  "permission_levels": [
+    {
+      "id": "crm.view",
+      "label": "Can view",
+      "description": "Read the objects, records, views, lists, and activity timelines on this node, and run searches and pipeline reports."
+    },
+    {
+      "id": "crm.edit",
+      "label": "Can edit",
+      "description": "Create and change records, log activities, and manage views and lists. Does not include changing the schema or importing files.",
+      "implies": ["crm.view"]
+    },
+    {
+      "id": "crm.admin",
+      "label": "Can administer",
+      "description": "Change the schema itself — add and delete objects and fields — and run CSV imports and record merges. These are the operations that rewrite or destroy many rows at once, which is why they are a separate level from ordinary editing.",
+      "implies": ["crm.edit"]
+    }
+  ],
+  "contributes": {
+    "chat_widget_templates": [
+      {
+        "id": "crm.chat",
+        "title": "Harbor widget",
+        "description": "Harbor chat widget metadata is coming soon; no render tool is available yet.",
+        "triggers": ["harbor widget"],
+        "examples": ["Show me a harbor widget"],
+        "backing": {},
+        "display_mode": "inline",
+        "safe_action_ids": [],
+        "availability": "coming-soon"
+      }
+    ],
+    "dock_panels": [
+      {
+        "id": "crm",
+        "title": "Harbor",
+        "icon": "hugeicons:user-group",
+        "placement": "both",
+        "panel": "native"
+      }
+    ],
+    "data_categories": [
+      {
+        "id": "crm",
+        "title": "Delete all Harbor data",
+        "noun": "CRM records",
+        "confirm_word": "Harbor",
+        "detail": "Every object and field you defined, every record and the relation edges between them, every saved view and curated list, the whole activity timeline (notes, calls, meetings, tasks, and the field- and stage-change audit entries), and every stored import — including the raw CSV text each import job keeps so preview and apply can run over the same bytes — will be permanently deleted. This is contact data about identifiable people, so it is the most sensitive blob on the node: there is no soft delete here and no undo. Records you exported or synced elsewhere are unaffected — this deletes Ryu's copy, not theirs."
+      }
+    ],
+    "hook_events": [
+      {
+        "id": "@ryu/crm#record.created",
+        "title": "Record created",
+        "description": "A new record committed to an object. Fires once per record at the moment the row is durable — including for each row a CSV import creates, so a 2,000-row import raises 2,000 events. It does NOT fire for a validation failure (nothing was written) and does NOT fire for the survivor of a merge (that record already existed).",
+        "payload_example": {
+          "record_id": "rec_9f0c2a1b4d3e4f5a",
+          "object": "company",
+          "title": "Northwind Traders",
+          "source": "import",
+          "created_at": "2026-08-11T09:14:22.418Z"
+        }
+      },
+      {
+        "id": "@ryu/crm#record.updated",
+        "title": "Record updated",
+        "description": "At least one field value on a record changed. `changed` names only the fields that actually differ, so a PATCH that re-sends identical values raises nothing at all. Fires once per write, not once per field. A stage move raises this AND `deal.stage_changed` — subscribe to one or the other, not both, unless you want to see it twice.",
+        "payload_example": {
+          "record_id": "rec_9f0c2a1b4d3e4f5a",
+          "object": "company",
+          "changed": ["employee_count", "owner"],
+          "updated_at": "2026-08-11T09:31:05.902Z"
+        }
+      },
+      {
+        "id": "@ryu/crm#deal.stage_changed",
+        "title": "Deal stage changed",
+        "description": "A record's status field moved from one stage to another — the event a pipeline automation actually wants, carrying both the old and the new stage so a rule can fire on a direction rather than on arrival. Fires for any object with a status field, not only the built-in deal, and only on a real transition: setting the stage to the value it already held is silent. Dragging a card on the board and PATCHing the field are the same event.",
+        "payload_example": {
+          "record_id": "rec_2b1c4d3e5f6a7b8c",
+          "object": "deal",
+          "field": "stage",
+          "from": "proposal",
+          "to": "won",
+          "amount_cents": 4200000,
+          "currency": "USD",
+          "changed_at": "2026-08-11T10:02:44.117Z"
+        }
+      },
+      {
+        "id": "@ryu/crm#task.due",
+        "title": "Task became due",
+        "description": "An open task passed its due time and was claimed by the sweep. Fires exactly ONCE per task: the claim is a compare-and-set, so a node running two Harbor processes against one data dir still announces it once, and a node that was offline for a month emits its backlog over several ticks rather than in one burst. Completing or rescheduling a task before it comes due means this never fires for it; reopening an already-announced task can let it fire again.",
+        "payload_example": {
+          "activity_id": "act_7c6d5e4f3a2b1c0d",
+          "record_id": "rec_2b1c4d3e5f6a7b8c",
+          "object": "deal",
+          "title": "Send the revised quote",
+          "assignee": "dana",
+          "due_at": "2026-08-11T09:00:00.000Z"
+        }
+      }
+    ],
+    "sidebar_sections": [
+      {
+        "id": "crm-tasks",
+        "title": "Follow-ups",
+        "icon": "user-group",
+        "order": 62,
+        "spec": {
+          "source": {
+            "http": { "method": "GET", "path": "/api/crm/tasks?window=today" },
+            "items": "tasks",
+            "limit": 8,
+            "refreshMs": 120000,
+            "map": {
+              "id": "id",
+              "title": "title",
+              "titleFallback": "Follow-up",
+              "subtitle": "record_title",
+              "accessory": "due_at"
+            }
+          },
+          "itemTarget": "/crm/{{item.record_id}}",
+          "itemActions": [
+            {
+              "id": "complete",
+              "label": "Complete",
+              "icon": "lucide:check",
+              "http": {
+                "method": "POST",
+                "path": "/api/crm/activities/{{item.id}}/complete"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

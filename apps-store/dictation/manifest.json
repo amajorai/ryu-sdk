@@ -1,0 +1,82 @@
+{
+  "tags": ["dictation", "voice", "transcription", "speech"],
+  "author": { "name": "Ryu", "url": "https://ryuhq.com" },
+  "repository": "https://github.com/amajorai/ryu-dictation",
+  "homepage": "https://github.com/amajorai/ryu-dictation",
+  "privacyPolicyUrl": "https://ryuhq.com/privacy",
+  "termsOfServiceUrl": "https://ryuhq.com/terms",
+  "id": "@ryu/dictation",
+  "name": "Dictation",
+  "version": "0.1.14",
+  "stability": "experimental",
+  "category": "Media & Voice",
+  "description": "System-wide dictation and agent-ask via the Island companion: speak anywhere to type a raw or locally cleaned transcript, or ask an agent and paste the answer into the focused app.",
+  "tagline": "Speak anywhere, type anywhere",
+  "keywords": ["dictation", "voice", "transcription", "speech", "cleanup"],
+  "icon": "voice",
+  "iconDither": { "from": 6, "to": "transparent", "direction": "down" },
+  "surfaces": {
+    "gateway": { "support": "none" },
+    "core": { "support": "full" },
+    "desktop": { "support": "full" },
+    "island": { "support": "limited" },
+    "mobile": { "support": "limited" },
+    "extension": { "support": "limited" },
+    "web": { "support": "full" },
+    "cli": { "support": "full" }
+  },
+  "engines": {
+    "ryu": ">=0.1.0"
+  },
+  "runnables": [
+    {
+      "id": "policy-dictation",
+      "name": "System-wide dictation (on/off)",
+      "kind": "policy",
+      "config": {
+        "policy_type": "dictation",
+        "definition": {
+          "surface": "island",
+          "note": "On/off switch for system-wide dictation + agent-ask hosted by the Island companion. Enabling this plugin is the single switch — there is no separate settings master toggle. Island registers the global shortcuts and drives capture → Core Voice Recognition → optional Speech Processing → optional agent → ghost insert. Core-local — no gateway restart."
+        }
+      }
+    }
+  ],
+  "contributes": {
+    "chat_widget_templates": [
+      {
+        "id": "dictation.chat",
+        "title": "Dictation widget",
+        "description": "Dictation chat widget metadata is coming soon; no render tool is available yet.",
+        "triggers": ["dictation widget"],
+        "examples": ["Show me a dictation widget"],
+        "backing": {},
+        "display_mode": "inline",
+        "safe_action_ids": [],
+        "availability": "coming-soon"
+      }
+    ],
+    "settings_tabs": [
+      {
+        "id": "dictation.settings",
+        "title": "Dictation",
+        "scope": "node",
+        "view": "dictation"
+      }
+    ],
+    "policies": [
+      {
+        "id": "policy-dictation",
+        "title": "Dictation"
+      }
+    ]
+  },
+  "permission_grants": [],
+  "permission_levels": [
+    {
+      "id": "dictation.use",
+      "label": "Can dictate",
+      "description": "Start system-wide dictation and agent-ask, which records the microphone and types the result into whichever app is focused."
+    }
+  ]
+}

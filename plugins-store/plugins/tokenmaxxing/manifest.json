@@ -1,0 +1,36 @@
+{
+  "id": "@ryu/tokenmaxxing",
+  "name": "Tokenmaxxing",
+  "version": "0.1.0",
+  "stability": "experimental",
+  "description": "Opt-in notification when all delegated agents finish.",
+  "tagline": "Know when the worker is done",
+  "category": "Productivity",
+  "iconDither": { "from": 344, "to": "transparent", "direction": "down" },
+  "author": { "name": "Ryu", "url": "https://ryuhq.com" },
+  "repository": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/tokenmaxxing",
+  "homepage": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/tokenmaxxing",
+  "surfaces": {
+    "gateway": { "support": "none" },
+    "core": { "support": "full" },
+    "desktop": { "support": "full" },
+    "island": { "support": "limited" },
+    "mobile": { "support": "limited" },
+    "extension": { "support": "limited" },
+    "web": { "support": "full" },
+    "cli": { "support": "full" }
+  },
+  "engines": { "ryu": ">=0.1.0" },
+  "permission_grants": ["notifications:send", "storage:kv"],
+  "activation_events": ["*"],
+  "runnables": [],
+  "contributes": {
+    "turn_hooks": [
+      {
+        "id": "tokenmaxxing.delegation-complete",
+        "on": "delegation_lifecycle",
+        "code_file": "hooks/delegation-complete.js"
+      }
+    ]
+  }
+}

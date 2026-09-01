@@ -1,0 +1,64 @@
+{
+  "tags": ["go", "golang", "gopls", "language-server", "developer"],
+  "author": { "name": "Ryu", "url": "https://ryuhq.com" },
+  "repository": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/lsp/gopls-lsp",
+  "homepage": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/lsp/gopls-lsp",
+  "privacyPolicyUrl": "https://ryuhq.com/privacy",
+  "termsOfServiceUrl": "https://ryuhq.com/terms",
+  "id": "@ryu/gopls-lsp",
+  "name": "Go LSP",
+  "version": "0.1.14",
+  "stability": "experimental",
+  "category": "Developer Tools",
+  "description": "Go language server (gopls) for the ryu agent: definitions, references, hover, symbols, implementations, call hierarchies and diagnostics after every edit. You install gopls; the plugin ships config.",
+  "tagline": "Go code intelligence via gopls",
+  "keywords": ["go", "golang", "gopls", "language-server", "developer"],
+  "icon": "code-02",
+  "iconDither": {
+    "from": 96,
+    "to": "transparent",
+    "direction": "down"
+  },
+  "surfaces": {
+    "gateway": {
+      "support": "none"
+    },
+    "core": {
+      "support": "full"
+    },
+    "desktop": {
+      "support": "full"
+    },
+    "island": {
+      "support": "limited"
+    },
+    "mobile": {
+      "support": "limited"
+    },
+    "extension": {
+      "support": "limited"
+    },
+    "web": {
+      "support": "limited"
+    },
+    "cli": {
+      "support": "full"
+    }
+  },
+  "engines": {
+    "ryu": ">=0.1.0"
+  },
+  "runnables": [],
+  "permission_grants": ["pi:extension"],
+  "activation_events": ["*"],
+  "contributes": {
+    "lsp_servers": {
+      "gopls": {
+        "command": "gopls",
+        "extensionToLanguage": {
+          ".go": "go"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,70 @@
+{
+  "tags": ["swift", "sourcekit-lsp", "apple", "language-server", "developer"],
+  "author": { "name": "Ryu", "url": "https://ryuhq.com" },
+  "repository": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/lsp/swift-lsp",
+  "homepage": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/lsp/swift-lsp",
+  "privacyPolicyUrl": "https://ryuhq.com/privacy",
+  "termsOfServiceUrl": "https://ryuhq.com/terms",
+  "id": "@ryu/swift-lsp",
+  "name": "Swift LSP",
+  "version": "0.1.14",
+  "stability": "experimental",
+  "category": "Developer Tools",
+  "description": "Swift language server (SourceKit-LSP) for the ryu agent: definitions, references, hover, symbols, implementations, call hierarchies and diagnostics after every edit. You install sourcekit-lsp; the plugin ships config.",
+  "tagline": "Swift code intelligence via SourceKit-LSP",
+  "keywords": [
+    "swift",
+    "sourcekit-lsp",
+    "apple",
+    "language-server",
+    "developer"
+  ],
+  "icon": "rocket-01",
+  "iconDither": {
+    "from": 352,
+    "to": "transparent",
+    "direction": "down"
+  },
+  "surfaces": {
+    "gateway": {
+      "support": "none"
+    },
+    "core": {
+      "support": "full"
+    },
+    "desktop": {
+      "support": "full"
+    },
+    "island": {
+      "support": "limited"
+    },
+    "mobile": {
+      "support": "limited"
+    },
+    "extension": {
+      "support": "limited"
+    },
+    "web": {
+      "support": "limited"
+    },
+    "cli": {
+      "support": "full"
+    }
+  },
+  "engines": {
+    "ryu": ">=0.1.0"
+  },
+  "runnables": [],
+  "permission_grants": ["pi:extension"],
+  "activation_events": ["*"],
+  "contributes": {
+    "lsp_servers": {
+      "sourcekit-lsp": {
+        "command": "sourcekit-lsp",
+        "extensionToLanguage": {
+          ".swift": "swift"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,358 @@
+{
+  "tags": [
+    "hallucination",
+    "verification",
+    "policy",
+    "formal-methods",
+    "solver",
+    "compliance",
+    "guardrails",
+    "logic"
+  ],
+  "author": { "name": "Ryu", "url": "https://ryuhq.com" },
+  "repository": "https://github.com/amajorai/ryu-reasoning",
+  "homepage": "https://github.com/amajorai/ryu-reasoning",
+  "privacyPolicyUrl": "https://ryuhq.com/privacy",
+  "termsOfServiceUrl": "https://ryuhq.com/terms",
+  "id": "@ryu/reasoning",
+  "name": "Automated Reasoning",
+  "version": "0.1.14",
+  "stability": "experimental",
+  "category": "Security",
+  "description": "Check an answer against a written policy with a solver instead of a second opinion. Point it at a document — an HR handbook, a refund policy, an underwriting rule sheet — and it drafts a formal model of it: typed variables and rules you can read and edit in plain language. From then on, a question and an answer are translated into logic and decided by a decision procedure built from scratch here (finite-domain enumeration over booleans and enums, Fourier–Motzkin elimination over linear rational arithmetic, branch-and-bound for integers). The result is not a score: `valid` means the policy PROVES the answer, `invalid` means it CONTRADICTS it and comes with a concrete counterexample, `satisfiable` means the policy simply does not settle it, and `impossible` means the policy contradicts itself — the case a naive checker silently reports as approval. Every finding names the minimal set of rules that decided it, the facts the answer quietly assumed, and what would have had to be different, all read back out of the solver rather than written by a model. Exact rational arithmetic throughout, so a rule about 0.1 + 0.2 does not fail on floating point. Model calls happen only at the two language edges; the verdict is reproducible offline from the formulas.",
+  "tagline": "Prove the answer follows the policy — or find the counterexample",
+  "keywords": [
+    "hallucination",
+    "verification",
+    "policy",
+    "formal-methods",
+    "solver",
+    "compliance",
+    "guardrails",
+    "logic"
+  ],
+  "icon": "checkmark-badge-03",
+  "iconDither": {
+    "from": 292,
+    "to": "transparent",
+    "direction": "down"
+  },
+  "surfaces": {
+    "gateway": {
+      "support": "none"
+    },
+    "core": {
+      "support": "full"
+    },
+    "desktop": {
+      "support": "full"
+    },
+    "island": {
+      "support": "limited"
+    },
+    "mobile": {
+      "support": "limited"
+    },
+    "extension": {
+      "support": "none"
+    },
+    "web": {
+      "support": "full"
+    },
+    "cli": {
+      "support": "full"
+    }
+  },
+  "engines": {
+    "ryu": ">=0.1.0"
+  },
+  "runnables": [
+    {
+      "id": "reasoning-companion",
+      "name": "Automated Reasoning",
+      "kind": "companion",
+      "config": {
+        "label": "Reasoning",
+        "ui_entry": "./dist/index.html",
+        "ui_format": "html"
+      }
+    }
+  ],
+  "sidecars": [
+    {
+      "name": "reasoning",
+      "process": {
+        "kind": "local",
+        "command": "ryu-reasoning",
+        "command_env": "RYU_REASONING_BIN",
+        "port_env": "RYU_REASONING_PORT"
+      },
+      "port": 8006,
+      "health_path": "/health",
+      "lazy": true,
+      "idle_stop_secs": 900,
+      "http": {
+        "mount": "/api/reasoning",
+        "public_mount": "/api/reasoning",
+        "routes": [
+          {
+            "path": "/policies",
+            "method": "GET",
+            "permission": "reasoning.view"
+          },
+          {
+            "path": "/policies",
+            "method": "POST",
+            "permission": "reasoning.edit"
+          },
+          {
+            "path": "/policies/draft",
+            "method": "POST",
+            "permission": "reasoning.edit"
+          },
+          {
+            "path": "/policies/:id",
+            "method": "GET",
+            "permission": "reasoning.view"
+          },
+          {
+            "path": "/policies/:id",
+            "method": "PUT",
+            "permission": "reasoning.edit"
+          },
+          {
+            "path": "/policies/:id",
+            "method": "DELETE",
+            "permission": "reasoning.edit"
+          },
+          { "path": "/policies/:id/analyze", "permission": "reasoning.edit" },
+          { "path": "/policies/:id/tests/run", "permission": "reasoning.edit" },
+          { "path": "/check", "permission": "reasoning.view" },
+          { "path": "/solve", "permission": "reasoning.view" }
+        ]
+      },
+      "host_api": {
+        "grants": ["hook:side-model"]
+      }
+    }
+  ],
+  "mcp_servers": {
+    "reasoning": {
+      "command": "ryu-reasoning",
+      "args": ["mcp"],
+      "description": "Automated reasoning checks as tools: `solve` decides claims written in the policy language with no model call at all, `check` does the same for prose, `policies` lists the vocabulary a policy declares, and `analyze` reports whether a policy's own rules are consistent. `solve` is the one to reach for inside a workflow — it is deterministic, so a branch gated on it always takes the same path for the same inputs."
+    }
+  },
+  "provides": [
+    {
+      "capability": "reasoning.check",
+      "version": "1.0.0",
+      "sidecar": "reasoning",
+      "route": "/check",
+      "grant": "reasoning:check"
+    }
+  ],
+  "permission_grants": [
+    "reasoning:check",
+    "hook:side-model",
+    "hook:run-agent",
+    "mcp:reasoning",
+    "ui:declarative-http"
+  ],
+  "permission_levels": [
+    {
+      "id": "reasoning.view",
+      "label": "Can view",
+      "description": "See the reasoning policies on this node and the findings of past checks."
+    },
+    {
+      "id": "reasoning.edit",
+      "label": "Can edit",
+      "description": "Create and change policies. This decides what every check on this node counts as correct, so it is the level that changes outcomes.",
+      "implies": ["reasoning.view"]
+    }
+  ],
+  "companion": {
+    "label": "Reasoning",
+    "icon": "checkmark-badge-03"
+  },
+  "contributes": {
+    "sidebar_buttons": [
+      {
+        "id": "reasoning-rules",
+        "title": "Rules",
+        "icon": "file-script",
+        "target": "/plugin/app__reasoning-companion",
+        "context": { "tab": "rules" },
+        "order": 49
+      },
+      {
+        "id": "reasoning-variables",
+        "title": "Variables",
+        "icon": "code",
+        "target": "/plugin/app__reasoning-companion",
+        "context": { "tab": "variables" },
+        "order": 50
+      },
+      {
+        "id": "reasoning-playground",
+        "title": "Playground",
+        "icon": "play-circle",
+        "target": "/plugin/app__reasoning-companion",
+        "context": { "tab": "playground" },
+        "order": 51
+      },
+      {
+        "id": "reasoning-tests",
+        "title": "Tests",
+        "icon": "test-tube",
+        "target": "/plugin/app__reasoning-companion",
+        "context": { "tab": "tests" },
+        "order": 52
+      }
+    ],
+    "chat_widget_templates": [
+      {
+        "id": "reasoning.chat",
+        "title": "Automated Reasoning widget",
+        "description": "Open Automated Reasoning data in a host-rendered chat widget.",
+        "triggers": ["automated reasoning widget"],
+        "examples": ["Show me a automated reasoning widget"],
+        "backing": { "view_id": "surface:reasoning" },
+        "display_mode": "inline",
+        "safe_action_ids": [],
+        "availability": "available"
+      }
+    ],
+    "sidebar_sections": [
+      {
+        "id": "policies",
+        "title": "Policies",
+        "icon": "checkmark-badge-03",
+        "order": 48,
+        "spec": {
+          "source": {
+            "http": { "method": "GET", "path": "/api/reasoning/policies" },
+            "items": "policies",
+            "map": {
+              "id": "id",
+              "title": "name",
+              "subtitle": "description",
+              "accessory": "version"
+            },
+            "refreshMs": 15000
+          },
+          "itemTarget": "/reasoning/{{item.id}}",
+          "emptyState": {
+            "title": "No policies yet",
+            "description": "Create a policy in the companion to check answers against it."
+          }
+        }
+      }
+    ],
+    "composer_controls": [
+      {
+        "id": "reasoning.toggle",
+        "type": "toggle",
+        "flag": "io.ryu.reasoning",
+        "label": "Check against policy",
+        "description": "After each answer, check it against the selected reasoning policy and report anything the policy contradicts."
+      }
+    ],
+    "settings_tabs": [
+      {
+        "id": "reasoning.settings",
+        "title": "Automated Reasoning",
+        "fields": [
+          {
+            "type": "text",
+            "pref_key": "reasoning-active-policy",
+            "label": "Policy to check against",
+            "description": "The id of the policy the composer toggle uses. Policies are created and edited in the Reasoning companion."
+          },
+          {
+            "type": "model_picker",
+            "pref_key": "reasoning-extraction-model",
+            "label": "Extraction model",
+            "description": "Translates a question and an answer into formulas. It never decides the verdict — the solver does — so a fast model is usually the right choice."
+          },
+          {
+            "type": "model_picker",
+            "pref_key": "reasoning-authoring-model",
+            "label": "Policy drafting model",
+            "description": "Reads a policy document and proposes variables and rules. This runs once per document and its output is reviewed by a person, so it is worth a stronger model."
+          }
+        ]
+      }
+    ],
+    "turn_hooks": [
+      {
+        "id": "reasoning.check",
+        "on": "post_assistant_turn",
+        "match": {
+          "flag": "io.ryu.reasoning"
+        },
+        "code_file": "hooks/check.js"
+      }
+    ],
+    "hook_events": [
+      {
+        "id": "@ryu/reasoning#check.contradicted",
+        "title": "An answer contradicted the policy",
+        "description": "A check finished with at least one `invalid` finding: the policy does not merely fail to support the answer, it proves the answer wrong, and a counterexample exists. Fires once per check, not once per finding. A check that came back `satisfiable` (the policy does not settle it) or `impossible` (the policy contradicts itself) does NOT fire this — those are gaps in the policy, not errors in the answer, and routing them to the same place trains people to ignore it.",
+        "payload_example": {
+          "policy_id": "refunds",
+          "policy_version": 4,
+          "result": "invalid",
+          "invalid_claims": ["refund_amount <= order_total"],
+          "responsible_rules": ["rule-3"],
+          "checked_at": "2026-08-10T09:15:00Z"
+        }
+      }
+    ],
+    "data_categories": [
+      {
+        "id": "reasoning_policies",
+        "title": "Delete all reasoning policies",
+        "noun": "policies",
+        "confirm_word": "Reasoning",
+        "detail": "Every reasoning policy on this node will be deleted, along with its rules and saved test cases. Checks will stop until a policy is created again."
+      }
+    ],
+    "views": [
+      {
+        "id": "surface:reasoning",
+        "title": "Reasoning",
+        "view": "list-detail",
+        "spec": {
+          "view": "list-detail",
+          "items": [],
+          "emptyText": "No reasoning policies yet.",
+          "source": {
+            "http": {
+              "method": "GET",
+              "path": "/api/reasoning/policies"
+            },
+            "items": "policies",
+            "map": {
+              "title": "name",
+              "subtitle": "description",
+              "accessory": "version"
+            }
+          },
+          "itemActions": [
+            {
+              "id": "analyze",
+              "label": "Check the policy itself",
+              "style": "primary",
+              "http": {
+                "method": "POST",
+                "path": "/api/reasoning/policies/{{item.id}}/analyze"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

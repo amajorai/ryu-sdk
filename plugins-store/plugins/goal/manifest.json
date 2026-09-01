@@ -1,0 +1,116 @@
+{
+  "tags": ["agent", "autonomy", "goals", "loop"],
+  "author": {
+    "name": "Ryu",
+    "url": "https://ryuhq.com"
+  },
+  "repository": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/goal",
+  "homepage": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/goal",
+  "privacyPolicyUrl": "https://ryuhq.com/privacy",
+  "termsOfServiceUrl": "https://ryuhq.com/terms",
+  "id": "@ryu/goal",
+  "name": "Goal",
+  "version": "0.1.14",
+  "stability": "experimental",
+  "description": "Give the agent a goal with `/goal` or let an agent set one with `goal.set`; it keeps working until a judge model agrees the goal is actually met, re-prompting itself after every turn instead of stopping and waiting for you. `/goal clear` stops the loop; the judge model is configurable.",
+  "tagline": "Keep working until a judge model says it's done",
+  "keywords": ["agent", "autonomy", "goals", "loop"],
+  "category": "Productivity",
+  "icon": "flag-03",
+  "iconDither": {
+    "from": 291,
+    "to": "transparent",
+    "direction": "down"
+  },
+  "surfaces": {
+    "gateway": {
+      "support": "none"
+    },
+    "core": {
+      "support": "full"
+    },
+    "desktop": {
+      "support": "full"
+    },
+    "island": {
+      "support": "limited"
+    },
+    "mobile": {
+      "support": "limited"
+    },
+    "extension": {
+      "support": "limited"
+    },
+    "web": {
+      "support": "full"
+    },
+    "cli": {
+      "support": "full"
+    }
+  },
+  "engines": {
+    "ryu": ">=0.1.0"
+  },
+  "runnables": [
+    {
+      "id": "tool-goal-set",
+      "name": "Set Conversation Goal",
+      "kind": "tool",
+      "config": {
+        "slug": "goal.set",
+        "backend": "inline_deno",
+        "description": "Set or replace the goal for the conversation you are currently working in. The conversation scope comes from the caller context, so the tool cannot target another chat. Use this when the user asks you to pursue a durable outcome; it resets goal progress and starts the judge loop from the next reply.",
+        "input_schema": {
+          "type": "object",
+          "required": ["goal"],
+          "properties": {
+            "goal": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4000,
+              "description": "The concrete outcome to pursue. Keep it specific and testable."
+            }
+          },
+          "additionalProperties": false
+        },
+        "code": "// Tool body for `goal.set`, run in Core's Deno sandbox.\n//\n// This file is a FRAGMENT, not an ES module: Core splices it into an async IIFE\n// (`build_inline_tool_program` in crates/core/tool-exec/src/lib.rs) with `input`\n// (the model's arguments), `caller` (the dispatching agent, host-derived), and\n// `host` (the capability bridge) already bound. A top-level `return` is correct;\n// `export` is not. The manifest's wire-form `code` is sealed from this file —\n// edit here, then run `node plugins-store/plugins/goal/seal.mjs`.\n\nconst MAX_GOAL_LENGTH = 4000;\n\nif (typeof input?.goal !== \"string\") {\n\tthrow new Error(\"goal.set: 'goal' is required and must be a string\");\n}\n\nconst goal = input.goal.trim();\nif (goal === \"\") {\n\tthrow new Error(\"goal.set: 'goal' must not be empty\");\n}\nif (goal.length > MAX_GOAL_LENGTH) {\n\tthrow new Error(\n\t\t`goal.set: 'goal' must be ${MAX_GOAL_LENGTH} characters or fewer`\n\t);\n}\n\n// The conversation is resolved by Core's dispatch path, not by the model's\n// arguments. This prevents an agent from writing a goal into another chat by\n// naming that conversation in its tool input.\nconst conversationId = String(caller?.conversation_id ?? \"\").trim();\nif (conversationId === \"\") {\n\tthrow new Error(\n\t\t\"goal.set: an active conversation is required; goals cannot be set from an agent-less call\"\n\t);\n}\n\nawait host.storage.set(\n\tconversationId,\n\tJSON.stringify({\n\t\tcondition: goal,\n\t\tstatus: \"active\",\n\t\tstarted_at: Date.now(),\n\t\tturns: 0,\n\t})\n);\n\nreturn {\n\tok: true,\n\tgoal,\n\tstatus: \"active\",\n\tturns: 0,\n\tmessage:\n\t\t\"Goal set for this conversation. Continue working toward it; the goal judge will evaluate progress after the reply.\",\n};\n"
+      }
+    }
+  ],
+  "permission_grants": ["tool:execute", "hook:side-model", "storage:kv"],
+  "activation_events": ["*"],
+  "contributes": {
+    "slash_commands": [
+      {
+        "id": "goal.set",
+        "command": "/goal",
+        "description": "Pursue a goal until a judge model says it is met. Use '/goal clear' to stop."
+      }
+    ],
+    "settings_tabs": [
+      {
+        "id": "goal.settings",
+        "title": "Goals",
+        "fields": [
+          {
+            "type": "model_picker",
+            "pref_key": "goal-judge-model",
+            "label": "Judge model",
+            "description": "Optional model that evaluates whether the goal was met. Leave empty to use the node's default."
+          }
+        ]
+      }
+    ],
+    "turn_hooks": [
+      {
+        "id": "goal.loop",
+        "on": "post_assistant_turn",
+        "match": {
+          "commands": ["/goal"],
+          "stateful": true
+        },
+        "code_file": "hooks/loop.js"
+      }
+    ]
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "name": "@ryuhq/core-client",
+  "version": "0.2.5",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./client": "./src/client.ts",
+    "./*": "./src/*.ts"
+  },
+  "scripts": {
+    "test": "bun test"
+  },
+  "dependencies": {
+    "@ryuhq/protocol": "workspace:*"
+  },
+  "devDependencies": {
+    "@ryu/config": "workspace:*",
+    "typescript": "^5"
+  }
+}
