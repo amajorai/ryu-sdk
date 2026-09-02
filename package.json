@@ -1,0 +1,46 @@
+{
+  "name": "@ryuhq/ryu-sdk-hub",
+  "private": true,
+  "type": "module",
+  "packageManager": "bun@1.3.14",
+  "workspaces": {
+    "packages": [
+      "packages/*",
+      "crates/sdk/napi"
+    ],
+    "catalog": {
+      "@types/bun": "1.3.14"
+    }
+  },
+  "scripts": {
+    "build": "bun run build:client && bun run build:sdk && bun run build:create-ryu-app",
+    "build:sdk": "bun run --cwd packages/sdk build",
+    "build:client": "bun run --cwd packages/client build",
+    "build:create-ryu-app": "bun run --cwd packages/create-ryu-app build",
+    "build:native": "bun run --cwd crates/sdk/napi build:debug",
+    "check-types": "bun run --cwd packages/sdk check-types && bun run --cwd packages/client check-types",
+    "generate:contracts": "bun run --cwd packages/sdk generate:contracts",
+    "test:hub": "node --test tools/sdk-hub.test.mjs",
+    "test:sdk": "bun run --cwd packages/sdk test",
+    "test:client": "bun run --cwd packages/client test",
+    "test:core-client": "bun run --cwd packages/core-client test",
+    "test:protocol": "bun run --cwd packages/protocol test",
+    "test:create-ryu-app": "bun run --cwd packages/create-ryu-app test",
+    "test:native": "bun run --cwd crates/sdk/napi test",
+    "test:packages": "bun run test:hub && bun run test:sdk && bun run test:client && bun run test:core-client && bun run test:protocol && bun run test:create-ryu-app",
+    "test:python": "bash bindings/python/test.sh",
+    "test:go": "bash bindings/go/test.sh",
+    "test:csharp": "bash bindings/csharp/test.sh",
+    "test:java": "bash bindings/java/test.sh",
+    "test:kotlin": "bash bindings/kotlin/test.sh",
+    "test:swift": "bash bindings/swift/test.sh",
+    "test:all": "bun run test:packages && bun run test:native && bun run test:python && bun run test:go && bun run test:csharp && bun run test:java && bun run test:kotlin && bun run test:swift",
+    "check": "bun run check-types && bun run test:packages"
+  },
+  "devDependencies": {
+    "@ryu/config": "workspace:*",
+    "@types/bun": "catalog:",
+    "@types/node": "^22.20.1",
+    "typescript": "^5"
+  }
+}

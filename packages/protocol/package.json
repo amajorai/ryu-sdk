@@ -1,0 +1,24 @@
+{
+  "name": "@ryuhq/protocol",
+  "version": "0.2.6",
+  "type": "module",
+  "exports": {
+    "./agent-rules": "./src/agent-rules.ts",
+    "./connection-status": "./src/connection-status.ts",
+    "./continuity": "./src/continuity.ts",
+    "./deep-link": "./src/deep-link.ts",
+    "./hardware": "./src/hardware.ts",
+    "./publisher-trust": "./src/publisher-trust.ts",
+    "./quest-events": "./src/quest-events.ts",
+    "./sse": "./src/sse-client.ts",
+    "./voice": "./src/voice.ts"
+  },
+  "scripts": {
+    "test": "bun test"
+  },
+  "devDependencies": {
+    "@ryu/config": "workspace:*",
+    "@types/bun": "catalog:",
+    "typescript": "^5"
+  }
+}

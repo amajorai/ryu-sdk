@@ -1,0 +1,70 @@
+{
+  "tags": ["automation", "desktop"],
+  "author": { "name": "Ryu", "url": "https://ryuhq.com" },
+  "repository": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/ghost",
+  "homepage": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/ghost",
+  "privacyPolicyUrl": "https://ryuhq.com/privacy",
+  "termsOfServiceUrl": "https://ryuhq.com/terms",
+  "id": "@ryu/ghost",
+  "name": "Ghost",
+  "version": "0.1.14",
+  "system": true,
+  "builtin": true,
+  "category": "Automation",
+  "description": "Desktop automation: 29 screen perception and input control tools. Cross-platform (Windows, macOS, Linux).",
+  "tagline": "Let agents see and drive your desktop",
+  "icon": "cursor-02",
+  "iconDither": { "from": 354, "to": "transparent", "direction": "down" },
+  "keywords": ["automation", "desktop"],
+  "surfaces": {
+    "gateway": { "support": "none" },
+    "core": { "support": "full" },
+    "desktop": { "support": "full" },
+    "island": { "support": "full" },
+    "mobile": { "support": "full" },
+    "extension": { "support": "full" },
+    "web": { "support": "full" },
+    "cli": { "support": "full" }
+  },
+  "engines": { "ryu": ">=0.1.0" },
+  "runnables": [],
+  "permission_grants": ["mcp:ghost"],
+  "mcp_servers": {
+    "ghost": {
+      "command": "ghost",
+      "command_env": "RYU_GHOST_BIN",
+      "args": ["mcp"],
+      "description": "Ghost — desktop automation (29 tools: screen perception + input control). Cross-platform (Windows, macOS, Linux); install the `ghost` sidecar to enable. Unavailable until installed."
+    }
+  },
+  "provides": [
+    {
+      "capability": "computer.control",
+      "version": "1.0.0",
+      "title": "Computer",
+      "selectable": true,
+      "default": true,
+      "target": "local-machine",
+      "tools": {
+        "computer.capture": {
+          "tool": "ghost.ghost_annotate"
+        },
+        "computer.click": {
+          "tool": "ghost.ghost_click"
+        },
+        "computer.type": {
+          "tool": "ghost.ghost_type"
+        },
+        "computer.key": {
+          "tool": "ghost.ghost_hotkey"
+        },
+        "computer.scroll": {
+          "tool": "ghost.ghost_scroll"
+        },
+        "computer.focus_app": {
+          "tool": "ghost.ghost_focus"
+        }
+      }
+    }
+  ]
+}

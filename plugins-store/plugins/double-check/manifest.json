@@ -1,0 +1,67 @@
+{
+  "tags": ["review", "verification", "quality", "accuracy"],
+  "author": { "name": "Ryu", "url": "https://ryuhq.com" },
+  "repository": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/double-check",
+  "homepage": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/double-check",
+  "privacyPolicyUrl": "https://ryuhq.com/privacy",
+  "termsOfServiceUrl": "https://ryuhq.com/terms",
+  "id": "@ryu/double-check",
+  "name": "Double Check",
+  "version": "0.1.14",
+  "stability": "experimental",
+  "description": "Sends every answer to a second model for review before you act on it, so mistakes get caught by a fresh set of eyes. Off until you flip the Double-check toggle in the composer; the reviewer model is configurable in settings.",
+  "tagline": "A second model reviews every answer",
+  "keywords": ["review", "verification", "quality", "accuracy"],
+  "category": "Security",
+  "icon": "tick-double-01",
+  "iconDither": { "from": 276, "to": "transparent", "direction": "down" },
+  "surfaces": {
+    "gateway": { "support": "none" },
+    "core": { "support": "full" },
+    "desktop": { "support": "full" },
+    "island": { "support": "limited" },
+    "mobile": { "support": "limited" },
+    "extension": { "support": "limited" },
+    "web": { "support": "full" },
+    "cli": { "support": "full" }
+  },
+  "engines": { "ryu": ">=0.1.0" },
+  "runnables": [],
+  "permission_grants": ["hook:side-model"],
+  "activation_events": ["*"],
+  "contributes": {
+    "composer_controls": [
+      {
+        "id": "double-check.toggle",
+        "type": "toggle",
+        "flag": "io.ryu.double-check",
+        "label": "Double-check",
+        "description": "Have a second model review each answer."
+      }
+    ],
+    "settings_tabs": [
+      {
+        "id": "double-check.settings",
+        "title": "Double-check",
+        "fields": [
+          {
+            "type": "model_picker",
+            "pref_key": "double-check-model",
+            "label": "Reviewer model",
+            "description": "Optional model used for the independent review. Leave empty to use the node's default."
+          }
+        ]
+      }
+    ],
+    "turn_hooks": [
+      {
+        "id": "double-check.review",
+        "on": "post_assistant_turn",
+        "match": {
+          "flag": "io.ryu.double-check"
+        },
+        "code_file": "hooks/review.js"
+      }
+    ]
+  }
+}

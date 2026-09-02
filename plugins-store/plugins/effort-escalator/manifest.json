@@ -1,0 +1,76 @@
+{
+  "tags": ["models", "effort", "stuck", "agent", "automation"],
+  "author": { "name": "Ryu", "url": "https://ryuhq.com" },
+  "repository": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/effort-escalator",
+  "homepage": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/effort-escalator",
+  "privacyPolicyUrl": "https://ryuhq.com/privacy",
+  "termsOfServiceUrl": "https://ryuhq.com/terms",
+  "id": "@ryu/effort-escalator",
+  "name": "Effort Escalator",
+  "version": "0.1.0",
+  "stability": "experimental",
+  "category": "Automation",
+  "description": "Detects stalled work with a cheap background judge and moves the next turn up a configured reasoning-effort or model ladder, per agent or globally.",
+  "tagline": "Spend more reasoning only when work is stuck",
+  "keywords": ["models", "effort", "stuck", "agent", "automation"],
+  "icon": "trending-up-01",
+  "iconDither": { "from": 104, "to": "transparent", "direction": "down" },
+  "surfaces": {
+    "gateway": { "support": "none" },
+    "core": { "support": "full" },
+    "desktop": { "support": "full" },
+    "island": { "support": "limited" },
+    "mobile": { "support": "limited" },
+    "extension": { "support": "limited" },
+    "web": { "support": "full" },
+    "cli": { "support": "full" }
+  },
+  "engines": { "ryu": ">=0.1.0" },
+  "runnables": [],
+  "permission_grants": ["hook:side-model", "storage:kv", "preferences:read"],
+  "activation_events": ["*"],
+  "contributes": {
+    "settings_tabs": [
+      {
+        "id": "effort-escalator.settings",
+        "title": "Effort escalation",
+        "scope": "node",
+        "fields": [
+          {
+            "type": "toggle",
+            "pref_key": "effort-escalator-enabled",
+            "label": "Automatically escalate stuck tasks",
+            "description": "Ask a cheap judge after the configured delay and increase effort on the next turn.",
+            "default": false
+          },
+          {
+            "type": "model_picker",
+            "pref_key": "effort-escalator-judge-model",
+            "label": "Judge model",
+            "description": "Optional cheap local model used to decide whether work is stuck."
+          },
+          {
+            "type": "textarea",
+            "pref_key": "effort-escalator-rules",
+            "label": "Agent and global escalation ladders",
+            "description": "JSON. Agent entries override global. Each ladder step has from, to, and optional effort. `after_minutes` controls the minimum quiet time between checks.",
+            "default": "{\n  \"global\": {\n    \"after_minutes\": 30,\n    \"max_escalations\": 3,\n    \"ladder\": [\n      { \"from\": \"gpt-4o-mini\", \"to\": \"gpt-4o\", \"effort\": \"medium\" },\n      { \"from\": \"gpt-4o\", \"to\": \"o3\", \"effort\": \"high\" },\n      { \"from\": \"o3\", \"to\": \"claude-sonnet\", \"effort\": \"high\" }\n    ]\n  },\n  \"agents\": {}\n}"
+          }
+        ]
+      }
+    ],
+    "turn_hooks": [
+      {
+        "id": "effort-escalator.judge",
+        "on": "post_assistant_turn",
+        "code_file": "hooks/judge.js"
+      },
+      {
+        "id": "effort-escalator.select",
+        "on": "pre_model_select",
+        "priority": 100,
+        "code_file": "hooks/select-model.js"
+      }
+    ]
+  }
+}

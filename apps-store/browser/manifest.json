@@ -1,0 +1,874 @@
+{
+  "tags": ["browser", "chromium", "automation", "web"],
+  "author": {
+    "name": "Ryu",
+    "url": "https://ryuhq.com"
+  },
+  "repository": "https://github.com/amajorai/ryu-browser",
+  "homepage": "https://github.com/amajorai/ryu-browser",
+  "privacyPolicyUrl": "https://ryuhq.com/privacy",
+  "termsOfServiceUrl": "https://ryuhq.com/terms",
+  "id": "@ryu/browser",
+  "name": "Browser",
+  "version": "0.1.15",
+  "system": true,
+  "description": "A real-Chromium browser (Electron) exposed as the grant-gated `browser.control` capability. Local nodes can share one embedded session with the user; managed cloud nodes give each Bot a hidden tab lane inside one persistent managed-Bot Chromium context, so cookies and logins are shared while active tabs stay separate. Core routes the desktop Browser panel and agent tools through its authenticated ext-proxy.",
+  "keywords": ["browser", "chromium", "automation", "web"],
+  "icon": "browser",
+  "iconDither": {
+    "from": 351,
+    "to": "transparent",
+    "direction": "down"
+  },
+  "tagline": "Real-Chromium browser control for agents",
+  "category": "Browsers",
+  "surfaces": {
+    "gateway": {
+      "support": "none"
+    },
+    "core": {
+      "support": "full"
+    },
+    "desktop": {
+      "support": "full"
+    },
+    "island": {
+      "support": "limited"
+    },
+    "mobile": {
+      "support": "limited"
+    },
+    "extension": {
+      "support": "none"
+    },
+    "web": {
+      "support": "full"
+    },
+    "cli": {
+      "support": "list"
+    }
+  },
+  "engines": {
+    "ryu": ">=0.1.0"
+  },
+  "runnables": [
+    {
+      "id": "tool-browser-list-tabs",
+      "name": "List Browser Tabs",
+      "kind": "tool",
+      "config": {
+        "slug": "chromium.list_tabs",
+        "backend": "http",
+        "caller_agent_query": "agent_id",
+        "method": "GET",
+        "url": "core:/api/ext/@ryu/browser/tabs",
+        "secret_headers": {
+          "Authorization": "Bearer env:RYU_TOKEN"
+        },
+        "fail_open": true,
+        "unwrap_body": true,
+        "description": "List the tabs currently open in the local Chromium browser sidecar. Returns `{tabs:[{id,url,title}]}`; the `id` is what every other browser tool takes. When the sidecar is not running the tool reports itself unavailable.",
+        "input_schema": {
+          "type": "object",
+          "properties": {}
+        }
+      }
+    },
+    {
+      "id": "tool-browser-open-tab",
+      "name": "Open Browser Tab",
+      "kind": "tool",
+      "config": {
+        "slug": "chromium.open_tab",
+        "backend": "http",
+        "caller_agent_query": "agent_id",
+        "method": "POST",
+        "url": "core:/api/ext/@ryu/browser/tabs",
+        "secret_headers": {
+          "Authorization": "Bearer env:RYU_TOKEN"
+        },
+        "fail_open": true,
+        "unwrap_body": true,
+        "description": "Open a NEW tab in the local Chromium browser at `url` and return `{tab:{id,url,title}}`. Use the returned `id` with the other browser tools. To move an EXISTING tab, use chromium.navigate_tab instead.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "url": {
+              "type": "string",
+              "description": "URL to load in the new tab (the sidecar defaults to about:blank when omitted)."
+            }
+          },
+          "required": ["url"]
+        }
+      }
+    },
+    {
+      "id": "tool-browser-tab-detail",
+      "name": "Browser Tab Detail",
+      "kind": "tool",
+      "config": {
+        "slug": "chromium.tab_detail",
+        "backend": "http",
+        "caller_agent_query": "agent_id",
+        "method": "GET",
+        "url": "core:/api/ext/@ryu/browser/tabs/{id}",
+        "secret_headers": {
+          "Authorization": "Bearer env:RYU_TOKEN"
+        },
+        "fail_open": true,
+        "unwrap_body": true,
+        "description": "Fetch one tab's current `{tab:{id,url,title}}` by tab id. 404s once the tab has been closed.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "Tab id, as returned by chromium.list_tabs or chromium.open_tab."
+            }
+          },
+          "required": ["id"]
+        }
+      }
+    },
+    {
+      "id": "tool-browser-navigate-tab",
+      "name": "Navigate Browser Tab",
+      "kind": "tool",
+      "config": {
+        "slug": "chromium.navigate_tab",
+        "backend": "http",
+        "caller_agent_query": "agent_id",
+        "method": "POST",
+        "url": "core:/api/ext/@ryu/browser/tabs/{id}/navigate",
+        "secret_headers": {
+          "Authorization": "Bearer env:RYU_TOKEN"
+        },
+        "fail_open": true,
+        "unwrap_body": true,
+        "description": "Navigate an EXISTING tab to `url` and return `{tab:{id,url,title}}`. Requires a tab id from chromium.list_tabs or chromium.open_tab; 404s once the tab has been closed.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "Tab id to navigate."
+            },
+            "url": {
+              "type": "string",
+              "description": "URL to load in that tab."
+            }
+          },
+          "required": ["id", "url"]
+        }
+      }
+    },
+    {
+      "id": "tool-browser-screenshot-tab",
+      "name": "Screenshot Browser Tab",
+      "kind": "tool",
+      "config": {
+        "slug": "chromium.screenshot_tab",
+        "backend": "http",
+        "caller_agent_query": "agent_id",
+        "method": "POST",
+        "url": "core:/api/ext/@ryu/browser/tabs/{id}/screenshot",
+        "secret_headers": {
+          "Authorization": "Bearer env:RYU_TOKEN"
+        },
+        "fail_open": true,
+        "unwrap_body": true,
+        "description": "Capture a PNG screenshot of one tab. Returns `{image,encoding:\"base64\",mime:\"image/png\"}`. Requires a tab id from chromium.list_tabs or chromium.open_tab.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "Tab id to capture."
+            }
+          },
+          "required": ["id"]
+        }
+      }
+    },
+    {
+      "id": "tool-browser-tab-title",
+      "name": "Browser Tab Title",
+      "kind": "tool",
+      "config": {
+        "slug": "chromium.tab_title",
+        "backend": "http",
+        "caller_agent_query": "agent_id",
+        "method": "GET",
+        "url": "core:/api/ext/@ryu/browser/tabs/{id}/title",
+        "secret_headers": {
+          "Authorization": "Bearer env:RYU_TOKEN"
+        },
+        "fail_open": true,
+        "unwrap_body": true,
+        "description": "Read one tab's current document title as `{title}`. Cheaper than a screenshot for confirming a navigation landed.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "Tab id whose title to read."
+            }
+          },
+          "required": ["id"]
+        }
+      }
+    },
+    {
+      "id": "tool-browser-snapshot-tab",
+      "name": "Snapshot Browser Tab",
+      "kind": "tool",
+      "config": {
+        "slug": "chromium.snapshot_tab",
+        "backend": "http",
+        "caller_agent_query": "agent_id",
+        "method": "POST",
+        "url": "core:/api/ext/@ryu/browser/tabs/{id}/snapshot",
+        "secret_headers": {
+          "Authorization": "Bearer env:RYU_TOKEN"
+        },
+        "fail_open": true,
+        "unwrap_body": true,
+        "description": "Read one tab's accessibility tree. Returns `{tab,snapshot_id,elements:[{ref,role,name,value,depth,props}],truncated}`, where each `ref` (`@e1`, `@e2`, …) is the handle chromium.click and chromium.type take. Refs are minted fresh by every snapshot and are dropped when the tab navigates, so snapshot again after any action that changes the page. Content inside cross-origin iframes is not included.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "Tab id to snapshot, as returned by chromium.list_tabs or chromium.open_tab."
+            }
+          },
+          "required": ["id"]
+        }
+      }
+    },
+    {
+      "id": "tool-browser-click",
+      "name": "Click Browser Element",
+      "kind": "tool",
+      "config": {
+        "slug": "chromium.click",
+        "backend": "http",
+        "caller_agent_query": "agent_id",
+        "method": "POST",
+        "url": "core:/api/ext/@ryu/browser/click",
+        "secret_headers": {
+          "Authorization": "Bearer env:RYU_TOKEN"
+        },
+        "fail_open": true,
+        "unwrap_body": true,
+        "description": "Click the element a chromium.snapshot_tab `ref` names, using a real mouse event at the element's centre. Returns `{ok,tab,x,y}`. A ref the current snapshot does not know, or whose element is hidden or gone, is a 400 telling you to snapshot again — it never falls back to another element.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "ref": {
+              "type": "string",
+              "description": "Element reference from a prior chromium.snapshot_tab, e.g. \"@e3\"."
+            },
+            "tab_id": {
+              "type": "string",
+              "description": "Tab to act on. Omit for the tab the browser is currently showing (a snapshot focuses the tab it reads)."
+            }
+          },
+          "required": ["ref"]
+        }
+      }
+    },
+    {
+      "id": "tool-browser-type",
+      "name": "Type Into Browser Element",
+      "kind": "tool",
+      "config": {
+        "slug": "chromium.type",
+        "backend": "http",
+        "caller_agent_query": "agent_id",
+        "method": "POST",
+        "url": "core:/api/ext/@ryu/browser/type",
+        "secret_headers": {
+          "Authorization": "Bearer env:RYU_TOKEN"
+        },
+        "fail_open": true,
+        "unwrap_body": true,
+        "description": "Focus the element a chromium.snapshot_tab `ref` names and insert `text` at its caret, optionally pressing Enter. Text is APPENDED by default — set `replace` to overwrite a field that already has a value. A `ref` that is focusable but cannot accept text (a link, a read-only or disabled input, a checkbox) is a 400 rather than a silent no-op. Returns `{ok,tab}`.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "ref": {
+              "type": "string",
+              "description": "Element reference from a prior chromium.snapshot_tab, e.g. \"@e3\"."
+            },
+            "text": {
+              "type": "string",
+              "description": "Text to insert at the element's caret."
+            },
+            "replace": {
+              "type": "boolean",
+              "description": "Overwrite the field's current value instead of appending to it. Use `replace` with an empty `text` to clear a field."
+            },
+            "submit": {
+              "type": "boolean",
+              "description": "Press Enter after typing (a real key event, so form/search handlers fire)."
+            },
+            "tab_id": {
+              "type": "string",
+              "description": "Tab to act on. Omit for the tab the browser is currently showing."
+            }
+          },
+          "required": ["ref", "text"]
+        }
+      }
+    },
+    {
+      "id": "tool-browser-scroll",
+      "name": "Scroll Browser Tab",
+      "kind": "tool",
+      "config": {
+        "slug": "chromium.scroll",
+        "backend": "http",
+        "caller_agent_query": "agent_id",
+        "method": "POST",
+        "url": "core:/api/ext/@ryu/browser/scroll",
+        "secret_headers": {
+          "Authorization": "Bearer env:RYU_TOKEN"
+        },
+        "fail_open": true,
+        "unwrap_body": true,
+        "description": "Scroll a tab's viewport with a real wheel event dispatched at its centre. `amount` is a distance in CSS pixels; omitted it travels 80% of the viewport. Returns `{ok,tab,x,y}`. Snapshot again afterwards — scrolling changes what is laid out.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "direction": {
+              "type": "string",
+              "enum": ["up", "down", "left", "right"],
+              "description": "Direction to scroll the page in."
+            },
+            "amount": {
+              "type": "integer",
+              "description": "Scroll distance in CSS pixels. Defaults to 80% of the viewport."
+            },
+            "tab_id": {
+              "type": "string",
+              "description": "Tab to act on. Omit for the tab the browser is currently showing."
+            }
+          },
+          "required": ["direction"]
+        }
+      }
+    },
+    {
+      "id": "tool-browser-close-tab",
+      "name": "Close Browser Tab",
+      "kind": "tool",
+      "config": {
+        "slug": "chromium.close_tab",
+        "backend": "http",
+        "caller_agent_query": "agent_id",
+        "method": "DELETE",
+        "url": "core:/api/ext/@ryu/browser/tabs/{id}",
+        "secret_headers": {
+          "Authorization": "Bearer env:RYU_TOKEN"
+        },
+        "fail_open": true,
+        "unwrap_body": true,
+        "description": "Close one tab and return `{ok:true}`. 404s when the tab is already gone.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "Tab id to close."
+            }
+          },
+          "required": ["id"]
+        }
+      }
+    },
+    {
+      "id": "tool-browser-context",
+      "name": "Get Browser Context",
+      "kind": "tool",
+      "config": {
+        "slug": "chromium.context",
+        "backend": "http",
+        "caller_agent_query": "agent_id",
+        "method": "POST",
+        "url": "core:/api/ext/@ryu/browser/tabs/{id}/context",
+        "secret_headers": { "Authorization": "Bearer env:RYU_TOKEN" },
+        "fail_open": true,
+        "unwrap_body": true,
+        "description": "Return a live page context bundle: URL/title, viewport, accessibility snapshot, saved annotations, a bounded list of page-declared WebMCP tools, and a PNG screenshot. Optionally pass CSS-pixel selection rectangles to retrieve DOM identity (tag, selector, XPath, attributes, computed styles, component hint, and text) for the pointed elements.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "id": { "type": "string", "description": "Tab id." },
+            "include_screenshot": {
+              "type": "boolean",
+              "description": "Set false for a text-only context refresh."
+            },
+            "selections": {
+              "type": "array",
+              "maxItems": 8,
+              "items": {
+                "type": "object",
+                "properties": {
+                  "x": { "type": "number" },
+                  "y": { "type": "number" },
+                  "width": { "type": "number", "minimum": 0 },
+                  "height": { "type": "number", "minimum": 0 }
+                },
+                "required": ["x", "y"]
+              }
+            }
+          },
+          "required": ["id"]
+        }
+      }
+    },
+    {
+      "id": "tool-browser-list-webmcp-tools",
+      "name": "List WebMCP Tools",
+      "kind": "tool",
+      "config": {
+        "slug": "chromium.list_webmcp_tools",
+        "backend": "http",
+        "caller_agent_query": "agent_id",
+        "method": "GET",
+        "url": "core:/api/ext/@ryu/browser/tabs/{id}/webmcp",
+        "secret_headers": { "Authorization": "Bearer env:RYU_TOKEN" },
+        "fail_open": true,
+        "unwrap_body": true,
+        "description": "List the structured WebMCP tools currently registered by the page in one browser tab. Each tool includes its name, description, JSON input schema, origin, and read-only or untrusted-output hints. Call this before chromium.execute_webmcp_tool.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "id": { "type": "string", "description": "Tab id." }
+          },
+          "required": ["id"]
+        }
+      }
+    },
+    {
+      "id": "tool-browser-execute-webmcp-tool",
+      "name": "Execute WebMCP Tool",
+      "kind": "tool",
+      "config": {
+        "slug": "chromium.execute_webmcp_tool",
+        "backend": "http",
+        "caller_agent_query": "agent_id",
+        "method": "POST",
+        "url": "core:/api/ext/@ryu/browser/tabs/{id}/webmcp/execute",
+        "secret_headers": { "Authorization": "Bearer env:RYU_TOKEN" },
+        "fail_open": true,
+        "unwrap_body": true,
+        "description": "Execute one WebMCP tool registered by the page in a browser tab. Use the exact tool_name and arguments from chromium.list_webmcp_tools. This runs page JavaScript visibly in the user's signed-in tab and can cause external effects, so follow normal browser confirmation policy.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "id": { "type": "string", "description": "Tab id." },
+            "tool_name": {
+              "type": "string",
+              "description": "Exact WebMCP name returned by the list operation."
+            },
+            "arguments": {
+              "type": "object",
+              "description": "JSON object matching the tool's input_schema."
+            }
+          },
+          "required": ["id", "tool_name"]
+        }
+      }
+    },
+    {
+      "id": "tool-browser-annotate",
+      "name": "Annotate Browser",
+      "kind": "tool",
+      "config": {
+        "slug": "chromium.annotate",
+        "backend": "http",
+        "caller_agent_query": "agent_id",
+        "method": "POST",
+        "url": "core:/api/ext/@ryu/browser/tabs/{id}/annotations",
+        "secret_headers": { "Authorization": "Bearer env:RYU_TOKEN" },
+        "fail_open": true,
+        "unwrap_body": true,
+        "description": "Attach a durable visual comment to a browser tab. Use kind `element` for one pointed element, `elements` for a relationship between multiple pointed elements, or `area` for a drawn region. The sidecar captures the target DOM context at annotation time.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "id": { "type": "string" },
+            "kind": {
+              "type": "string",
+              "enum": ["area", "element", "elements"]
+            },
+            "rect": {
+              "type": "object",
+              "properties": {
+                "x": { "type": "number" },
+                "y": { "type": "number" },
+                "width": { "type": "number", "minimum": 0 },
+                "height": { "type": "number", "minimum": 0 }
+              },
+              "required": ["x", "y"]
+            },
+            "selections": {
+              "type": "array",
+              "maxItems": 8,
+              "items": {
+                "type": "object",
+                "properties": {
+                  "x": { "type": "number" },
+                  "y": { "type": "number" },
+                  "width": { "type": "number", "minimum": 0 },
+                  "height": { "type": "number", "minimum": 0 }
+                },
+                "required": ["x", "y"]
+              }
+            },
+            "comment": {
+              "type": "string",
+              "description": "Specific change request."
+            },
+            "style": {
+              "type": "object",
+              "description": "Optional safe style feedback such as font_size, color, letter_spacing, padding, or margin."
+            }
+          },
+          "required": ["id", "kind", "rect", "comment"]
+        }
+      }
+    },
+    {
+      "id": "tool-browser-clear-annotations",
+      "name": "Clear Browser Annotations",
+      "kind": "tool",
+      "config": {
+        "slug": "chromium.clear_annotations",
+        "backend": "http",
+        "caller_agent_query": "agent_id",
+        "method": "DELETE",
+        "url": "core:/api/ext/@ryu/browser/tabs/{id}/annotations",
+        "secret_headers": { "Authorization": "Bearer env:RYU_TOKEN" },
+        "fail_open": true,
+        "unwrap_body": true,
+        "description": "Clear all saved visual annotations from one browser tab.",
+        "input_schema": {
+          "type": "object",
+          "properties": { "id": { "type": "string" } },
+          "required": ["id"]
+        }
+      }
+    },
+    {
+      "id": "tool-browser-hover",
+      "name": "Hover Browser Element",
+      "kind": "tool",
+      "config": {
+        "slug": "chromium.hover",
+        "backend": "http",
+        "caller_agent_query": "agent_id",
+        "method": "POST",
+        "url": "core:/api/ext/@ryu/browser/hover",
+        "secret_headers": { "Authorization": "Bearer env:RYU_TOKEN" },
+        "fail_open": true,
+        "unwrap_body": true,
+        "description": "Move the real pointer over a snapshot element without clicking it, useful for menus and hover states.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "ref": { "type": "string" },
+            "tab_id": { "type": "string" }
+          },
+          "required": ["ref"]
+        }
+      }
+    },
+    {
+      "id": "tool-browser-click-at",
+      "name": "Click Browser Coordinate",
+      "kind": "tool",
+      "config": {
+        "slug": "chromium.click_at",
+        "backend": "http",
+        "caller_agent_query": "agent_id",
+        "method": "POST",
+        "url": "core:/api/ext/@ryu/browser/click-at",
+        "secret_headers": { "Authorization": "Bearer env:RYU_TOKEN" },
+        "fail_open": true,
+        "unwrap_body": true,
+        "description": "Click a CSS-pixel viewport coordinate for canvas and custom controls when no accessibility ref exists.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "x": { "type": "number" },
+            "y": { "type": "number" },
+            "button": { "type": "string", "enum": ["left", "middle", "right"] },
+            "count": { "type": "integer", "minimum": 1, "maximum": 3 },
+            "tab_id": { "type": "string" }
+          },
+          "required": ["x", "y"]
+        }
+      }
+    },
+    {
+      "id": "tool-browser-key",
+      "name": "Press Browser Keys",
+      "kind": "tool",
+      "config": {
+        "slug": "chromium.key",
+        "backend": "http",
+        "caller_agent_query": "agent_id",
+        "method": "POST",
+        "url": "core:/api/ext/@ryu/browser/key",
+        "secret_headers": { "Authorization": "Bearer env:RYU_TOKEN" },
+        "fail_open": true,
+        "unwrap_body": true,
+        "description": "Press a browser key or chord at the current focus, such as [\"cmd\", \"l\"] or [\"Escape\"].",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "keys": { "type": "array", "items": { "type": "string" } },
+            "tab_id": { "type": "string" }
+          },
+          "required": ["keys"]
+        }
+      }
+    },
+    {
+      "id": "tool-browser-drag",
+      "name": "Drag Browser Pointer",
+      "kind": "tool",
+      "config": {
+        "slug": "chromium.drag",
+        "backend": "http",
+        "caller_agent_query": "agent_id",
+        "method": "POST",
+        "url": "core:/api/ext/@ryu/browser/drag",
+        "secret_headers": { "Authorization": "Bearer env:RYU_TOKEN" },
+        "fail_open": true,
+        "unwrap_body": true,
+        "description": "Drag the real browser pointer between two CSS-pixel viewport coordinates.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "from": {
+              "type": "object",
+              "properties": {
+                "x": { "type": "number" },
+                "y": { "type": "number" }
+              },
+              "required": ["x", "y"]
+            },
+            "to": {
+              "type": "object",
+              "properties": {
+                "x": { "type": "number" },
+                "y": { "type": "number" }
+              },
+              "required": ["x", "y"]
+            },
+            "tab_id": { "type": "string" }
+          },
+          "required": ["from", "to"]
+        }
+      }
+    }
+  ],
+  "sidecars": [
+    {
+      "name": "browser",
+      "process": {
+        "kind": "local",
+        "command": "ryu-browser",
+        "command_env": "RYU_BROWSER_BIN",
+        "port_env": "RYU_BROWSER_PORT"
+      },
+      "port": 7993,
+      "health_path": "/health",
+      "lazy": true,
+      "idle_stop_secs": 300,
+      "http": {
+        "routes": [
+          { "path": "/", "permission": "browser.view" },
+          {
+            "path": "/health"
+          },
+          { "path": "/tabs", "method": "GET", "permission": "browser.view" },
+          {
+            "path": "/tabs",
+            "method": "POST",
+            "permission": "browser.control"
+          },
+          {
+            "path": "/tabs/:id",
+            "method": "GET",
+            "permission": "browser.view"
+          },
+          {
+            "path": "/tabs/:id",
+            "method": "DELETE",
+            "permission": "browser.control"
+          },
+          { "path": "/tabs/:id/navigate", "permission": "browser.control" },
+          { "path": "/tabs/:id/screenshot", "permission": "browser.view" },
+          { "path": "/tabs/:id/eval", "permission": "browser.control" },
+          { "path": "/tabs/:id/snapshot", "permission": "browser.view" },
+          { "path": "/tabs/:id/title", "permission": "browser.view" },
+          { "path": "/tabs/:id/context", "permission": "browser.view" },
+          {
+            "path": "/tabs/:id/webmcp",
+            "method": "GET",
+            "permission": "browser.view"
+          },
+          {
+            "path": "/tabs/:id/webmcp/execute",
+            "method": "POST",
+            "permission": "browser.control"
+          },
+          { "path": "/tabs/:id/annotations", "permission": "browser.control" },
+          {
+            "path": "/tabs/:id/annotations/:annotation_id",
+            "permission": "browser.control"
+          },
+          { "path": "/click", "permission": "browser.control" },
+          { "path": "/type", "permission": "browser.control" },
+          { "path": "/scroll", "permission": "browser.control" },
+          { "path": "/hover", "permission": "browser.control" },
+          { "path": "/click-at", "permission": "browser.control" },
+          { "path": "/key", "permission": "browser.control" },
+          { "path": "/drag", "permission": "browser.control" }
+        ]
+      }
+    }
+  ],
+  "provides": [
+    {
+      "capability": "browser.session",
+      "version": "1.0.0",
+      "title": "Browser session",
+      "sidecar": "browser",
+      "route": "/",
+      "grant": "browser:control",
+      "target": "local-machine"
+    },
+    {
+      "capability": "browser.control",
+      "version": "1.0.0",
+      "title": "Browser",
+      "sidecar": "browser",
+      "route": "/",
+      "grant": "browser:control",
+      "selectable": true,
+      "default": true,
+      "target": "local-machine",
+      "tools": {
+        "browser.tabs": {
+          "tool": "chromium.list_tabs"
+        },
+        "browser.navigate": {
+          "tool": "chromium.open_tab"
+        },
+        "browser.screenshot": {
+          "tool": "chromium.screenshot_tab",
+          "args": {
+            "tab_id": "id"
+          }
+        },
+        "browser.snapshot": {
+          "tool": "chromium.snapshot_tab",
+          "args": {
+            "tab_id": "id"
+          }
+        },
+        "browser.click": {
+          "tool": "chromium.click"
+        },
+        "browser.type": {
+          "tool": "chromium.type"
+        },
+        "browser.scroll": {
+          "tool": "chromium.scroll"
+        },
+        "browser.context": {
+          "tool": "chromium.context",
+          "args": {
+            "tab_id": "id"
+          }
+        },
+        "browser.annotate": {
+          "tool": "chromium.annotate",
+          "args": {
+            "tab_id": "id"
+          }
+        },
+        "browser.clear_annotations": {
+          "tool": "chromium.clear_annotations",
+          "args": {
+            "tab_id": "id"
+          }
+        },
+        "browser.hover": {
+          "tool": "chromium.hover"
+        },
+        "browser.click_at": {
+          "tool": "chromium.click_at"
+        },
+        "browser.key": {
+          "tool": "chromium.key"
+        },
+        "browser.drag": {
+          "tool": "chromium.drag"
+        }
+      }
+    }
+  ],
+  "permission_grants": ["browser:control", "tool:http-egress:127.0.0.1"],
+  "permission_levels": [
+    {
+      "id": "browser.view",
+      "label": "Can view",
+      "description": "Read the browser's open tabs, their titles, screenshots, and accessibility snapshots."
+    },
+    {
+      "id": "browser.control",
+      "label": "Can control",
+      "description": "Open, navigate, and close tabs and drive pages with synthetic clicks, typing, and scrolling, using whatever the browser is already signed in to.",
+      "implies": ["browser.view"]
+    }
+  ],
+  "contributes": {
+    "dock_panels": [
+      {
+        "id": "browser",
+        "title": "Browser",
+        "icon": "hugeicons:globe-02",
+        "placement": "both",
+        "panel": "native",
+        "spec": {
+          "linkHandler": {
+            "schemes": ["http", "https"],
+            "method": "POST",
+            "path": "/api/ext/@ryu/browser/tabs",
+            "bodyKey": "url"
+          }
+        }
+      }
+    ],
+    "chat_widget_templates": [
+      {
+        "id": "browser.chat",
+        "title": "Browser widget",
+        "description": "Browser chat widget metadata is coming soon; no render tool is available yet.",
+        "triggers": ["browser widget"],
+        "examples": ["Show me a browser widget"],
+        "backing": {},
+        "display_mode": "inline",
+        "safe_action_ids": [],
+        "availability": "coming-soon"
+      }
+    ]
+  }
+}

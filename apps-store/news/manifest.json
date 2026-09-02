@@ -1,0 +1,471 @@
+{
+  "tags": [
+    "news",
+    "rss",
+    "atom",
+    "feeds",
+    "briefing",
+    "monitoring",
+    "clustering",
+    "dedupe"
+  ],
+  "author": { "name": "Ryu", "url": "https://ryuhq.com" },
+  "repository": "https://github.com/amajorai/ryu-news",
+  "homepage": "https://github.com/amajorai/ryu-news",
+  "privacyPolicyUrl": "https://ryuhq.com/privacy",
+  "termsOfServiceUrl": "https://ryuhq.com/terms",
+  "id": "@ryu/news",
+  "name": "Wire",
+  "version": "0.1.14",
+  "stability": "experimental",
+  "category": "Productivity",
+  "description": "Your own newsroom, running on your node. Wire pulls RSS, Atom and JSON Feed in on a schedule — parsed natively, with conditional GET, per-source backoff, and a source marked `failing` after three consecutive misses rather than quietly going silent — then does the work an aggregator does for you and never shows its working. Duplicates die twice: URLs are canonicalized (redirects followed, `utm_*` and friends stripped, query pairs sorted) and content is fingerprinted with a banded 64-bit SimHash over word shingles, which is what catches one wire story running under six different headlines on six different sites. What survives is clustered across outlets by shingle similarity, entity overlap and title overlap, so the unit you read is a story with *n* sources attached and a visible spread of framings, not the same paragraph six times. A watch is a real boolean query — `AND` / `OR` / `NOT`, phrases, `title:` and `source:` scoping — parsed to an AST and evaluated against tokenized text, and it refuses to save on a parse error with the column, because a watch that silently matches nothing is worse than one that will not save. Breaking is defined, not guessed: a topic's hourly volume against a baseline built from the same hour of day over the trailing week, carrying its z-score and the articles that caused it. Ranking is recency half-life × source count × topic match × unread, every factor displayable. A model is involved in exactly two places — two sentences per cluster in the brief, and one neutral headline for a story eight outlets titled eight ways — and the raw cluster stays inspectable underneath both. Nothing leaves the node but the fetches, and those go to the sources you added.",
+  "tagline": "Every outlet covering the same story, collapsed into one",
+  "keywords": [
+    "news",
+    "rss",
+    "atom",
+    "feeds",
+    "briefing",
+    "monitoring",
+    "clustering",
+    "dedupe"
+  ],
+  "icon": "news",
+  "iconDither": {
+    "from": 198,
+    "to": "transparent",
+    "direction": "down"
+  },
+  "surfaces": {
+    "gateway": {
+      "support": "none"
+    },
+    "core": {
+      "support": "full"
+    },
+    "desktop": {
+      "support": "full"
+    },
+    "island": {
+      "support": "limited"
+    },
+    "mobile": {
+      "support": "limited"
+    },
+    "extension": {
+      "support": "none"
+    },
+    "web": {
+      "support": "full"
+    },
+    "cli": {
+      "support": "full"
+    }
+  },
+  "engines": {
+    "ryu": ">=0.1.0"
+  },
+  "runnables": [
+    {
+      "id": "news-companion",
+      "name": "Wire",
+      "kind": "companion",
+      "config": {
+        "label": "Wire",
+        "ui_entry": "./dist/index.html",
+        "ui_format": "html"
+      }
+    }
+  ],
+  "sidecars": [
+    {
+      "name": "news",
+      "process": {
+        "kind": "local",
+        "command": "ryu-news",
+        "command_env": "RYU_NEWS_BIN",
+        "port_env": "RYU_NEWS_PORT"
+      },
+      "port": 8008,
+      "health_path": "/health",
+      "lazy": true,
+      "idle_stop_secs": 900,
+      "http": {
+        "mount": "/api/news",
+        "public_mount": "/api/news",
+        "routes": [
+          { "path": "/sources", "method": "GET", "permission": "news.view" },
+          { "path": "/sources", "method": "POST", "permission": "news.edit" },
+          {
+            "path": "/sources/opml",
+            "method": "GET",
+            "permission": "news.view"
+          },
+          {
+            "path": "/sources/opml",
+            "method": "POST",
+            "permission": "news.edit"
+          },
+          {
+            "path": "/sources/:id",
+            "method": "GET",
+            "permission": "news.view"
+          },
+          {
+            "path": "/sources/:id",
+            "method": "PATCH",
+            "permission": "news.edit"
+          },
+          {
+            "path": "/sources/:id",
+            "method": "DELETE",
+            "permission": "news.edit"
+          },
+          {
+            "path": "/sources/:id/refresh",
+            "method": "POST",
+            "permission": "news.edit"
+          },
+          { "path": "/articles", "method": "GET", "permission": "news.view" },
+          {
+            "path": "/articles/:id",
+            "method": "GET",
+            "permission": "news.view"
+          },
+          { "path": "/articles/:id/read", "permission": "news.edit" },
+          { "path": "/articles/:id/save", "permission": "news.edit" },
+          { "path": "/articles/:id/archive", "permission": "news.edit" },
+          { "path": "/stories", "method": "GET", "permission": "news.view" },
+          {
+            "path": "/stories/:id",
+            "method": "GET",
+            "permission": "news.view"
+          },
+          {
+            "path": "/stories/:id/follow",
+            "method": "POST",
+            "permission": "news.edit"
+          },
+          { "path": "/topics", "method": "GET", "permission": "news.view" },
+          { "path": "/topics", "method": "POST", "permission": "news.edit" },
+          { "path": "/topics/:id", "method": "GET", "permission": "news.view" },
+          {
+            "path": "/topics/:id",
+            "method": "PATCH",
+            "permission": "news.edit"
+          },
+          {
+            "path": "/topics/:id",
+            "method": "DELETE",
+            "permission": "news.edit"
+          },
+          {
+            "path": "/topics/:id/matches",
+            "method": "GET",
+            "permission": "news.view"
+          },
+          { "path": "/briefs", "method": "GET", "permission": "news.view" },
+          {
+            "path": "/briefs/generate",
+            "method": "POST",
+            "permission": "news.edit"
+          },
+          { "path": "/briefs/:id", "method": "GET", "permission": "news.view" },
+          { "path": "/settings", "method": "GET", "permission": "news.view" },
+          { "path": "/settings", "method": "PUT", "permission": "news.edit" }
+        ]
+      },
+      "host_api": {
+        "grants": ["hook:side-model", "storage:kv"]
+      }
+    }
+  ],
+  "mcp_servers": {
+    "news": {
+      "command": "ryu-news",
+      "args": ["mcp"],
+      "description": "Your reviewed feed as tools. `search` queries the LOCAL corpus — the sources you added, already deduplicated and clustered — with no web call at all, so an agent answering \"what happened with X this week\" reads what you curated instead of whatever a fresh search returns. `brief` fetches a generated digest, `story` opens one cluster with every outlet covering it, and `topics` lists the saved watches and what they are currently matching."
+    }
+  },
+  "provides": [
+    {
+      "capability": "news.crud",
+      "version": "1.0.0",
+      "sidecar": "news",
+      "grant": "news:crud"
+    }
+  ],
+  "permission_grants": [
+    "news:crud",
+    "hook:side-model",
+    "storage:kv",
+    "mcp:news",
+    "ui:declarative-http"
+  ],
+  "permission_levels": [
+    {
+      "id": "news.view",
+      "label": "Can view",
+      "description": "Read the feed, open a story with every outlet covering it, read the briefs, and see which watches are firing and why."
+    },
+    {
+      "id": "news.edit",
+      "label": "Can edit",
+      "description": "Add and remove sources, import OPML, and write the boolean queries behind watches. This decides what this node ingests and what it treats as breaking, so it is the level that changes what everyone else sees.",
+      "implies": ["news.view"]
+    }
+  ],
+  "companion": {
+    "label": "Wire",
+    "icon": "news"
+  },
+  "contributes": {
+    "sidebar_buttons": [
+      {
+        "id": "news-today",
+        "title": "Today",
+        "icon": "news",
+        "target": "/plugin/app__news-companion",
+        "context": { "tab": "today" },
+        "order": 70
+      },
+      {
+        "id": "news-stories",
+        "title": "Stories",
+        "icon": "news-02",
+        "target": "/plugin/app__news-companion",
+        "context": { "tab": "stories" },
+        "order": 71
+      },
+      {
+        "id": "news-feed",
+        "title": "Feed",
+        "icon": "rss",
+        "target": "/plugin/app__news-companion",
+        "context": { "tab": "feed" },
+        "order": 72
+      },
+      {
+        "id": "news-topics",
+        "title": "Topics",
+        "icon": "hashtag",
+        "target": "/plugin/app__news-companion",
+        "context": { "tab": "topics" },
+        "order": 73
+      },
+      {
+        "id": "news-sources",
+        "title": "Sources",
+        "icon": "link-01",
+        "target": "/plugin/app__news-companion",
+        "context": { "tab": "sources" },
+        "order": 74
+      },
+      {
+        "id": "news-saved",
+        "title": "Saved",
+        "icon": "bookmark-02",
+        "target": "/plugin/app__news-companion",
+        "context": { "tab": "saved" },
+        "order": 75
+      },
+      {
+        "id": "news-settings",
+        "title": "Settings",
+        "icon": "settings-01",
+        "target": "/plugin/app__news-companion",
+        "context": { "tab": "settings" },
+        "order": 76
+      }
+    ],
+    "chat_widget_templates": [
+      {
+        "id": "news.chat",
+        "title": "Wire widget",
+        "description": "Open Wire data in a host-rendered chat widget.",
+        "triggers": ["wire widget"],
+        "examples": ["Show me a wire widget"],
+        "backing": { "view_id": "surface:news" },
+        "display_mode": "inline",
+        "safe_action_ids": [],
+        "availability": "available"
+      }
+    ],
+    "composer_controls": [
+      {
+        "id": "news.toggle",
+        "type": "toggle",
+        "flag": "io.ryu.news",
+        "label": "Ground in news",
+        "description": "Before the message is sent, attach the top matching recent items from your own feed, with their source links. Nothing is attached when nothing matches."
+      }
+    ],
+    "settings_tabs": [
+      {
+        "id": "news.settings",
+        "title": "Wire",
+        "fields": [
+          {
+            "type": "text",
+            "pref_key": "news-brief-time",
+            "label": "Brief time",
+            "description": "Local wall-clock time the daily brief is generated, as 24-hour HH:MM. Leave blank to generate briefs only on demand.",
+            "placeholder": "07:30"
+          },
+          {
+            "type": "text",
+            "pref_key": "news-brief-timezone",
+            "label": "Time zone",
+            "description": "IANA zone the brief time is read in, e.g. Europe/London. Blank uses the node's own zone. A fixed UTC offset would be wrong for half the year in most of the world, so this is a zone name, not an offset.",
+            "placeholder": "Europe/London"
+          },
+          {
+            "type": "model_picker",
+            "pref_key": "news-brief-model",
+            "label": "Brief model",
+            "description": "Writes two sentences per cluster and one neutral headline per story. It never decides what is in the brief — clustering, burst detection and ranking are computed — so a fast model is usually the right choice."
+          },
+          {
+            "type": "number",
+            "pref_key": "news-item-cap",
+            "label": "Items per brief",
+            "description": "How many ranked stories the brief covers. Also caps the snapshot the composer's Ground in news toggle reads from.",
+            "default": 25,
+            "min": 5,
+            "max": 100,
+            "step": 1
+          },
+          {
+            "type": "select",
+            "pref_key": "news-dedupe-aggressiveness",
+            "label": "Dedupe aggressiveness",
+            "description": "How close two articles must be, by SimHash Hamming distance over content shingles, to count as the same copy. Aggressive collapses more syndicated wire copy but can merge two genuinely different follow-ups.",
+            "default": "standard",
+            "options": [
+              {
+                "value": "relaxed",
+                "label": "Relaxed — only near-identical copies"
+              },
+              {
+                "value": "standard",
+                "label": "Standard — catches syndicated wire copy"
+              },
+              {
+                "value": "aggressive",
+                "label": "Aggressive — collapses rewrites too"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "turn_hooks": [
+      {
+        "id": "news.ground",
+        "on": "pre_user_turn",
+        "match": {
+          "flag": "io.ryu.news"
+        },
+        "code_file": "hooks/ground.js"
+      }
+    ],
+    "hook_events": [
+      {
+        "id": "@ryu/news#brief.ready",
+        "title": "The daily brief finished generating",
+        "description": "A brief was generated and stored — either on the schedule set in Settings → Wire, or because someone asked for one. Fires once per brief, after the prose is written and the source links are attached, so a workflow bound to it can read the finished document rather than poll for it. A poll cycle that ingested articles but produced no brief does NOT fire this, and neither does a brief that failed to generate.",
+        "payload_example": {
+          "brief_id": "br_2026-08-10",
+          "generated_at": "2026-08-10T07:30:04Z",
+          "trigger": "scheduled",
+          "story_count": 12,
+          "article_count": 47,
+          "top_story_ids": ["st_9f2c", "st_41ab", "st_7d10"]
+        }
+      },
+      {
+        "id": "@ryu/news#topic.breaking",
+        "title": "A watch is bursting",
+        "description": "A saved topic's article rate crossed its burst threshold: the z-score against a baseline built from the same hour of day over the trailing seven days is at or above the threshold AND the absolute count clears the floor. Both conditions, because a topic that normally sees zero articles an hour has a standard deviation of zero and would otherwise fire forever on a single article. Fires at most once per topic per cooldown window, so a story that keeps climbing does not page repeatedly. A topic that merely matched new articles at its usual rate does NOT fire this — matching is not breaking.",
+        "payload_example": {
+          "topic_id": "tp_semis",
+          "topic_name": "Semiconductor export controls",
+          "z_score": 4.7,
+          "count": 9,
+          "baseline_mean": 1.2,
+          "baseline_stdev": 1.6,
+          "hour_of_day": 14,
+          "article_ids": ["ar_3311", "ar_3318", "ar_3324"],
+          "detected_at": "2026-08-10T14:05:00Z"
+        }
+      },
+      {
+        "id": "@ryu/news#story.developing",
+        "title": "A followed story picked up more outlets",
+        "description": "A story you follow gained new source articles since the last poll — the cluster grew, which is the signal that a one-outlet report is becoming a covered event. Fires once per poll per story that grew, carrying the outlets that joined. A story that is only followed and unchanged does NOT fire, a new cluster opening for the first time does NOT fire (there is nothing developing yet), and a cluster you do not follow never fires this however fast it grows.",
+        "payload_example": {
+          "story_id": "st_9f2c",
+          "title": "Regulator opens inquiry into the merger",
+          "source_count": 8,
+          "new_source_count": 3,
+          "new_sources": ["Reuters", "AP", "Bloomberg"],
+          "new_article_ids": ["ar_3402", "ar_3407", "ar_3411"],
+          "first_seen_at": "2026-08-09T18:40:00Z",
+          "updated_at": "2026-08-10T09:12:00Z"
+        }
+      }
+    ],
+    "data_categories": [
+      {
+        "id": "news_articles",
+        "title": "Delete the collected news",
+        "noun": "articles",
+        "confirm_word": "Wire",
+        "detail": "Every article, story cluster, dedupe fingerprint, brief and read/saved/archived mark on this node will be deleted. The sources you subscribed to and the watches you wrote are kept, so the feed refills from the next poll onward — but nothing older than that poll comes back."
+      },
+      {
+        "id": "news_sources",
+        "title": "Delete all sources and watches",
+        "noun": "sources",
+        "confirm_word": "Sources",
+        "detail": "Every source subscription and every saved topic query on this node will be deleted, and polling stops. Articles already collected are kept but nothing new arrives. Export your OPML first if you want the subscription list back."
+      }
+    ],
+    "views": [
+      {
+        "id": "surface:news",
+        "title": "Wire",
+        "view": "list-detail",
+        "spec": {
+          "view": "list-detail",
+          "items": [],
+          "emptyText": "No stories yet. Add a source to start collecting.",
+          "source": {
+            "http": {
+              "method": "GET",
+              "path": "/api/news/stories"
+            },
+            "items": "stories",
+            "map": {
+              "title": "title",
+              "subtitle": "summary",
+              "accessory": "source_count"
+            }
+          },
+          "itemActions": [
+            {
+              "id": "open",
+              "label": "Open every outlet",
+              "style": "primary",
+              "http": {
+                "method": "GET",
+                "path": "/api/news/stories/{{item.id}}"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

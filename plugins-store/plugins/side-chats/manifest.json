@@ -1,0 +1,71 @@
+{
+  "tags": ["chat", "context", "side-chat", "btw", "questions"],
+  "author": { "name": "Ryu", "url": "https://ryuhq.com" },
+  "repository": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/side-chats",
+  "homepage": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/side-chats",
+  "privacyPolicyUrl": "https://ryuhq.com/privacy",
+  "termsOfServiceUrl": "https://ryuhq.com/terms",
+  "id": "@ryu/side-chats",
+  "name": "Side Chats",
+  "version": "0.1.0",
+  "stability": "experimental",
+  "category": "Productivity",
+  "description": "Ask focused questions about the current conversation without adding another turn to the main transcript, then keep the answer as a recoverable side chat.",
+  "tagline": "Ask aside questions with main-chat context",
+  "keywords": ["chat", "context", "side-chat", "btw", "questions"],
+  "icon": "message-question-01",
+  "iconDither": { "from": 176, "to": "transparent", "direction": "down" },
+  "surfaces": {
+    "gateway": { "support": "none" },
+    "core": { "support": "full" },
+    "desktop": { "support": "full" },
+    "island": { "support": "limited" },
+    "mobile": { "support": "limited" },
+    "extension": { "support": "limited" },
+    "web": { "support": "limited" },
+    "cli": { "support": "full" }
+  },
+  "engines": { "ryu": ">=0.1.0" },
+  "runnables": [],
+  "activation_events": ["*"],
+  "contributes": {
+    "chat_features": [
+      {
+        "id": "side-chats",
+        "kind": "side-chat",
+        "command": "/btw",
+        "context": "main-chat",
+        "persistence": "parent-conversation"
+      }
+    ],
+    "selection_actions": [
+      {
+        "id": "side-chats.ask-selection",
+        "label": "Ask in side chat",
+        "kind": "button",
+        "args": {
+          "dispatch": "side-chat.selection",
+          "intent": "ask"
+        },
+        "order": 100
+      },
+      {
+        "id": "side-chats.explain-selection",
+        "label": "Explain",
+        "kind": "button",
+        "args": {
+          "dispatch": "side-chat.selection",
+          "intent": "explain"
+        },
+        "order": 110
+      }
+    ],
+    "slash_commands": [
+      {
+        "id": "side-chats.ask",
+        "command": "/btw",
+        "description": "Ask a quick side question using the current main-chat context"
+      }
+    ]
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "id": "@ryu/durable",
+  "name": "Durable Workflows",
+  "version": "1.0.0",
+  "description": "The durable workflow engine: workflow runs survive a crash, a restart, or a machine going to sleep, resuming from where they stopped instead of starting over. The default engine every workflow uses unless another is bound.",
+  "tagline": "Workflow runs that survive a restart",
+  "keywords": ["workflows", "durability", "engine", "automation"],
+  "category": "Core",
+  "engines": {
+    "ryu": ">=0.0.1"
+  },
+  "runnables": [
+    {
+      "id": "engine-durable-workflow",
+      "name": "Durable workflow execution engine",
+      "kind": "engine",
+      "config": {
+        "engine_type": "durable_workflow",
+        "base_url": "core://workflow/durable"
+      }
+    }
+  ],
+  "contributes": {
+    "workflows": []
+  },
+  "permission_grants": [],
+  "permission_levels": [
+    {
+      "id": "workflow.view",
+      "label": "Can view runs",
+      "description": "See durable workflow runs and their history."
+    },
+    {
+      "id": "workflow.run",
+      "label": "Can run",
+      "description": "Start a durable workflow and resume a suspended one."
+    }
+  ]
+}

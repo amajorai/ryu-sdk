@@ -1,0 +1,89 @@
+{
+  "tags": [
+    "usage",
+    "quota",
+    "models",
+    "automation",
+    "subscription",
+    "fast-mode"
+  ],
+  "author": { "name": "Ryu", "url": "https://ryuhq.com" },
+  "repository": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/usage-pacer",
+  "homepage": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/usage-pacer",
+  "privacyPolicyUrl": "https://ryuhq.com/privacy",
+  "termsOfServiceUrl": "https://ryuhq.com/terms",
+  "id": "@ryu/usage-pacer",
+  "name": "Usage Pacer",
+  "version": "0.2.0",
+  "stability": "experimental",
+  "category": "Automation",
+  "description": "Keeps subscription agents usable for the whole rolling window. It can pace usage down with a fallback ladder, then spend remaining quota on stronger models or ACP fast mode as a reset approaches.",
+  "tagline": "Pace quota, then spend it before reset",
+  "keywords": [
+    "usage",
+    "quota",
+    "models",
+    "automation",
+    "subscription",
+    "fast-mode"
+  ],
+  "icon": "gauge-02",
+  "iconDither": { "from": 32, "to": "transparent", "direction": "down" },
+  "surfaces": {
+    "gateway": { "support": "none" },
+    "core": { "support": "full" },
+    "desktop": { "support": "full" },
+    "island": { "support": "limited" },
+    "mobile": { "support": "limited" },
+    "extension": { "support": "limited" },
+    "web": { "support": "full" },
+    "cli": { "support": "full" }
+  },
+  "engines": { "ryu": ">=0.1.0" },
+  "runnables": [],
+  "permission_grants": ["preferences:read", "usage:read"],
+  "activation_events": ["*"],
+  "contributes": {
+    "settings_tabs": [
+      {
+        "id": "usage-pacer.settings",
+        "title": "Usage pacing",
+        "scope": "node",
+        "fields": [
+          {
+            "type": "toggle",
+            "pref_key": "usage-pacer-enabled",
+            "label": "Automatically pace and escalate models",
+            "description": "Applies your fallback and end-of-window rules only to agents with readable subscription usage windows. It never changes an agent's saved model.",
+            "default": false
+          },
+          {
+            "type": "select",
+            "pref_key": "usage-pacer-mode",
+            "label": "Pacing mode",
+            "description": "Even burn compares usage with the remaining-window pace and applies extra pressure when you are in deficit. Usage thresholds only switches when an explicit ladder threshold is crossed.",
+            "default": "even",
+            "options": [
+              { "value": "even", "label": "Even burn (recommended)" },
+              { "value": "threshold", "label": "Usage thresholds only" }
+            ]
+          },
+          {
+            "type": "textarea",
+            "pref_key": "usage-pacer-rules",
+            "label": "Agent and global ladders",
+            "description": "JSON configuration. Agent entries override global entries. `windows` accepts `weekly`, `session`, or `both`; `ladder` uses `at` as used-percent. Optional `upgrade_ladder` uses `remaining` as percent left and/or `within_minutes` until reset; steps may set `model`, `effort`, or ACP `acp_config` values such as `fast_mode: \"true\"`.",
+            "default": "{\n  \"global\": {\n    \"windows\": \"weekly\",\n    \"pace_deficit\": 15,\n    \"ladder\": [\n      { \"from\": \"opus\", \"at\": 50, \"model\": \"sonnet\" },\n      { \"from\": \"sonnet\", \"at\": 75, \"model\": \"haiku\" }\n    ],\n    \"upgrade_ladder\": [\n      { \"from\": \"sonnet\", \"remaining\": 20, \"model\": \"opus\" },\n      { \"from\": \"opus\", \"within_minutes\": 1440, \"acp_config\": { \"fast_mode\": \"true\" } }\n    ]\n  },\n  \"agents\": {\n    \"acp:claude\": {\n      \"windows\": \"both\",\n      \"pace_deficit\": 15,\n      \"ladder\": [\n        { \"from\": \"opus\", \"at\": 50, \"model\": \"sonnet\" },\n        { \"from\": \"sonnet\", \"at\": 75, \"model\": \"haiku\" }\n      ],\n      \"upgrade_ladder\": [\n        { \"from\": \"sonnet\", \"remaining\": 20, \"model\": \"opus\" },\n        { \"from\": \"opus\", \"within_minutes\": 1440, \"acp_config\": { \"fast_mode\": \"true\" } }\n      ]\n    }\n  }\n}"
+          }
+        ]
+      }
+    ],
+    "turn_hooks": [
+      {
+        "id": "usage-pacer.select",
+        "on": "pre_model_select",
+        "code_file": "hooks/select-model.js"
+      }
+    ]
+  }
+}

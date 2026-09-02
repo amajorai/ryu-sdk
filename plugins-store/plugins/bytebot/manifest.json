@@ -1,0 +1,288 @@
+{
+  "tags": ["automation", "desktop", "computer-use", "bytebot"],
+  "author": { "name": "Ryu", "url": "https://ryuhq.com" },
+  "repository": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/bytebot",
+  "homepage": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/bytebot",
+  "privacyPolicyUrl": "https://ryuhq.com/privacy",
+  "termsOfServiceUrl": "https://ryuhq.com/terms",
+  "id": "@ryu/bytebot",
+  "name": "Bytebot Desktop",
+  "version": "0.1.14",
+  "stability": "experimental",
+  "description": "Drives a Bytebot desktop (https://github.com/bytebot-ai/bytebot) through `bytebotd`, its local HTTP daemon, as the SECOND provider of the swappable `computer.control` layer — the first thing that makes that layer actually swappable rather than merely marked selectable. READ THIS BEFORE SELECTING IT: bytebotd drives the desktop IT runs on, which in the shipped Bytebot product is a containerized Linux desktop, NOT the machine running Ryu. Selecting it re-points `computer.capture` / `computer.click` / `computer.type` / `computer.key` / `computer.scroll` away from your own screen (`ghost`, the declared default) and onto that desktop — the same remote-target relationship `browser.control` already has between the local Chromium sidecar and a hosted browser. It serves FIVE of the six canonical verbs: `computer.focus_app` is deliberately NOT bound, because bytebotd's `application` action takes a closed seven-value enum (firefox, 1password, thunderbird, vscode, terminal, desktop, directory) while the canonical verb takes a free-form app name, so any other name would be a schema-legal call that 400s. The app switch is still reachable natively as `bytebot.application`, whose own schema carries that enum so an illegal call cannot be composed. Requires no API key — bytebotd ships with no authentication at all, which is also why this plugin only ever addresses it over loopback. SECURITY, read before enabling: bytebotd ships with NO authentication — no auth middleware, permissive CORS — and this plugin reaches it at the fixed loopback port 9990. Its egress grant is `tool:http-egress:127.0.0.1`, which is HOST-scoped, not port-scoped: approving it grants reach to any service on loopback, not just bytebotd. Only enable this on a machine where you accept that an unauthenticated desktop-control daemon is running and reachable. TARGET: bytebotd drives the desktop IT runs on — in the shipped Bytebot product that is a containerized Linux desktop, NOT the machine running Ryu — so selecting this instead of `ghost` does not give you another way to drive your own computer.",
+  "iconUrl": "https://avatars.githubusercontent.com/u/154629106?v=4",
+  "iconDither": { "from": 237, "to": "transparent", "direction": "down" },
+  "tagline": "Swap computer control onto a Bytebot desktop",
+  "keywords": ["automation", "desktop", "computer-use", "bytebot"],
+  "category": "Automation",
+  "surfaces": {
+    "gateway": { "support": "none" },
+    "core": { "support": "full" },
+    "desktop": { "support": "full" },
+    "island": { "support": "full" },
+    "mobile": { "support": "full" },
+    "extension": { "support": "full" },
+    "web": { "support": "full" },
+    "cli": { "support": "full" }
+  },
+  "engines": {
+    "ryu": ">=0.1.0"
+  },
+  "runnables": [
+    {
+      "id": "tool-bytebot-screenshot",
+      "name": "Bytebot Screenshot",
+      "kind": "tool",
+      "config": {
+        "slug": "bytebot.screenshot",
+        "backend": "http",
+        "method": "POST",
+        "url": "http://127.0.0.1:9990/computer-use",
+        "fail_open": false,
+        "unwrap_body": true,
+        "body_defaults": {
+          "action": "screenshot"
+        },
+        "description": "Capture the Bytebot desktop as a PNG. Returns `{image}`, base64-encoded, with no accessibility metadata — Bytebot's daemon is pixels-only, so target coordinates by looking at the image. Requires a reachable bytebotd at 127.0.0.1:9990.",
+        "input_schema": {
+          "type": "object",
+          "properties": {}
+        }
+      }
+    },
+    {
+      "id": "tool-bytebot-click",
+      "name": "Bytebot Click",
+      "kind": "tool",
+      "config": {
+        "slug": "bytebot.click",
+        "backend": "http",
+        "method": "POST",
+        "url": "http://127.0.0.1:9990/computer-use",
+        "fail_open": false,
+        "unwrap_body": false,
+        "body_defaults": {
+          "action": "click_mouse",
+          "button": "left",
+          "clickCount": 1
+        },
+        "description": "Move the pointer to a coordinate on the Bytebot desktop and click. `button` and `clickCount` are required by the daemon and defaulted here to a single left click. Answers `{status, body}` rather than the raw upstream payload: this action returns an EMPTY body on success, and an unwrapped empty string reads like a failure. Requires a reachable bytebotd at 127.0.0.1:9990.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "coordinates": {
+              "type": "object",
+              "description": "Where to click, in screen pixels.",
+              "properties": {
+                "x": {
+                  "type": "integer"
+                },
+                "y": {
+                  "type": "integer"
+                }
+              },
+              "required": ["x", "y"]
+            },
+            "button": {
+              "type": "string",
+              "description": "Which mouse button (daemon default when omitted: left).",
+              "enum": ["left", "right", "middle"]
+            },
+            "clickCount": {
+              "type": "integer",
+              "description": "How many clicks; 2 is a double-click. Bytebot spaces repeats 150ms apart.",
+              "minimum": 1,
+              "maximum": 3
+            }
+          },
+          "required": ["coordinates"]
+        }
+      }
+    },
+    {
+      "id": "tool-bytebot-type-text",
+      "name": "Bytebot Type Text",
+      "kind": "tool",
+      "config": {
+        "slug": "bytebot.type_text",
+        "backend": "http",
+        "method": "POST",
+        "url": "http://127.0.0.1:9990/computer-use",
+        "fail_open": false,
+        "unwrap_body": false,
+        "body_defaults": {
+          "action": "type_text"
+        },
+        "description": "Type literal text into whatever has keyboard focus on the Bytebot desktop. Answers `{status, body}` because the action returns an empty body on success. Requires a reachable bytebotd at 127.0.0.1:9990.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "text": {
+              "type": "string",
+              "description": "The text to type."
+            },
+            "delay": {
+              "type": "integer",
+              "description": "Milliseconds between keystrokes; slower typing is more reliable in apps that debounce input.",
+              "minimum": 0
+            }
+          },
+          "required": ["text"]
+        }
+      }
+    },
+    {
+      "id": "tool-bytebot-type-keys",
+      "name": "Bytebot Press Keys",
+      "kind": "tool",
+      "config": {
+        "slug": "bytebot.type_keys",
+        "backend": "http",
+        "method": "POST",
+        "url": "http://127.0.0.1:9990/computer-use",
+        "fail_open": false,
+        "unwrap_body": false,
+        "body_defaults": {
+          "action": "type_keys"
+        },
+        "description": "Press keys together as one chord on the Bytebot desktop — the daemon presses every key, then releases every key. This is `type_keys`, NOT the daemon's `press_keys`: that one holds keys down or releases them as a half-action, so a chord sent through it would leave modifiers physically held. Answers `{status, body}` because the action returns an empty body on success. Requires a reachable bytebotd at 127.0.0.1:9990.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "keys": {
+              "type": "array",
+              "description": "Key tokens pressed together, e.g. [\"ctrl\", \"s\"] or [\"escape\"].",
+              "items": {
+                "type": "string"
+              }
+            },
+            "delay": {
+              "type": "integer",
+              "description": "Milliseconds to hold the chord before release.",
+              "minimum": 0
+            }
+          },
+          "required": ["keys"]
+        }
+      }
+    },
+    {
+      "id": "tool-bytebot-scroll",
+      "name": "Bytebot Scroll",
+      "kind": "tool",
+      "config": {
+        "slug": "bytebot.scroll",
+        "backend": "http",
+        "method": "POST",
+        "url": "http://127.0.0.1:9990/computer-use",
+        "fail_open": false,
+        "unwrap_body": false,
+        "body_defaults": {
+          "action": "scroll",
+          "scrollCount": 3
+        },
+        "description": "Scroll the Bytebot desktop at the pointer's current position. `scrollCount` counts MOUSE-WHEEL TICKS, not pixels, and the daemon sleeps 150ms between ticks — so it is capped low on purpose: a value meant as pixels would wedge the desktop for minutes. Answers `{status, body}` because the action returns an empty body on success. Requires a reachable bytebotd at 127.0.0.1:9990.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "direction": {
+              "type": "string",
+              "description": "Which way to scroll.",
+              "enum": ["up", "down", "left", "right"]
+            },
+            "scrollCount": {
+              "type": "integer",
+              "description": "Number of wheel ticks (daemon requires it; defaulted to 3 here).",
+              "minimum": 1,
+              "maximum": 10
+            }
+          },
+          "required": ["direction"]
+        }
+      }
+    },
+    {
+      "id": "tool-bytebot-application",
+      "name": "Bytebot Open Application",
+      "kind": "tool",
+      "config": {
+        "slug": "bytebot.application",
+        "backend": "http",
+        "method": "POST",
+        "url": "http://127.0.0.1:9990/computer-use",
+        "fail_open": false,
+        "unwrap_body": false,
+        "body_defaults": {
+          "action": "application"
+        },
+        "description": "Focus (or launch) one of the applications preinstalled on the Bytebot desktop. The name is a CLOSED enum the daemon validates — it is not an arbitrary app name — which is exactly why the canonical `computer.focus_app` verb is not bound to this tool. `desktop` minimises everything to show the desktop. Answers `{status, body}` because the action returns an empty body on success. Requires a reachable bytebotd at 127.0.0.1:9990.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "application": {
+              "type": "string",
+              "description": "Which preinstalled application to bring to the front.",
+              "enum": [
+                "firefox",
+                "1password",
+                "thunderbird",
+                "vscode",
+                "terminal",
+                "desktop",
+                "directory"
+              ]
+            }
+          },
+          "required": ["application"]
+        }
+      }
+    }
+  ],
+  "provides": [
+    {
+      "capability": "computer.control",
+      "version": "1.0.0",
+      "title": "Computer",
+      "selectable": true,
+      "target": "remote-desktop",
+      "tools": {
+        "computer.capture": {
+          "tool": "bytebot.screenshot"
+        },
+        "computer.click": {
+          "tool": "bytebot.click",
+          "args": {
+            "count": "clickCount"
+          },
+          "arg_template": {
+            "coordinates": {
+              "x": "{x}",
+              "y": "{y}"
+            }
+          }
+        },
+        "computer.type": {
+          "tool": "bytebot.type_text"
+        },
+        "computer.key": {
+          "tool": "bytebot.type_keys"
+        },
+        "computer.scroll": {
+          "tool": "bytebot.scroll",
+          "args": {
+            "x": "",
+            "y": "",
+            "amount": "scrollCount"
+          },
+          "arg_clamp": {
+            "amount": {
+              "min": 1,
+              "max": 10
+            }
+          }
+        }
+      }
+    }
+  ],
+  "permission_grants": ["tool:http-egress:127.0.0.1"]
+}

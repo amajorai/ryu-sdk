@@ -1,0 +1,81 @@
+{
+  "tags": ["summary", "thinking", "tools", "commands", "accessibility"],
+  "author": { "name": "Ryu", "url": "https://ryuhq.com" },
+  "repository": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/action-summary",
+  "homepage": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/action-summary",
+  "privacyPolicyUrl": "https://ryuhq.com/privacy",
+  "termsOfServiceUrl": "https://ryuhq.com/terms",
+  "id": "@ryu/action-summary",
+  "name": "Action Summary",
+  "version": "0.1.0",
+  "stability": "experimental",
+  "description": "Explains streamed thinking blocks and tool calls in one plain-language line per action, using a configurable small side model.",
+  "tagline": "Make agent actions easy to understand",
+  "keywords": ["summary", "thinking", "tools", "commands", "accessibility"],
+  "category": "Productivity",
+  "icon": "text-align-left",
+  "iconDither": { "from": 204, "to": "transparent", "direction": "down" },
+  "surfaces": {
+    "gateway": { "support": "none" },
+    "core": { "support": "full" },
+    "desktop": { "support": "full" },
+    "island": { "support": "full" },
+    "mobile": { "support": "limited" },
+    "extension": { "support": "limited" },
+    "web": { "support": "full" },
+    "cli": { "support": "full" }
+  },
+  "engines": { "ryu": ">=0.1.0" },
+  "runnables": [],
+  "permission_grants": ["hook:side-model", "preferences:read"],
+  "activation_events": ["*"],
+  "contributes": {
+    "settings_tabs": [
+      {
+        "id": "action-summary.settings",
+        "title": "Action summaries",
+        "scope": "node",
+        "fields": [
+          {
+            "type": "toggle",
+            "pref_key": "action-summary-enabled",
+            "label": "Explain thinking and tool actions",
+            "description": "Show one plain-language line for each surfaced thinking block and tool call.",
+            "default": true
+          },
+          {
+            "type": "select",
+            "pref_key": "action-summary-detail",
+            "label": "Detail",
+            "description": "Controls how much context each one-line summary includes.",
+            "default": "standard",
+            "options": [
+              { "value": "brief", "label": "Brief — what happened" },
+              {
+                "value": "standard",
+                "label": "Standard — what happened and why"
+              },
+              {
+                "value": "full",
+                "label": "Full — safest useful context"
+              }
+            ]
+          },
+          {
+            "type": "model_picker",
+            "pref_key": "action-summary-model",
+            "label": "Summary model",
+            "description": "Optional. Empty follows Ryu's normal side-model/node default."
+          }
+        ]
+      }
+    ],
+    "turn_hooks": [
+      {
+        "id": "action-summary.action",
+        "on": "action",
+        "code_file": "hooks/action.js"
+      }
+    ]
+  }
+}

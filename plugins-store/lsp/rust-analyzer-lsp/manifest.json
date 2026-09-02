@@ -1,0 +1,64 @@
+{
+  "tags": ["rust", "rust-analyzer", "language-server", "developer"],
+  "author": { "name": "Ryu", "url": "https://ryuhq.com" },
+  "repository": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/lsp/rust-analyzer-lsp",
+  "homepage": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/lsp/rust-analyzer-lsp",
+  "privacyPolicyUrl": "https://ryuhq.com/privacy",
+  "termsOfServiceUrl": "https://ryuhq.com/terms",
+  "id": "@ryu/rust-analyzer-lsp",
+  "name": "Rust LSP",
+  "version": "0.1.14",
+  "stability": "experimental",
+  "category": "Developer Tools",
+  "description": "Rust language server (rust-analyzer) for the ryu agent: definitions, references, hover, symbols, implementations, call hierarchies and diagnostics after every edit. You install rust-analyzer; the plugin ships config.",
+  "tagline": "Rust code intelligence via rust-analyzer",
+  "keywords": ["rust", "rust-analyzer", "language-server", "developer"],
+  "icon": "gear-01",
+  "iconDither": {
+    "from": 320,
+    "to": "transparent",
+    "direction": "down"
+  },
+  "surfaces": {
+    "gateway": {
+      "support": "none"
+    },
+    "core": {
+      "support": "full"
+    },
+    "desktop": {
+      "support": "full"
+    },
+    "island": {
+      "support": "limited"
+    },
+    "mobile": {
+      "support": "limited"
+    },
+    "extension": {
+      "support": "limited"
+    },
+    "web": {
+      "support": "limited"
+    },
+    "cli": {
+      "support": "full"
+    }
+  },
+  "engines": {
+    "ryu": ">=0.1.0"
+  },
+  "runnables": [],
+  "permission_grants": ["pi:extension"],
+  "activation_events": ["*"],
+  "contributes": {
+    "lsp_servers": {
+      "rust-analyzer": {
+        "command": "rust-analyzer",
+        "extensionToLanguage": {
+          ".rs": "rust"
+        }
+      }
+    }
+  }
+}

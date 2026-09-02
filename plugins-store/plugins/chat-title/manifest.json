@@ -1,0 +1,103 @@
+{
+  "tags": ["chat", "titles", "automation", "productivity"],
+  "author": { "name": "Ryu", "url": "https://ryuhq.com" },
+  "repository": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/chat-title",
+  "homepage": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/chat-title",
+  "privacyPolicyUrl": "https://ryuhq.com/privacy",
+  "termsOfServiceUrl": "https://ryuhq.com/terms",
+  "id": "@ryu/chat-title",
+  "name": "Chat Title",
+  "version": "0.1.14",
+  "stability": "experimental",
+  "description": "Auto-renames a chat as soon as the first reply lands, then again after every N completed assistant turns (default 5), using a side model — and keeps a Core-side history of the names it chose so you can see how a conversation drifted. Enablement, the first-turn rename, frequency, and the model to use are all settings.",
+  "tagline": "Names your chats for you, automatically",
+  "keywords": ["chat", "titles", "automation", "productivity"],
+  "category": "Productivity",
+  "icon": "bubble-chat-edit",
+  "iconDither": { "from": 339, "to": "transparent", "direction": "down" },
+  "surfaces": {
+    "gateway": { "support": "none" },
+    "core": { "support": "full" },
+    "desktop": { "support": "full" },
+    "island": { "support": "limited" },
+    "mobile": { "support": "limited" },
+    "extension": { "support": "limited" },
+    "web": { "support": "full" },
+    "cli": { "support": "full" }
+  },
+  "engines": { "ryu": ">=0.1.0" },
+  "runnables": [],
+  "permission_grants": [
+    "hook:side-model",
+    "conversation:set-title",
+    "preferences:read",
+    "hook:run-self"
+  ],
+  "activation_events": ["*"],
+  "contributes": {
+    "settings_tabs": [
+      {
+        "id": "chat-title.settings",
+        "title": "Chat titles",
+        "scope": "node",
+        "fields": [
+          {
+            "type": "toggle",
+            "pref_key": "auto-title-enabled",
+            "label": "Auto-rename chats",
+            "description": "Generate short titles as the conversation progresses. Off leaves the first-message placeholder.",
+            "default": true
+          },
+          {
+            "type": "toggle",
+            "pref_key": "auto-title-on-first-turn",
+            "label": "Rename after the first reply",
+            "description": "Name the chat as soon as its first reply lands, instead of waiting for the Nth turn. Off leaves the first-message placeholder until then.",
+            "default": true
+          },
+          {
+            "type": "number",
+            "pref_key": "auto-title-every-n",
+            "label": "Rename every N turns",
+            "description": "Re-title after this many completed assistant turns (1 = every turn). Default 5. The first reply is always covered by the setting above.",
+            "default": 5,
+            "min": 1,
+            "max": 100
+          },
+          {
+            "type": "model_picker",
+            "pref_key": "auto-title-model",
+            "label": "Title model",
+            "description": "Optional. Empty uses the local engine (or the node default)."
+          }
+        ]
+      }
+    ],
+    "context_menu_items": [
+      {
+        "id": "chat-title.rename-now",
+        "label": "Rename with AI",
+        "icon": "bubble-chat-edit",
+        "anchor": "conversation",
+        "capability": "hooks.run",
+        "args": {
+          "hook_id": "chat-title.rename",
+          "event": { "force": true }
+        },
+        "feedback": {
+          "loading": "Renaming this chat\u2026",
+          "success": "Renamed",
+          "error": "Couldn't rename this chat"
+        },
+        "order": 20
+      }
+    ],
+    "turn_hooks": [
+      {
+        "id": "chat-title.rename",
+        "on": "post_assistant_turn",
+        "code_file": "hooks/rename.js"
+      }
+    ]
+  }
+}

@@ -1,0 +1,94 @@
+{
+  "tags": ["developer-tools"],
+  "author": {
+    "name": "Ryu",
+    "url": "https://ryuhq.com"
+  },
+  "repository": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/dynamic-workflows",
+  "homepage": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/dynamic-workflows",
+  "privacyPolicyUrl": "https://ryuhq.com/privacy",
+  "termsOfServiceUrl": "https://ryuhq.com/terms",
+  "id": "@ryu/dynamic-workflows",
+  "name": "dynamic-workflows",
+  "stability": "experimental",
+  "version": "0.1.14",
+  "description": "Run a validated, bounded fan-out of clean-context delegates.",
+  "iconDither": {
+    "from": 232,
+    "to": "transparent",
+    "direction": "down"
+  },
+  "category": "Developer Tools",
+  "engines": {
+    "ryu": ">=0.1.0"
+  },
+  "permission_grants": ["tool:execute", "hook:run-agent"],
+  "runnables": [
+    {
+      "id": "tool-workflow.run",
+      "name": "workflow.run",
+      "kind": "tool",
+      "config": {
+        "slug": "workflow.run",
+        "backend": "inline_deno",
+        "description": "Run several independent delegate tasks concurrently and return their results.",
+        "timeout_secs": 600,
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "tasks": {
+              "type": "array",
+              "description": "Independent delegate tasks to run.",
+              "minItems": 1,
+              "maxItems": 20,
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "task": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "agent_id": {
+                    "type": "string"
+                  },
+                  "preset": {
+                    "type": "string",
+                    "enum": ["research", "code_read", "summarise"]
+                  },
+                  "system_prompt": {
+                    "type": "string"
+                  },
+                  "model": {
+                    "type": "string"
+                  }
+                },
+                "required": ["task"],
+                "additionalProperties": false
+              }
+            },
+            "max_concurrent": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 5
+            },
+            "wall_time_secs": {
+              "type": "integer",
+              "minimum": 5,
+              "maximum": 600
+            },
+            "max_tokens": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 32768
+            }
+          },
+          "required": ["tasks"]
+        },
+        "code": "// Tool body for `workflow.run`, run in Core's Deno sandbox.\n//\n// This file is a FRAGMENT, not an ES module: Core splices it into an async IIFE\n// with `input` (the call arguments) and `host` (the capability bridge) already\n// bound, and the body `return`s the tool's result. A top-level `return` is\n// therefore correct here and `export` is not.\n//\n// It must be a PURE function of `input` plus whatever `host.*` returns: no\n// `Date.now()`, no `Math.random()`, no ambient clock or environment. Everything\n// variable arrives as an argument. `node tools/toolsmith/index.mjs verify`\n// enforces that both statically and by running every case twice.\n\nconst tasks = input && input.tasks;\nif (!Array.isArray(tasks) || tasks.length === 0 || tasks.length > 20) {\n\tthrow new Error(\"workflow.run: 'tasks' must contain 1-20 delegate tasks\");\n}\n\nconst presets = new Set([\"research\", \"code_read\", \"summarise\"]);\nconst ids = new Set();\nconst delegates = tasks.map((task, index) => {\n\tif (!task || typeof task !== \"object\" || Array.isArray(task)) {\n\t\tthrow new Error(`workflow.run: task ${index + 1} must be an object`);\n\t}\n\tif (typeof task.task !== \"string\" || task.task.trim().length === 0) {\n\t\tthrow new Error(`workflow.run: task ${index + 1} requires a non-empty 'task'`);\n\t}\n\tconst id = typeof task.id === \"string\" && task.id.trim().length > 0\n\t\t? task.id.trim()\n\t\t: `delegate-${index + 1}`;\n\tif (ids.has(id)) {\n\t\tthrow new Error(`workflow.run: duplicate task id '${id}'`);\n\t}\n\tids.add(id);\n\tif (task.agent_id !== undefined && (typeof task.agent_id !== \"string\" || task.agent_id.trim().length === 0)) {\n\t\tthrow new Error(`workflow.run: task ${index + 1} 'agent_id' must be a non-empty string`);\n\t}\n\tif (task.preset !== undefined && !presets.has(task.preset)) {\n\t\tthrow new Error(`workflow.run: task ${index + 1} has an unknown preset`);\n\t}\n\tif (task.tools !== undefined) {\n\t\tthrow new Error(\"workflow.run: inline delegates are prompt-only; use a registered agent_id for tools\");\n\t}\n\tconst delegate = {\n\t\tid,\n\t\ttask: task.task.trim(),\n\t\tpreset: task.preset ?? \"code_read\",\n\t};\n\tif (task.agent_id !== undefined) delegate.agent_id = task.agent_id.trim();\n\tif (task.system_prompt !== undefined || task.model !== undefined) {\n\t\tif (typeof task.system_prompt !== \"string\" || task.system_prompt.trim().length === 0) {\n\t\t\tthrow new Error(`workflow.run: task ${index + 1} 'system_prompt' must be non-empty`);\n\t\t}\n\t\tdelegate.inline = {\n\t\t\tsystem_prompt: task.system_prompt?.trim() ?? \"\",\n\t\t\t...(task.model === undefined ? {} : { model: task.model }),\n\t\t};\n\t}\n\treturn delegate;\n});\n\nconst caps = {};\nfor (const [key, minimum, maximum] of [[\"max_concurrent\", 1, 5], [\"wall_time_secs\", 5, 600], [\"max_tokens\", 1, 32768]]) {\n\tif (input[key] !== undefined && (!Number.isInteger(input[key]) || input[key] < minimum || input[key] > maximum)) {\n\t\tthrow new Error(`workflow.run: '${key}' must be an integer from ${minimum} to ${maximum}`);\n\t}\n\tif (input[key] !== undefined) caps[key] = input[key];\n}\n\nconst response = await host.runFanout({ delegates, caps });\nif (!response || response.ok !== true || !Array.isArray(response.results)) {\n\tthrow new Error(\"workflow.run: host.runFanout returned an invalid response\");\n}\nreturn { ok: true, count: response.results.length, results: response.results };\n"
+      }
+    }
+  ]
+}

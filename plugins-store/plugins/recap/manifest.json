@@ -1,0 +1,104 @@
+{
+  "tags": ["recap", "summary", "review", "productivity", "turn"],
+  "author": { "name": "Ryu", "url": "https://ryuhq.com" },
+  "repository": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/recap",
+  "homepage": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/recap",
+  "privacyPolicyUrl": "https://ryuhq.com/privacy",
+  "termsOfServiceUrl": "https://ryuhq.com/terms",
+  "id": "@ryu/recap",
+  "name": "Recap",
+  "version": "0.1.14",
+  "stability": "experimental",
+  "description": "Ends a long agent turn with a short recap of what it actually did — the work, the files and commands it named, what it could not finish, and the obvious next step — written by a side model so the main answer is left untouched. Long turns only by default (short answers recap themselves). `/recap` recaps the whole conversation on demand without spending a turn on the main model; `/recap off` mutes the automatic one for that chat.",
+  "tagline": "A short recap of what the agent just did",
+  "keywords": ["recap", "summary", "review", "productivity", "turn"],
+  "category": "Productivity",
+  "icon": "note-01",
+  "iconDither": { "from": 24, "to": "transparent", "direction": "down" },
+  "surfaces": {
+    "gateway": { "support": "none" },
+    "core": { "support": "full" },
+    "desktop": { "support": "full" },
+    "island": { "support": "limited" },
+    "mobile": { "support": "limited" },
+    "extension": { "support": "limited" },
+    "web": { "support": "full" },
+    "cli": { "support": "full" }
+  },
+  "engines": { "ryu": ">=0.1.0" },
+  "runnables": [],
+  "permission_grants": ["hook:side-model", "storage:kv", "preferences:read"],
+  "activation_events": ["*"],
+  "contributes": {
+    "slash_commands": [
+      {
+        "id": "recap.now",
+        "command": "/recap",
+        "description": "Recap the conversation so far — what was done, what changed, what is still open. `/recap off` mutes the automatic per-turn recap in this chat, `/recap on` restores it."
+      }
+    ],
+    "settings_tabs": [
+      {
+        "id": "recap.settings",
+        "title": "Recap",
+        "scope": "node",
+        "fields": [
+          {
+            "type": "toggle",
+            "pref_key": "recap-auto",
+            "label": "Recap long turns automatically",
+            "description": "Summarize what the agent did at the end of a turn. Off leaves `/recap` as the only way in.",
+            "default": true
+          },
+          {
+            "type": "number",
+            "pref_key": "recap-min-chars",
+            "label": "Recap turns longer than (characters)",
+            "description": "Turns shorter than this are left alone — a three-line answer is already its own recap. Default 1200; 0 recaps every turn.",
+            "default": 1200,
+            "min": 0,
+            "max": 20000,
+            "step": 100
+          },
+          {
+            "type": "select",
+            "pref_key": "recap-detail",
+            "label": "Detail",
+            "description": "How much the recap says.",
+            "default": "standard",
+            "options": [
+              { "value": "brief", "label": "Brief — one line" },
+              {
+                "value": "standard",
+                "label": "Standard — a line plus bullets"
+              },
+              {
+                "value": "detailed",
+                "label": "Detailed — bullets plus what is still open"
+              }
+            ]
+          },
+          {
+            "type": "model_picker",
+            "pref_key": "recap-model",
+            "label": "Recap model",
+            "description": "Optional. Empty uses the local engine (or the node default)."
+          }
+        ]
+      }
+    ],
+    "turn_hooks": [
+      {
+        "id": "recap.turn",
+        "on": "post_assistant_turn",
+        "code_file": "hooks/turn.js"
+      },
+      {
+        "id": "recap.command",
+        "on": "pre_user_turn",
+        "match": { "commands": ["/recap"] },
+        "code_file": "hooks/command.js"
+      }
+    ]
+  }
+}

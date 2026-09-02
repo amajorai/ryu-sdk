@@ -1,0 +1,165 @@
+{
+  "tags": ["capture", "memory"],
+  "author": { "name": "Ryu", "url": "https://ryuhq.com" },
+  "repository": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/shadow",
+  "homepage": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/shadow",
+  "privacyPolicyUrl": "https://ryuhq.com/privacy",
+  "termsOfServiceUrl": "https://ryuhq.com/terms",
+  "id": "@ryu/shadow",
+  "name": "Shadow",
+  "version": "0.1.14",
+  "system": true,
+  "builtin": true,
+  "description": "Search everything Shadow has captured (screen text, audio transcripts, input) and summarize recent activity. Exposed as declarative HTTP tools that reach the device-local Shadow sidecar through Core's authenticated `/api/shadow/*` proxy (which injects Shadow's bearer token).",
+  "icon": "record",
+  "iconDither": { "from": 296, "to": "transparent", "direction": "down" },
+  "tagline": "Recall what you have seen and done",
+  "keywords": ["capture", "memory"],
+  "category": "Knowledge & Memory",
+  "surfaces": {
+    "gateway": { "support": "none" },
+    "core": { "support": "full" },
+    "desktop": { "support": "full" },
+    "island": { "support": "full" },
+    "mobile": { "support": "full" },
+    "extension": { "support": "full" },
+    "web": { "support": "full" },
+    "cli": { "support": "full" }
+  },
+  "engines": { "ryu": ">=0.1.0" },
+  "runnables": [
+    {
+      "id": "tool-shadow-search",
+      "name": "Shadow Search",
+      "kind": "tool",
+      "config": {
+        "slug": "shadow.search",
+        "backend": "http",
+        "method": "GET",
+        "url": "core:/api/shadow/search",
+        "secret_headers": {
+          "Authorization": "Bearer env:RYU_TOKEN"
+        },
+        "fail_open": true,
+        "unwrap_body": true,
+        "description": "Full-text search over everything Shadow has captured (screen text, audio transcripts, input). Returns matching timeline entries. Shadow capture is cross-platform (Windows, macOS, Linux); when the sidecar is not running the tool reports itself unavailable.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "q": {
+              "type": "string",
+              "description": "Text to search for across captured screen/audio/input history."
+            },
+            "limit": {
+              "type": "integer",
+              "description": "Max results to return (default 20).",
+              "minimum": 1
+            }
+          },
+          "required": ["q"]
+        }
+      }
+    },
+    {
+      "id": "tool-shadow-semantic-search",
+      "name": "Shadow Semantic Search",
+      "kind": "tool",
+      "config": {
+        "slug": "shadow.semantic_search",
+        "backend": "http",
+        "method": "GET",
+        "url": "core:/api/shadow/search/semantic",
+        "secret_headers": {
+          "Authorization": "Bearer env:RYU_TOKEN"
+        },
+        "fail_open": true,
+        "unwrap_body": true,
+        "description": "Semantic (vector) search over captured history. Use for fuzzy, meaning-based recall when exact keywords are unknown. Shadow capture is cross-platform (Windows, macOS, Linux); when the sidecar is not running the tool reports itself unavailable.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "q": {
+              "type": "string",
+              "description": "Natural-language query matched semantically against captured history."
+            },
+            "limit": {
+              "type": "integer",
+              "description": "Max results to return (default 5).",
+              "minimum": 1
+            }
+          },
+          "required": ["q"]
+        }
+      }
+    },
+    {
+      "id": "tool-shadow-timeline",
+      "name": "Shadow Timeline",
+      "kind": "tool",
+      "config": {
+        "slug": "shadow.timeline",
+        "backend": "http",
+        "method": "GET",
+        "url": "core:/api/shadow/timeline",
+        "secret_headers": {
+          "Authorization": "Bearer env:RYU_TOKEN"
+        },
+        "fail_open": true,
+        "unwrap_body": true,
+        "description": "Fetch captured timeline entries within an explicit time range (microseconds since the Unix epoch). Shadow capture is cross-platform (Windows, macOS, Linux); when the sidecar is not running the tool reports itself unavailable.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "start": {
+              "type": "integer",
+              "description": "Range start, microseconds since the Unix epoch."
+            },
+            "end": {
+              "type": "integer",
+              "description": "Range end, microseconds since the Unix epoch."
+            }
+          },
+          "required": ["start", "end"]
+        }
+      }
+    },
+    {
+      "id": "tool-shadow-recent-context",
+      "name": "Shadow Recent Context",
+      "kind": "tool",
+      "config": {
+        "slug": "shadow.recent_context",
+        "backend": "http",
+        "method": "GET",
+        "url": "core:/api/shadow/context/recent",
+        "secret_headers": {
+          "Authorization": "Bearer env:RYU_TOKEN"
+        },
+        "fail_open": true,
+        "unwrap_body": true,
+        "description": "Summarize what the user has been doing in the last N minutes, drawn from captured history. Shadow capture is cross-platform (Windows, macOS, Linux); when the sidecar is not running the tool reports itself unavailable.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "q": {
+              "type": "integer",
+              "description": "How many minutes back to summarize (Shadow defaults the window when omitted; typically 10).",
+              "minimum": 1
+            }
+          }
+        }
+      }
+    }
+  ],
+  "contributes": {
+    "settings_tabs": [
+      {
+        "id": "shadow.settings",
+        "title": "Shadow",
+        "scope": "node",
+        "view": "shadow"
+      }
+    ]
+  },
+  "permission_grants": ["tool:http-egress:127.0.0.1"]
+}

@@ -1,0 +1,169 @@
+{
+  "tags": ["dashboards", "widgets", "monitoring", "home"],
+  "author": { "name": "Ryu", "url": "https://ryuhq.com" },
+  "repository": "https://github.com/amajorai/ryu-dashboards",
+  "homepage": "https://github.com/amajorai/ryu-dashboards",
+  "privacyPolicyUrl": "https://ryuhq.com/privacy",
+  "termsOfServiceUrl": "https://ryuhq.com/terms",
+  "id": "@ryu/dashboards",
+  "name": "Dashboards",
+  "version": "0.1.14",
+  "stability": "experimental",
+  "category": "Productivity",
+  "description": "Dashboards: composable widget boards that assemble live views over monitors, meetings, quests, and other Core surfaces via soft HTTP loopback. Declares the out-of-process ryu-dashboards sidecar (kind:local) that owns the store + refresh loop + /api/dashboards/* surface, served to the desktop through the generic ext-proxy public_mount. Started eagerly (not lazy) so the kernel hardware device-dashboard renderer + nudge loop can reach it at boot / on a device poll before any desktop has opened Home. The dashboard_builder MCP runnable + the hardware render seam reach it over loopback via dashboards_client.",
+  "tagline": "Live widget boards over your node",
+  "keywords": ["dashboards", "widgets", "monitoring", "home"],
+  "icon": "dashboard-square-01",
+  "iconDither": { "from": 264, "to": "transparent", "direction": "down" },
+  "surfaces": {
+    "gateway": { "support": "none" },
+    "core": { "support": "full" },
+    "desktop": { "support": "full" },
+    "island": { "support": "limited" },
+    "mobile": { "support": "limited" },
+    "extension": { "support": "none" },
+    "web": { "support": "full" },
+    "cli": { "support": "list" }
+  },
+  "engines": {
+    "ryu": ">=0.1.0"
+  },
+  "runnables": [],
+  "sidecars": [
+    {
+      "name": "ryu-dashboards",
+      "process": {
+        "kind": "local",
+        "command": "ryu-dashboards",
+        "command_env": "RYU_DASHBOARDS_BIN",
+        "port_env": "RYU_DASHBOARDS_PORT"
+      },
+      "host_api": {
+        "grants": ["tools.invoke"]
+      },
+      "port": 7997,
+      "health_path": "/api/dashboards/catalog",
+      "http": {
+        "mount": "/api/dashboards",
+        "public_mount": "/api/dashboards",
+        "routes": [
+          { "path": "/", "method": "GET", "permission": "dashboards.view" },
+          { "path": "/", "method": "POST", "permission": "dashboards.edit" },
+          {
+            "path": "/catalog",
+            "method": "GET",
+            "permission": "dashboards.view"
+          },
+          {
+            "path": "/events",
+            "method": "GET",
+            "permission": "dashboards.view"
+          },
+          { "path": "/:id", "method": "GET", "permission": "dashboards.view" },
+          { "path": "/:id", "method": "PUT", "permission": "dashboards.edit" },
+          {
+            "path": "/:id",
+            "method": "DELETE",
+            "permission": "dashboards.edit"
+          },
+          {
+            "path": "/:id/widgets",
+            "method": "GET",
+            "permission": "dashboards.view"
+          },
+          {
+            "path": "/:id/widgets",
+            "method": "POST",
+            "permission": "dashboards.edit"
+          },
+          {
+            "path": "/:id/widgets/:wid",
+            "method": "PUT",
+            "permission": "dashboards.edit"
+          },
+          {
+            "path": "/:id/widgets/:wid",
+            "method": "DELETE",
+            "permission": "dashboards.edit"
+          },
+          {
+            "path": "/:id/widgets/:wid/layout",
+            "method": "PUT",
+            "permission": "dashboards.edit"
+          },
+          {
+            "path": "/:id/widgets/:wid/refresh",
+            "method": "POST",
+            "permission": "dashboards.edit"
+          }
+        ]
+      }
+    }
+  ],
+  "permission_grants": ["tools.invoke", "app:realtime"],
+  "permission_levels": [
+    {
+      "id": "dashboards.view",
+      "label": "Can view",
+      "description": "Open dashboards and the live data their widgets pull from monitors, meetings, quests, and other node surfaces."
+    },
+    {
+      "id": "dashboards.edit",
+      "label": "Can edit",
+      "description": "Create dashboards and add, configure, or remove their widgets.",
+      "implies": ["dashboards.view"]
+    }
+  ],
+  "contributes": {
+    "chat_widget_templates": [
+      {
+        "id": "dashboards.chat",
+        "title": "Dashboards widget",
+        "description": "Dashboards chat widget metadata is coming soon; no render tool is available yet.",
+        "triggers": ["dashboards widget"],
+        "examples": ["Show me a dashboards widget"],
+        "backing": {},
+        "display_mode": "inline",
+        "safe_action_ids": [],
+        "availability": "coming-soon"
+      }
+    ],
+    "hook_events": [
+      {
+        "id": "@ryu/dashboards#widget.failed",
+        "title": "Dashboard widget broke",
+        "description": "A widget's data source stopped resolving — the endpoint errored, the agent refused, the monitor or workflow it reads is gone. Fires on the TRANSITION into failure, which includes a brand-new widget whose very first resolve fails; a widget that then STAYS broken re-tries every interval but does not re-fire, so this is safe to hang an alert on. `source_type` is the wire tag of the resolver that broke (`core_endpoint` / `monitor` / `workflow` / `composio` / `http` / `agent`). Note that expensive sources are only refreshed while someone is watching the dashboard, so their failures surface when the board is opened rather than in the background.",
+        "payload_example": {
+          "dashboard_id": "dash_9f3c1b2a4d5e6f708192a3b4c5d6e7f8",
+          "widget_id": "wid_4c7e1a9b2d3f4058617293a4b5c6d7e8",
+          "title": "Open incidents",
+          "kind": "stat",
+          "source_type": "core_endpoint",
+          "error": "core endpoint 'monitors' returned 503",
+          "at": "2026-08-01T10:15:00Z"
+        }
+      },
+      {
+        "id": "@ryu/dashboards#widget.recovered",
+        "title": "Dashboard widget recovered",
+        "description": "A widget that had been failing resolved cleanly again — the counterpart transition to `widget.failed`, so an escalation raised on that one can be cleared by this one. Fires only on the crossing back to healthy; a widget that was never failing does not emit it on every refresh.",
+        "payload_example": {
+          "dashboard_id": "dash_9f3c1b2a4d5e6f708192a3b4c5d6e7f8",
+          "widget_id": "wid_4c7e1a9b2d3f4058617293a4b5c6d7e8",
+          "title": "Open incidents",
+          "kind": "stat",
+          "source_type": "core_endpoint",
+          "at": "2026-08-01T10:20:00Z"
+        }
+      }
+    ],
+    "sidebar_buttons": [
+      {
+        "id": "home",
+        "title": "Home",
+        "icon": "lucide:house",
+        "target": "/dashboard"
+      }
+    ]
+  }
+}
