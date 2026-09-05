@@ -1,0 +1,65 @@
+{
+  "id": "@ryu/layers",
+  "name": "Toolkits",
+  "version": "1.0.0",
+  "mandatory": true,
+  "runnables": [],
+  "description": "Settings for the swappable capability toolkits — web search, extraction, crawling, browser and computer control. WHICH provider serves a toolkit is chosen in the node selector's Toolkits section; this app owns the settings that apply whichever provider is selected. Each field writes `layer.<capability>.default.<argument>`, which the capability tool facade merges underneath every call to that toolkit's verbs (an argument the caller supplies always wins). Only arguments a provider actually forwards get a field here: `web.extract`'s `format` is deliberately absent because `scrapling` is the only shipped extract provider that forwards it (onto its `extraction_type`) and the other four drop it, so a node-wide default that applies whichever provider is selected would be silently ignored by most of them.",
+  "keywords": ["toolkits", "capabilities", "defaults", "settings"],
+  "tagline": "Defaults for the swappable toolkits",
+  "category": "Core",
+  "engines": {
+    "ryu": ">=0.0.1"
+  },
+  "permission_grants": [],
+  "contributes": {
+    "settings_tabs": [
+      {
+        "id": "layers.defaults",
+        "title": "Toolkit defaults",
+        "scope": "node",
+        "fields": [
+          {
+            "type": "number",
+            "pref_key": "layer.web.search.default.limit",
+            "label": "Search results per query",
+            "description": "How many results a web search returns when the agent does not ask for a specific number. Applies to whichever search provider is selected. Leave blank for the provider's own default.",
+            "min": 1,
+            "max": 100,
+            "placeholder": "10"
+          },
+          {
+            "type": "number",
+            "pref_key": "layer.web.crawl.default.depth",
+            "label": "Crawl depth",
+            "description": "How many link hops a crawl follows from the start URL when the agent does not specify. 0 crawls only the start page.",
+            "min": 0,
+            "max": 10,
+            "placeholder": "1"
+          },
+          {
+            "type": "number",
+            "pref_key": "layer.web.crawl.default.limit",
+            "label": "Crawl page limit",
+            "description": "Maximum pages a single crawl may fetch when the agent does not specify. The main guard against an accidental large crawl.",
+            "min": 1,
+            "max": 500,
+            "placeholder": "10"
+          }
+        ]
+      }
+    ]
+  },
+  "permission_levels": [
+    {
+      "id": "gateway.view",
+      "label": "Can view toolkits",
+      "description": "See which providers are bound for search, extraction, crawling and browsing."
+    },
+    {
+      "id": "gateway.configure",
+      "label": "Can change toolkits",
+      "description": "Swap the provider behind a capability for everyone on this node."
+    }
+  ]
+}

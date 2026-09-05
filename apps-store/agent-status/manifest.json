@@ -1,0 +1,196 @@
+{
+  "tags": ["runs", "status", "sidebar", "agents", "inbox"],
+  "author": { "name": "Ryu", "url": "https://ryuhq.com" },
+  "repository": "https://github.com/amajorai/ryu-agent-status",
+  "homepage": "https://github.com/amajorai/ryu-agent-status",
+  "privacyPolicyUrl": "https://ryuhq.com/privacy",
+  "termsOfServiceUrl": "https://ryuhq.com/terms",
+  "id": "@ryu/agent-status",
+  "name": "Agent Status",
+  "version": "0.1.14",
+  "stability": "experimental",
+  "description": "Splits your agent runs across three sidebar sections — Working, Needs input and Done — each row showing the project it belongs to.",
+  "tagline": "See which agents are working, stuck, or done",
+  "category": "Productivity",
+  "icon": "lucide:activity",
+  "iconDither": { "from": 118, "to": "transparent", "direction": "down" },
+  "keywords": ["runs", "status", "sidebar", "agents", "inbox"],
+  "surfaces": {
+    "gateway": { "support": "none" },
+    "core": { "support": "none" },
+    "desktop": { "support": "full" },
+    "island": { "support": "none" },
+    "mobile": { "support": "none" },
+    "extension": { "support": "none" },
+    "web": { "support": "none" },
+    "cli": { "support": "none" }
+  },
+  "engines": { "ryu": ">=0.1.0" },
+  "runnables": [],
+  "permission_grants": ["ui:declarative-http"],
+  "contributes": {
+    "chat_widget_templates": [
+      {
+        "id": "agent-status.chat",
+        "title": "Agent Status widget",
+        "description": "Agent Status chat widget metadata is coming soon; no render tool is available yet.",
+        "triggers": ["agent status widget"],
+        "examples": ["Show me a agent status widget"],
+        "backing": {},
+        "display_mode": "inline",
+        "safe_action_ids": [],
+        "availability": "coming-soon"
+      }
+    ],
+    "live_activities": [
+      {
+        "id": "working",
+        "title": "Working",
+        "icon": "lucide:loader-circle",
+        "accent": "var(--primary)",
+        "order": 1,
+        "spec": {
+          "source": {
+            "http": { "method": "GET", "path": "/api/runs" },
+            "items": "runs",
+            "filter": [{ "key": "run_status", "equals": "running" }],
+            "map": {
+              "id": "id",
+              "title": "title",
+              "titleFallback": "Untitled run",
+              "detail": "folder_path"
+            },
+            "refreshMs": 5000,
+            "limit": 5
+          },
+          "map": {
+            "status": "run_status",
+            "statusMap": {
+              "running": "running",
+              "completed": "done",
+              "failed": "error"
+            }
+          },
+          "target": "/chat?conversationId={{item.id}}"
+        }
+      },
+      {
+        "id": "needs-input",
+        "title": "Needs input",
+        "icon": "lucide:message-circle-question",
+        "accent": "var(--warning, #f59e0b)",
+        "order": 2,
+        "spec": {
+          "source": {
+            "http": {
+              "method": "GET",
+              "path": "/api/approvals?status=pending"
+            },
+            "items": "approvals",
+            "map": { "id": "id", "title": "title", "detail": "summary" },
+            "refreshMs": 5000,
+            "limit": 10
+          },
+          "map": {
+            "status": "status",
+            "statusMap": { "pending": "waiting" }
+          },
+          "target": "/inbox"
+        }
+      }
+    ],
+    "sidebar_sections": [
+      {
+        "id": "working",
+        "title": "Working",
+        "icon": "lucide:loader-circle",
+        "order": 1,
+        "spec": {
+          "source": {
+            "http": { "method": "GET", "path": "/api/runs" },
+            "items": "runs",
+            "filter": [{ "key": "run_status", "equals": "running" }],
+            "map": {
+              "id": "id",
+              "title": "title",
+              "titleFallback": "Untitled run",
+              "subtitle": "folder_path",
+              "subtitleTransform": "basename"
+            },
+            "refreshMs": 5000,
+            "limit": 25
+          },
+          "itemTarget": "/chat?conversationId={{item.id}}",
+          "itemPreview": {
+            "meta": [
+              { "label": "Project", "value": "{{item.folder_path}}" },
+              { "label": "Branch", "value": "{{item.branch}}" }
+            ]
+          },
+          "emptyState": {
+            "title": "Nothing running",
+            "description": "Runs appear here while an agent is working."
+          }
+        }
+      },
+      {
+        "id": "needs-input",
+        "title": "Needs input",
+        "icon": "lucide:message-circle-question",
+        "order": 2,
+        "spec": {
+          "source": {
+            "http": {
+              "method": "GET",
+              "path": "/api/approvals?status=pending"
+            },
+            "items": "approvals",
+            "map": { "id": "id", "title": "title" },
+            "refreshMs": 5000,
+            "limit": 25
+          },
+          "itemTarget": "/inbox",
+          "itemPreview": { "description": "{{item.summary}}" },
+          "emptyState": {
+            "title": "Nothing waiting on you",
+            "description": "Requests an agent needs you to decide show up here.",
+            "unavailable": "Enable the Approvals app to see what's waiting."
+          }
+        }
+      },
+      {
+        "id": "done",
+        "title": "Done",
+        "icon": "lucide:circle-check",
+        "order": 3,
+        "spec": {
+          "source": {
+            "http": { "method": "GET", "path": "/api/runs" },
+            "items": "runs",
+            "filter": [{ "key": "run_status", "in": ["completed", "failed"] }],
+            "map": {
+              "id": "id",
+              "title": "title",
+              "titleFallback": "Untitled run",
+              "subtitle": "folder_path",
+              "subtitleTransform": "basename"
+            },
+            "refreshMs": 5000,
+            "limit": 15
+          },
+          "itemTarget": "/chat?conversationId={{item.id}}",
+          "itemPreview": {
+            "meta": [
+              { "label": "Project", "value": "{{item.folder_path}}" },
+              { "label": "Branch", "value": "{{item.branch}}" }
+            ]
+          },
+          "emptyState": {
+            "title": "No finished runs yet",
+            "description": "The last 15 completed or failed runs collect here."
+          }
+        }
+      }
+    ]
+  }
+}

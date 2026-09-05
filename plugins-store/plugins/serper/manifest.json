@@ -1,0 +1,187 @@
+{
+  "tags": ["search", "web", "google", "scrape"],
+  "author": { "name": "Ryu", "url": "https://ryuhq.com" },
+  "repository": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/serper",
+  "homepage": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/serper",
+  "privacyPolicyUrl": "https://ryuhq.com/privacy",
+  "termsOfServiceUrl": "https://ryuhq.com/terms",
+  "id": "@ryu/serper",
+  "name": "Serper",
+  "version": "0.1.14",
+  "stability": "experimental",
+  "description": "Google's own search results as JSON via the Serper API (https://serper.dev), plus single-page scraping, exposed as two declarative HTTP tools. Provides the swappable `web.search` and `web.extract` layers, so selecting it in the layer picker re-points the stable `web.search` / `web.extract` tools at Serper without changing what agents call. Serper is a paid, credit-metered API with a free allowance; requires a BYOK Serper API key.",
+  "icon": "google",
+  "iconDither": { "from": 257, "to": "transparent", "direction": "down" },
+  "tagline": "Google's real results, as JSON, in a second",
+  "keywords": ["search", "web", "google", "scrape"],
+  "category": "Search",
+  "surfaces": {
+    "gateway": { "support": "none" },
+    "core": { "support": "full" },
+    "desktop": { "support": "full" },
+    "island": { "support": "limited" },
+    "mobile": { "support": "limited" },
+    "extension": { "support": "limited" },
+    "web": { "support": "full" },
+    "cli": { "support": "full" }
+  },
+  "engines": {
+    "ryu": ">=0.1.0"
+  },
+  "runnables": [
+    {
+      "id": "tool-serper-search",
+      "name": "Serper Google Search",
+      "kind": "tool",
+      "config": {
+        "slug": "serper.search",
+        "backend": "http",
+        "method": "POST",
+        "url": "https://google.serper.dev/search",
+        "secret_headers": {
+          "X-API-KEY": "env:RYU_SERPER_API_KEY"
+        },
+        "fail_open": true,
+        "unwrap_body": true,
+        "body_defaults": {
+          "num": 10
+        },
+        "description": "Google web search, returned as structured JSON. The ranked organic results carry a title, link, and snippet. Costs 1 credit per query. Requires RYU_SERPER_API_KEY.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "q": {
+              "type": "string",
+              "description": "The search query, exactly as it would be typed into Google."
+            },
+            "num": {
+              "type": "integer",
+              "description": "Number of results to request (default 10). Google decides the real page size, so fewer may come back.",
+              "minimum": 1,
+              "maximum": 100
+            },
+            "page": {
+              "type": "integer",
+              "description": "One-based results page (default 1).",
+              "minimum": 1
+            },
+            "gl": {
+              "type": "string",
+              "description": "Two-letter country code to search from (default us)."
+            },
+            "hl": {
+              "type": "string",
+              "description": "Two-letter interface language code (default en)."
+            },
+            "autocorrect": {
+              "type": "boolean",
+              "description": "Let Google correct apparent typos in the query (default true). Set false to search the phrase verbatim."
+            }
+          },
+          "required": ["q"]
+        }
+      }
+    },
+    {
+      "id": "tool-serper-scrape",
+      "name": "Serper Scrape",
+      "kind": "tool",
+      "config": {
+        "slug": "serper.scrape",
+        "backend": "http",
+        "method": "POST",
+        "url": "https://scrape.serper.dev",
+        "secret_headers": {
+          "X-API-KEY": "env:RYU_SERPER_API_KEY"
+        },
+        "fail_open": true,
+        "unwrap_body": true,
+        "body_defaults": {
+          "includeMarkdown": true
+        },
+        "description": "Fetch one web page and return its readable content as text, and as markdown when asked. Costs 2 credits for a typical page, up to 6 or 10 for a hard-to-scrape one. Requires RYU_SERPER_API_KEY.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "url": {
+              "type": "string",
+              "description": "The URL of the page to scrape."
+            },
+            "includeMarkdown": {
+              "type": "boolean",
+              "description": "Also return the page as markdown alongside the plain text (default true here)."
+            }
+          },
+          "required": ["url"]
+        }
+      }
+    }
+  ],
+  "provides": [
+    {
+      "capability": "web.search",
+      "version": "1.0.0",
+      "title": "Search",
+      "selectable": true,
+      "tools": {
+        "web.search": {
+          "tool": "serper.search",
+          "args": {
+            "query": "q",
+            "limit": "num"
+          },
+          "response": {
+            "results": "organic",
+            "fields": {
+              "title": "title",
+              "url": "link",
+              "snippet": "snippet",
+              "position": "position"
+            }
+          }
+        }
+      }
+    },
+    {
+      "capability": "web.extract",
+      "version": "1.0.0",
+      "title": "Extract",
+      "selectable": true,
+      "tools": {
+        "web.extract": {
+          "tool": "serper.scrape",
+          "args": {
+            "format": ""
+          },
+          "response": {
+            "fields": {
+              "content": "text",
+              "markdown": "markdown"
+            }
+          }
+        }
+      }
+    }
+  ],
+  "permission_grants": [
+    "tool:http-egress:google.serper.dev",
+    "tool:http-egress:scrape.serper.dev"
+  ],
+  "contributes": {
+    "settings_tabs": [
+      {
+        "id": "serper.settings",
+        "title": "Serper",
+        "scope": "node",
+        "fields": [
+          {
+            "type": "secret",
+            "pref_key": "RYU_SERPER_API_KEY",
+            "label": "Serper API key",
+            "description": "Create a key at https://serper.dev/api-keys and paste it here. Serper is paid per credit after a free allowance, so selecting it as a layer spends credits. Stored encrypted on this node and never shown again — re-paste to change it. Without a key the Serper tools stay installed but return nothing, so `web.search` / `web.extract` fall back to whichever other provider you select."
+          }
+        ]
+      }
+    ]
+  }
+}

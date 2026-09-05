@@ -1,0 +1,207 @@
+{
+  "tags": ["email", "inbox", "communication", "agents"],
+  "author": { "name": "Ryu", "url": "https://ryuhq.com" },
+  "repository": "https://github.com/amajorai/ryu-mail",
+  "homepage": "https://github.com/amajorai/ryu-mail",
+  "privacyPolicyUrl": "https://ryuhq.com/privacy",
+  "termsOfServiceUrl": "https://ryuhq.com/terms",
+  "id": "@ryu/mail",
+  "name": "Mail",
+  "version": "0.1.14",
+  "stability": "experimental",
+  "description": "Agent Inboxes — email as a service for agents. Runs the out-of-process ryu-mail sidecar; Core proxies /api/mail/* to it. Its sandboxed companion is a per-node mail client (list inboxes, read messages, compose/send, create an inbox) driving /api/mail/* via the mail:crud bridge capability.",
+  "keywords": ["email", "inbox", "communication", "agents"],
+  "icon": "mail-01",
+  "iconDither": { "from": 279, "to": "transparent", "direction": "down" },
+  "tagline": "Email inboxes for your agents",
+  "category": "Communication",
+  "surfaces": {
+    "gateway": { "support": "none" },
+    "core": { "support": "full" },
+    "desktop": { "support": "full" },
+    "island": { "support": "limited" },
+    "mobile": { "support": "limited" },
+    "extension": { "support": "none" },
+    "web": { "support": "full" },
+    "cli": { "support": "list" }
+  },
+  "engines": {
+    "ryu": ">=0.1.0"
+  },
+  "runnables": [
+    {
+      "id": "mail-companion",
+      "name": "Mail",
+      "kind": "companion",
+      "config": {
+        "label": "Agent Inboxes",
+        "ui_entry": "./dist/index.html",
+        "ui_format": "html"
+      }
+    }
+  ],
+  "sidecars": [
+    {
+      "name": "ryu-mail",
+      "process": {
+        "kind": "local",
+        "command": "ryu-mail",
+        "command_env": "RYU_MAIL_BIN",
+        "port_env": "RYU_MAIL_PORT"
+      },
+      "host_api": { "grants": ["mail:crud"] },
+      "port": 7996,
+      "health_path": "/health",
+      "http": {
+        "mount": "/api/mail",
+        "public_mount": "/api/mail",
+        "max_body_bytes": 27262976,
+        "routes": [
+          { "path": "/status", "permission": "mail.read" },
+          { "path": "/inboxes", "method": "GET", "permission": "mail.read" },
+          { "path": "/inboxes", "method": "POST", "permission": "mail.manage" },
+          {
+            "path": "/inboxes/:id",
+            "method": "GET",
+            "permission": "mail.read"
+          },
+          {
+            "path": "/inboxes/:id",
+            "method": "PATCH",
+            "permission": "mail.manage"
+          },
+          {
+            "path": "/inboxes/:id",
+            "method": "DELETE",
+            "permission": "mail.manage"
+          },
+          {
+            "path": "/inboxes/:id/rotate-secret",
+            "method": "POST",
+            "permission": "mail.manage"
+          },
+          {
+            "path": "/inboxes/:id/messages",
+            "method": "GET",
+            "permission": "mail.read"
+          },
+          {
+            "path": "/inboxes/:id/send",
+            "method": "POST",
+            "permission": "mail.send"
+          },
+          {
+            "path": "/messages/:id",
+            "method": "GET",
+            "permission": "mail.read"
+          },
+          {
+            "path": "/attachments/:id",
+            "method": "GET",
+            "permission": "mail.read"
+          },
+          { "path": "/inbound/:id", "auth": "public" }
+        ]
+      }
+    }
+  ],
+  "permission_grants": ["mail:crud", "ui:toast"],
+  "permission_levels": [
+    {
+      "id": "mail.read",
+      "label": "Can read",
+      "description": "List agent inboxes and read the messages in them."
+    },
+    {
+      "id": "mail.send",
+      "label": "Can send",
+      "description": "Compose and send mail from an agent inbox, which leaves this node and reaches real recipients. Grant this level separately from read access."
+    },
+    {
+      "id": "mail.manage",
+      "label": "Can manage inboxes",
+      "description": "Create and remove agent inboxes, which decides what addresses agents can be reached at. Grant send access separately."
+    }
+  ],
+  "companion": {
+    "label": "Agent Inboxes",
+    "icon": "mail-01"
+  },
+  "contributes": {
+    "chat_widget_templates": [
+      {
+        "id": "mail.chat",
+        "title": "Mail widget",
+        "description": "Mail chat widget metadata is coming soon; no render tool is available yet.",
+        "triggers": ["mail widget"],
+        "examples": ["Show me a mail widget"],
+        "backing": {},
+        "display_mode": "inline",
+        "safe_action_ids": [],
+        "availability": "coming-soon"
+      }
+    ],
+    "sidebar_sections": [
+      {
+        "id": "inboxes",
+        "title": "Inboxes",
+        "icon": "mail-01",
+        "order": 52,
+        "spec": {
+          "source": {
+            "http": { "method": "GET", "path": "/api/mail/inboxes" },
+            "items": "inboxes",
+            "map": {
+              "id": "id",
+              "title": "name",
+              "titleFallback": "Unnamed inbox",
+              "subtitle": "address"
+            },
+            "refreshMs": 15000
+          },
+          "itemTarget": "/mail/{{item.id}}",
+          "emptyState": {
+            "title": "No inboxes yet",
+            "description": "Create an inbox in Agent Inboxes to receive mail."
+          }
+        }
+      }
+    ],
+    "hook_events": [
+      {
+        "id": "@ryu/mail#message.received",
+        "title": "Email received",
+        "description": "An inbound message was accepted and stored. Fires once per accepted POST to the inbound webhook, after the per-inbox HMAC verified and the row was written — so a forwarder that retries the same message fires this again. The payload is metadata only; fetch the body with GET /api/mail/messages/:id.",
+        "payload_example": {
+          "messageId": "0f6d2a1c-3b44-4f0e-9a77-8c1e2d5b6f90",
+          "inboxId": "8b3c1f5e-9d24-4a7b-b1c6-2e0f7a4d3c88",
+          "direction": "inbound",
+          "from": "customer@example.com",
+          "to": ["support@node.example"],
+          "cc": [],
+          "subject": "Invoice for March",
+          "inReplyTo": null,
+          "attachmentCount": 1,
+          "createdAt": "2026-08-01T09:14:22.417Z"
+        }
+      },
+      {
+        "id": "@ryu/mail#message.sent",
+        "title": "Email sent",
+        "description": "An outbound message was handed to the SMTP transport and recorded against the sending inbox. Fires once per successful send; a send that the transport rejects fires nothing. Hand-off is not delivery — providerMessageId is the relay's id, and a later bounce is not visible here.",
+        "payload_example": {
+          "messageId": "5c9e7b02-1a3d-4e88-9f21-7d0b4c6a2e11",
+          "inboxId": "8b3c1f5e-9d24-4a7b-b1c6-2e0f7a4d3c88",
+          "direction": "outbound",
+          "from": "support@node.example",
+          "to": ["customer@example.com"],
+          "cc": [],
+          "subject": "Re: Invoice for March",
+          "inReplyTo": "<abc123@example.com>",
+          "providerMessageId": "<9f2b@node.example>",
+          "createdAt": "2026-08-01T09:16:03.902Z"
+        }
+      }
+    ]
+  }
+}

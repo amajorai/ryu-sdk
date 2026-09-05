@@ -1,0 +1,108 @@
+{
+  "tags": ["tokens", "cli", "developer", "compression"],
+  "author": { "name": "Ryu", "url": "https://ryuhq.com" },
+  "repository": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/rtk",
+  "homepage": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/rtk",
+  "privacyPolicyUrl": "https://ryuhq.com/privacy",
+  "termsOfServiceUrl": "https://ryuhq.com/terms",
+  "id": "@ryu/rtk",
+  "name": "RTK (Rust Token Killer)",
+  "version": "0.1.14",
+  "stability": "experimental",
+  "description": "Run a dev command through RTK (Rust Token Killer) and get a token-compressed version of its output (60-90% fewer tokens), exposed as a declarative `command` tool that shells out to the locally-installed `rtk` binary. BYO — no API key.",
+  "keywords": ["tokens", "cli", "developer", "compression"],
+  "icon": "computer-terminal-01",
+  "iconDither": { "from": 345, "to": "transparent", "direction": "down" },
+  "tagline": "Token-compress noisy dev-command output for agents",
+  "category": "Developer Tools",
+  "surfaces": {
+    "gateway": { "support": "none" },
+    "core": { "support": "full" },
+    "desktop": { "support": "full" },
+    "island": { "support": "limited" },
+    "mobile": { "support": "limited" },
+    "extension": { "support": "limited" },
+    "web": { "support": "full" },
+    "cli": { "support": "full" }
+  },
+  "engines": {
+    "ryu": ">=0.1.0"
+  },
+  "runnables": [
+    {
+      "id": "tool-rtk-run",
+      "name": "RTK Run",
+      "kind": "tool",
+      "config": {
+        "slug": "rtk.run",
+        "backend": "command",
+        "bin": "rtk",
+        "timeout_secs": 120,
+        "description": "Run a dev command through RTK (Rust Token Killer) and return a token-compressed version of its output (60-90% fewer tokens). Prefer this over running noisy commands (git status/log/diff, test runners, build tools, ls/find/grep) directly — you get the same information for a fraction of the context.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "command": {
+              "type": "string",
+              "description": "The dev command to run through RTK, e.g. \"git status\", \"cargo test\", \"ls -la\". RTK runs it and returns a token-compressed version of its output."
+            },
+            "mode": {
+              "type": "string",
+              "enum": ["wrap", "proxy", "test", "err"],
+              "description": "wrap (default): filter+compress the output. proxy: run raw with tracking (no filtering). test: keep only failures. err: keep only errors."
+            }
+          },
+          "required": ["command"]
+        },
+        "args": [
+          {
+            "from": "mode",
+            "map": {
+              "wrap": [],
+              "proxy": ["proxy"],
+              "test": ["test"],
+              "err": ["err"]
+            },
+            "default": "wrap"
+          },
+          {
+            "from": "command",
+            "split": "shell",
+            "required": true
+          }
+        ]
+      }
+    }
+  ],
+  "permission_grants": ["tool:command:rtk"],
+  "activation_events": [],
+  "contributes": {
+    "settings_tabs": [
+      {
+        "id": "rtk.settings",
+        "title": "RTK",
+        "fields": [
+          {
+            "type": "toggle",
+            "pref_key": "rtk-wrap-pi",
+            "label": "Auto-wrap the Ryu (Pi) agent's commands",
+            "description": "When on, Ryu configures RTK's PreToolUse hook for the Pi agent so its shell commands are token-compressed automatically. Requires rtk on PATH."
+          },
+          {
+            "type": "toggle",
+            "pref_key": "rtk-wrap-claude",
+            "label": "Auto-wrap Claude Code's commands",
+            "description": "Same, for the Claude Code agent."
+          },
+          {
+            "type": "textarea",
+            "pref_key": "rtk-exclude-commands",
+            "label": "Commands to never wrap",
+            "description": "One command or command prefix per line. Matching commands are sent to the shell unchanged; use this for commands that do not work with RTK.",
+            "placeholder": "curl, playwright"
+          }
+        ]
+      }
+    ]
+  }
+}

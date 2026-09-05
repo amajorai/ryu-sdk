@@ -1,0 +1,72 @@
+{
+  "tags": ["example", "reference", "developer", "template"],
+  "author": { "name": "Ryu", "url": "https://ryuhq.com" },
+  "repository": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/sample",
+  "homepage": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/sample",
+  "privacyPolicyUrl": "https://ryuhq.com/privacy",
+  "termsOfServiceUrl": "https://ryuhq.com/terms",
+  "id": "@example/research-assistant",
+  "name": "Research Assistant",
+  "version": "0.1.14",
+  "stability": "experimental",
+  "description": "The reference plugin: a minimal example that declares one of each runnable kind — an agent, a workflow, a tool, and a skill — plus a companion window. It does nothing useful on purpose, and ships hidden. Copy this directory as the starting point for your own plugin.",
+  "tagline": "Reference plugin: one of every runnable kind",
+  "keywords": ["example", "reference", "developer", "template"],
+  "hidden": true,
+  "category": "Developer Tools",
+  "icon": "book-search",
+  "iconDither": { "from": 243, "to": "transparent", "direction": "down" },
+  "surfaces": {
+    "gateway": { "support": "none" },
+    "core": { "support": "full" },
+    "desktop": { "support": "full" },
+    "island": { "support": "full" },
+    "mobile": { "support": "full" },
+    "extension": { "support": "full" },
+    "web": { "support": "full" },
+    "cli": { "support": "full" }
+  },
+  "engines": { "ryu": ">=0.1.0" },
+  "runnables": [
+    {
+      "id": "agent-researcher",
+      "name": "Researcher",
+      "kind": "agent",
+      "config": {
+        "system_prompt": "You are a research assistant.",
+        "model": "gemma4",
+        "tools": ["web_search"]
+      }
+    },
+    {
+      "id": "wf-summarise",
+      "name": "Summarise Workflow",
+      "kind": "workflow",
+      "config": {
+        "entry": "step-summarise"
+      }
+    },
+    {
+      "id": "tool-web-search",
+      "name": "Web Search",
+      "kind": "tool",
+      "config": {
+        "slug": "web_search"
+      }
+    },
+    {
+      "id": "skill-research",
+      "name": "Research Skill",
+      "kind": "skill",
+      "config": {
+        "skill_id": "ryu:research/v1"
+      }
+    }
+  ],
+  "permission_grants": ["mcp:web_search", "mcp:file_read"],
+  "companion": {
+    "label": "Research Assistant",
+    "icon": "book-search",
+    "shortcut": "ctrl+shift+r"
+  }
+}

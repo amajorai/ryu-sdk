@@ -1,0 +1,386 @@
+{
+  "id": "@ryu/memory",
+  "name": "Memory",
+  "version": "1.0.0",
+  "description": "Long-term memory CRUD: the multi-level (agent/user/node/project/org) memory store surfaced in the Memory Library. Governance shell over the in-crate memory module — the in-process chat auto-recall path is KERNEL: it always reads the built-in store directly and never routes through this HTTP surface, so no provider selection can swap it. What IS swappable is the model-facing `memory` layer — the stable `memory.search` / `memory.store` / `memory.forget` verbs. Those resolve to exactly ONE provider at a time and default to this built-in store, so an external memory provider AUGMENTS the built-in store (which the kernel keeps recalling from regardless) rather than replacing it. The built-in verbs are declarative HTTP loopbacks through Core's authenticated `/api/memory` CRUD surface and memory-only retrieval search; because the loopback presents the node token rather than a verified human identity, these built-in model-facing tools are unavailable on organization-bound nodes while kernel auto-recall remains scoped and available there.",
+  "tagline": "Durable facts the agent can recall, store, and forget",
+  "keywords": ["memory", "recall", "facts"],
+  "category": "Knowledge & Memory",
+  "engines": {
+    "ryu": ">=0.0.1"
+  },
+  "runnables": [
+    {
+      "id": "tool-memory-recall",
+      "name": "Memory Recall",
+      "kind": "tool",
+      "config": {
+        "slug": "memorystore.recall",
+        "backend": "http",
+        "method": "POST",
+        "url": "core:/api/retrieval/search",
+        "secret_headers": {
+          "Authorization": "Bearer env:RYU_TOKEN"
+        },
+        "fail_open": true,
+        "unwrap_body": true,
+        "body_defaults": {
+          "space_ids": [],
+          "include_memory": true,
+          "top_k": 5
+        },
+        "description": "Semantically recall durable facts from the built-in long-term memory store, ranked by embedding similarity with an importance boost. Searches MEMORY ONLY — the empty Space filter matches no Space, so every document chunk is excluded. Reaches `agent`-, `user`-, and `node`-scope facts: this route pins no active project and passes no read levels, so `project`- and `org`-scope facts are never returned. Sensitive topics stay excluded unless the owning user enabled them in Memory settings. To filter by scope or category instead of by meaning, use `memorystore.list`. On an organization-bound node this node-token loopback is unavailable; use kernel auto-recall or the Memory Library's verified-user surface.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "query": {
+              "type": "string",
+              "description": "Natural-language description of what to recall."
+            },
+            "top_k": {
+              "type": "integer",
+              "description": "Maximum number of facts to return (default 5).",
+              "minimum": 1,
+              "maximum": 50
+            },
+            "min_score": {
+              "type": "number",
+              "description": "Drop facts whose similarity falls below this score (0.0 keeps everything)."
+            }
+          },
+          "required": ["query"]
+        }
+      }
+    },
+    {
+      "id": "tool-memory-save",
+      "name": "Memory Save",
+      "kind": "tool",
+      "config": {
+        "slug": "memorystore.save",
+        "backend": "http",
+        "method": "POST",
+        "url": "core:/api/memory",
+        "secret_headers": {
+          "Authorization": "Bearer env:RYU_TOKEN"
+        },
+        "fail_open": true,
+        "unwrap_body": true,
+        "description": "Remember a durable fact in the built-in long-term memory store. The entry is mirrored into the retrieval index on write, so it is recallable on the next turn. Sensitive topics such as health conditions and religious beliefs require the user's Memory setting. An unrecognized scope decodes to the NARROWEST level (`user`), never a broader one. On an organization-bound node this node-token loopback is unavailable; save the fact through the Memory Library's verified-user surface.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "content": {
+              "type": "string",
+              "description": "The durable fact to remember."
+            },
+            "scope": {
+              "type": "string",
+              "description": "How broadly the fact applies. `agent` uses the selected agent, `user` follows the user across nodes, `node` stays on this machine, and `project` follows one folder. Anything unrecognized narrows to `user`. Organization scope is NOT writable through this tool: the owning org is derived from a verified user.",
+              "enum": ["agent", "user", "node", "project"]
+            },
+            "scope_id": {
+              "type": "string",
+              "description": "The agent id for an `agent`-scope fact or project folder path for a `project`-scope fact. Omit for `user` and `node`. Never set it for an org fact — the server derives the org id from the verified caller and refuses a client-supplied one."
+            },
+            "category": {
+              "type": "string",
+              "description": "What kind of fact this is. Anything unrecognized decodes to `user_fact`.",
+              "enum": [
+                "user_fact",
+                "preference",
+                "domain_knowledge",
+                "organization",
+                "project_context",
+                "relationship",
+                "directive",
+                "procedure",
+                "event",
+                "other"
+              ]
+            },
+            "importance": {
+              "type": "integer",
+              "description": "How strongly this fact should outrank others at recall time (default 3).",
+              "minimum": 1,
+              "maximum": 5
+            },
+            "when_to_use": {
+              "type": "string",
+              "description": "Hint describing when this fact is relevant."
+            },
+            "tags": {
+              "type": "array",
+              "description": "Free-form tags for curation in the Memory Library.",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "required": ["content"]
+        }
+      }
+    },
+    {
+      "id": "tool-memory-delete",
+      "name": "Memory Delete",
+      "kind": "tool",
+      "config": {
+        "slug": "memorystore.delete",
+        "backend": "http",
+        "method": "DELETE",
+        "url": "core:/api/memory/{id}",
+        "secret_headers": {
+          "Authorization": "Bearer env:RYU_TOKEN"
+        },
+        "fail_open": true,
+        "unwrap_body": true,
+        "description": "Delete one remembered fact by id, removing it from the store and from the retrieval index. A fact the caller may not see reports as not found rather than being deleted.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "Id of the memory entry to delete, as returned by `memorystore.list` or `memorystore.recall`."
+            }
+          },
+          "required": ["id"]
+        }
+      }
+    },
+    {
+      "id": "tool-memory-list",
+      "name": "Memory List",
+      "kind": "tool",
+      "config": {
+        "slug": "memorystore.list",
+        "backend": "http",
+        "method": "GET",
+        "url": "core:/api/memory",
+        "secret_headers": {
+          "Authorization": "Bearer env:RYU_TOKEN"
+        },
+        "fail_open": true,
+        "unwrap_body": true,
+        "description": "Browse remembered facts by scope and category rather than by meaning. This is the scope-filtered counterpart to `memorystore.recall`, which cannot filter by level — and the only route that reaches project-scope facts. On an organization-bound node this node-token loopback is unavailable; browse through the Memory Library's verified-user surface.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "scope": {
+              "type": "string",
+              "description": "Restrict to one scope level. `org` returns rows only when the caller has a verified organization; a node-authenticated call sees none, which is the fail-closed direction rather than an error.",
+              "enum": ["agent", "user", "node", "project", "org"]
+            },
+            "scope_id": {
+              "type": "string",
+              "description": "Project folder path to restrict a scoped listing to. Not needed for `org` — the caller's own org is the filter."
+            },
+            "category": {
+              "type": "string",
+              "description": "Restrict to one category of fact.",
+              "enum": [
+                "user_fact",
+                "preference",
+                "domain_knowledge",
+                "organization",
+                "project_context",
+                "relationship",
+                "directive",
+                "procedure",
+                "event",
+                "other"
+              ]
+            },
+            "limit": {
+              "type": "integer",
+              "description": "Maximum number of entries to return.",
+              "minimum": 1,
+              "maximum": 200
+            }
+          }
+        }
+      }
+    }
+  ],
+  "provides": [
+    {
+      "capability": "memory",
+      "version": "1.0.0",
+      "title": "Memory",
+      "selectable": true,
+      "default": true,
+      "tools": {
+        "memory.search": {
+          "tool": "memorystore.recall",
+          "args": {
+            "limit": "top_k",
+            "scope": ""
+          },
+          "response": {
+            "results": "chunks",
+            "fields": {
+              "id": "id",
+              "content": "content",
+              "score": "score"
+            }
+          }
+        },
+        "memory.store": {
+          "tool": "memorystore.save"
+        },
+        "memory.forget": {
+          "tool": "memorystore.delete"
+        }
+      }
+    }
+  ],
+  "permission_grants": ["tool:http-egress:127.0.0.1"],
+  "permission_levels": [
+    {
+      "id": "memory.read",
+      "label": "Can read",
+      "description": "Read stored long-term memories, which can hold anything an agent was ever told to remember."
+    },
+    {
+      "id": "memory.write",
+      "label": "Can write",
+      "description": "Save and edit memories, which changes what every agent recalls in later conversations.",
+      "implies": ["memory.read"]
+    },
+    {
+      "id": "memory.delete",
+      "label": "Can delete",
+      "description": "Permanently remove memories; agents cannot recover them afterwards.",
+      "implies": ["memory.write"]
+    }
+  ],
+  "contributes": {
+    "composer_controls": [
+      {
+        "id": "memory.temporary-context",
+        "type": "toggle",
+        "flag": "@ryu/memory/temporary-context",
+        "label": "Use memory in temporary chat",
+        "description": "Allow this temporary chat to use personalized memories and personalization. It still will not be saved.",
+        "order": 30
+      }
+    ],
+    "message_actions": [
+      {
+        "id": "memory.citations",
+        "label": "Memories cited",
+        "icon": "lucide:brain",
+        "target": "assistant",
+        "kind": "button",
+        "capability": "memory.read",
+        "args": {
+          "renderer": "memory-citations"
+        },
+        "order": 20
+      }
+    ],
+    "settings_tabs": [
+      {
+        "id": "memory.settings",
+        "title": "Memory",
+        "scope": "node",
+        "view": "memory"
+      },
+      {
+        "id": "memory.behavior",
+        "title": "Memory behaviour",
+        "scope": "node",
+        "fields": [
+          {
+            "type": "select",
+            "pref_key": "memory.recall-mode",
+            "label": "Recall mode",
+            "description": "How remembered facts enter a chat turn. `Automatic` injects them without being asked (the default). `Manual` stops the automatic injection but leaves the memory tools available, so the agent recalls only when it decides to. `Off` stops automatic injection entirely. None of these can turn memory on for a request that did not ask for it.",
+            "options": [
+              {
+                "value": "auto",
+                "label": "Automatic — inject relevant memories each turn"
+              },
+              {
+                "value": "manual",
+                "label": "Manual — only when the agent calls a memory tool"
+              },
+              {
+                "value": "off",
+                "label": "Off — never inject automatically"
+              }
+            ],
+            "default": "auto"
+          },
+          {
+            "type": "select",
+            "pref_key": "memory.recall-budget",
+            "label": "Recall budget",
+            "description": "How much remembered context a single turn may spend. Higher recalls more facts at the cost of prompt space.",
+            "options": [
+              {
+                "value": "low",
+                "label": "Low — a couple of facts"
+              },
+              {
+                "value": "mid",
+                "label": "Balanced (default)"
+              },
+              {
+                "value": "high",
+                "label": "High — more facts, more context used"
+              }
+            ],
+            "default": "mid"
+          },
+          {
+            "type": "select",
+            "pref_key": "memory.write-frequency",
+            "label": "Write frequency",
+            "description": "When new durable facts are captured from your turns. `Never` makes memory read-only: existing facts are still recalled, but nothing new is stored. This is independent of Recall mode — \"use what you know but learn nothing new\" is a real choice.",
+            "options": [
+              {
+                "value": "per_turn",
+                "label": "Each turn (default)"
+              },
+              {
+                "value": "never",
+                "label": "Never — read-only memory"
+              }
+            ],
+            "default": "per_turn"
+          },
+          {
+            "type": "toggle",
+            "pref_key": "memory.mirror-builtin",
+            "label": "Mirror new memories to the external provider",
+            "description": "When you have selected an external memory provider, echo each fact this node records to it as well, so the two stores do not drift apart. Has no effect while the built-in store is the selected provider. On by default.",
+            "default": true
+          },
+          {
+            "type": "toggle",
+            "pref_key": "memory.sync-turns",
+            "label": "Send raw turns to the external provider",
+            "description": "Hand your messages to the selected external provider verbatim and let IT decide what is worth remembering, instead of only sending facts this node already extracted. Providers that do their own extraction work best this way. OFF by default: this sends your raw messages off the node.",
+            "default": false
+          },
+          {
+            "type": "toggle",
+            "pref_key": "memory.provider-context",
+            "label": "Inject the provider's summary of you",
+            "description": "Ask the external provider for its own standing summary of you and include it in every turn. Only providers that model a user over time have one. OFF by default, because it spends prompt space on every single turn.",
+            "default": false
+          }
+        ]
+      }
+    ],
+    "sidebar_buttons": [
+      {
+        "id": "memory",
+        "title": "Memory",
+        "icon": "lucide:brain",
+        "target": "/library/memory"
+      }
+    ]
+  }
+}

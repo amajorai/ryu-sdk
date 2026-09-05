@@ -1,0 +1,22 @@
+{
+  "name": "@ryuhq/core-client",
+  "version": "0.2.8",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./client": "./src/client.ts",
+    "./*": "./src/*.ts"
+  },
+  "scripts": {
+    "test": "bun test",
+    "check-types": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@ryu/i18n": "workspace:*",
+    "@ryuhq/protocol": "workspace:*"
+  },
+  "devDependencies": {
+    "@ryu/config": "workspace:*",
+    "typescript": "^5"
+  }
+}

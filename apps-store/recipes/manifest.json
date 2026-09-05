@@ -1,0 +1,164 @@
+{
+  "tags": ["automation", "recipes", "desktop", "replay"],
+  "author": { "name": "Ryu", "url": "https://ryuhq.com" },
+  "repository": "https://github.com/amajorai/ryu-recipes",
+  "homepage": "https://github.com/amajorai/ryu-recipes",
+  "privacyPolicyUrl": "https://ryuhq.com/privacy",
+  "termsOfServiceUrl": "https://ryuhq.com/terms",
+  "id": "@ryu/recipes",
+  "name": "Recipes",
+  "version": "0.1.14",
+  "stability": "experimental",
+  "category": "Automation",
+  "description": "Desktop-automation recipes: record → save → replay UI action sequences. Backed by Ghost's RecipeStore, so it declares Ghost as a dependency and the graph refuses to disable Ghost out from under it.",
+  "tagline": "Record a UI sequence once, replay it forever",
+  "keywords": ["automation", "recipes", "desktop", "replay"],
+  "icon": "repeat",
+  "iconDither": { "from": 231, "to": "transparent", "direction": "down" },
+  "surfaces": {
+    "gateway": { "support": "none" },
+    "core": { "support": "full" },
+    "desktop": { "support": "full" },
+    "island": { "support": "full" },
+    "mobile": { "support": "full" },
+    "extension": { "support": "full" },
+    "web": { "support": "full" },
+    "cli": { "support": "full" }
+  },
+  "engines": {
+    "ryu": ">=0.1.0"
+  },
+  "runnables": [],
+  "requires": {
+    "apps": [
+      {
+        "id": "ghost",
+        "min_version": "0.1.14"
+      }
+    ]
+  },
+  "sidecars": [
+    {
+      "name": "ryu-recipes",
+      "process": {
+        "kind": "local",
+        "command": "ryu-recipes",
+        "command_env": "RYU_RECIPES_BIN",
+        "port_env": "RYU_RECIPES_PORT"
+      },
+      "port": 7999,
+      "health_path": "/health",
+      "lazy": true,
+      "idle_stop_secs": 300,
+      "http": {
+        "mount": "/api/recipes",
+        "public_mount": "/api/recipes",
+        "routes": [
+          { "path": "/", "method": "GET", "permission": "recipes.view" },
+          { "path": "/", "method": "POST", "permission": "recipes.record" },
+          { "path": "/:name", "method": "GET", "permission": "recipes.view" },
+          {
+            "path": "/:name",
+            "method": "DELETE",
+            "permission": "recipes.record"
+          },
+          {
+            "path": "/:name/run",
+            "method": "POST",
+            "permission": "recipes.run"
+          },
+          { "path": "/record/start", "permission": "recipes.record" },
+          { "path": "/record/status", "permission": "recipes.view" },
+          { "path": "/record/stop", "permission": "recipes.record" }
+        ]
+      },
+      "host_api": {
+        "grants": ["ghost:record"]
+      }
+    }
+  ],
+  "permission_grants": ["ghost:record"],
+  "permission_levels": [
+    {
+      "id": "recipes.view",
+      "label": "Can view",
+      "description": "Browse saved desktop-automation recipes and the steps each one replays."
+    },
+    {
+      "id": "recipes.record",
+      "label": "Can record",
+      "description": "Record and save new recipes, which captures every UI action performed while recording.",
+      "implies": ["recipes.view"]
+    },
+    {
+      "id": "recipes.run",
+      "label": "Can replay",
+      "description": "Replay a saved recipe, which drives this machine's real mouse and keyboard against whatever is on screen.",
+      "implies": ["recipes.view"]
+    }
+  ],
+  "contributes": {
+    "chat_widget_templates": [
+      {
+        "id": "recipes.chat",
+        "title": "Recipes widget",
+        "description": "Recipes chat widget metadata is coming soon; no render tool is available yet.",
+        "triggers": ["recipes widget"],
+        "examples": ["Show me a recipes widget"],
+        "backing": {},
+        "display_mode": "inline",
+        "safe_action_ids": [],
+        "availability": "coming-soon"
+      }
+    ],
+    "hook_events": [
+      {
+        "id": "@ryu/recipes#recording.ended",
+        "title": "Desktop recording finished",
+        "description": "Fires when a recording session is stopped (POST /api/recipes/record/stop) and the captured action sequence has been turned into an editable recipe draft. The draft is NOT persisted anywhere — `save` is a separate, later call — so it travels in the payload: a consumer that wants to refine or install it must take it from here. Fires once per session; a session that is never stopped never fires. If the draft would push the payload past Core's event-size cap, it is omitted and `draft_omitted: true` is set — the event still fires, so a subscriber learns the recording ended and can tell the draft was shed rather than empty.",
+        "payload_example": {
+          "task": "file a bug in Linear",
+          "started_at": "2026-08-01T10:04:11Z",
+          "event_count": 12,
+          "draft": {
+            "schema_version": 2,
+            "name": "file-a-bug-in-linear",
+            "description": "file a bug in Linear",
+            "app": "Linear",
+            "params": {},
+            "steps": [
+              {
+                "id": 1,
+                "action": "click",
+                "note": "New issue"
+              }
+            ],
+            "on_failure": "abort"
+          }
+        }
+      },
+      {
+        "id": "@ryu/recipes#replay.ended",
+        "title": "Recipe replay succeeded",
+        "description": "Fires when a recipe finished replaying against the native desktop without erroring. Carries ghost's structured run result (per-step success/timing), which is the only place that detail exists — nothing persists a run record. Fires once per replay, so a recipe run on a schedule fires on every run.",
+        "payload_example": {
+          "recipe": "file-a-bug-in-linear",
+          "result": {
+            "success": true,
+            "steps_run": 6,
+            "duration_ms": 4210
+          }
+        }
+      },
+      {
+        "id": "@ryu/recipes#replay.failed",
+        "title": "Recipe replay failed",
+        "description": "Fires when a replay could not complete: ghost is unreachable, the recipe is missing, or a step's target could not be found on screen. `error` is the same message the caller received. A replay raises either this or `replay.ended`, never both.",
+        "payload_example": {
+          "recipe": "file-a-bug-in-linear",
+          "error": "recipe replay failed: no element matching 'New issue' in Linear"
+        }
+      }
+    ]
+  }
+}

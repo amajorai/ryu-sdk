@@ -1,0 +1,123 @@
+{
+  "tags": ["dashboard", "summary", "history", "tasks", "review"],
+  "author": { "name": "Ryu", "url": "https://ryuhq.com" },
+  "repository": "https://github.com/amajorai/ryu-mission-control",
+  "homepage": "https://github.com/amajorai/ryu-mission-control",
+  "privacyPolicyUrl": "https://ryuhq.com/privacy",
+  "termsOfServiceUrl": "https://ryuhq.com/terms",
+  "id": "@ryu/mission-control",
+  "name": "Mission Control",
+  "version": "0.1.14",
+  "stability": "experimental",
+  "category": "Productivity",
+  "description": "The project-level view over many chats: recent sessions and what each one accomplished, per-day activity, the files several chats keep returning to, and the to-dos left outstanding in threads nobody reopened. Declares the out-of-process ryu-mission-control sidecar (kind:local), which owns the digest store and the cross-chat rollup and is served to the desktop through the generic ext-proxy public_mount. The digests themselves are computed in the desktop from each chat's message parts and PUT here, because a manifest sidecar has no conversation read and the parts column is sealed at rest — the same function feeds the in-chat Mission Control panel, so a chat's summary is identical in both places.",
+  "tagline": "What every chat did, and what is still open",
+  "keywords": ["dashboard", "summary", "history", "tasks", "review"],
+  "icon": "radar-01",
+  "iconDither": { "from": 201, "to": "transparent", "direction": "down" },
+  "surfaces": {
+    "gateway": { "support": "none" },
+    "core": { "support": "full" },
+    "desktop": { "support": "full" },
+    "island": { "support": "limited" },
+    "mobile": { "support": "limited" },
+    "extension": { "support": "none" },
+    "web": { "support": "full" },
+    "cli": { "support": "list" }
+  },
+  "engines": {
+    "ryu": ">=0.1.0"
+  },
+  "runnables": [],
+  "sidecars": [
+    {
+      "name": "mission-control",
+      "process": {
+        "kind": "local",
+        "command": "ryu-mission-control",
+        "command_env": "RYU_MISSION_CONTROL_BIN",
+        "port_env": "RYU_MISSION_CONTROL_PORT"
+      },
+      "port": 8010,
+      "health_path": "/health",
+      "lazy": true,
+      "idle_stop_secs": 300,
+      "host_api": {
+        "grants": ["hook:side-model"]
+      },
+      "http": {
+        "mount": "/api/mission-control",
+        "public_mount": "/api/mission-control",
+        "routes": [
+          {
+            "path": "/",
+            "method": "GET",
+            "permission": "mission-control.view"
+          },
+          { "path": "/health" },
+          { "path": "/overview", "permission": "mission-control.view" },
+          { "path": "/index-state", "permission": "mission-control.view" },
+          { "path": "/conversations", "permission": "mission-control.view" },
+          {
+            "path": "/conversations/:id",
+            "method": "GET",
+            "permission": "mission-control.view"
+          },
+          {
+            "path": "/conversations/:id",
+            "method": "PUT",
+            "permission": "mission-control.manage"
+          },
+          {
+            "path": "/conversations/:id",
+            "method": "DELETE",
+            "permission": "mission-control.manage"
+          },
+          {
+            "path": "/conversations/:id/summarize",
+            "method": "POST",
+            "permission": "mission-control.manage"
+          }
+        ]
+      }
+    }
+  ],
+  "permission_grants": ["hook:side-model"],
+  "permission_levels": [
+    {
+      "id": "mission-control.view",
+      "label": "Can view",
+      "description": "See the project dashboard: which chats ran, what each one changed and reasoned, which files they touched, and what is still outstanding across all of them."
+    },
+    {
+      "id": "mission-control.manage",
+      "label": "Can manage",
+      "description": "Re-index a chat's digest, ask the node's own side model to narrate a session, and remove a chat from the dashboard. Narrating a session sends that chat's digest — its turn headlines, the agent's reasoning and its to-do list — to whatever model the node is configured to use.",
+      "implies": ["mission-control.view"]
+    }
+  ],
+  "contributes": {
+    "chat_widget_templates": [
+      {
+        "id": "mission-control.chat",
+        "title": "Mission Control widget",
+        "description": "Mission Control chat widget metadata is coming soon; no render tool is available yet.",
+        "triggers": ["mission control widget"],
+        "examples": ["Show me a mission control widget"],
+        "backing": {},
+        "display_mode": "inline",
+        "safe_action_ids": [],
+        "availability": "coming-soon"
+      }
+    ],
+    "sidebar_buttons": [
+      {
+        "id": "home",
+        "title": "Mission Control",
+        "icon": "hugeicons:radar-01",
+        "target": "/mission-control",
+        "order": 40
+      }
+    ]
+  }
+}

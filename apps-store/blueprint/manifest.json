@@ -1,0 +1,318 @@
+{
+  "tags": [
+    "planning",
+    "review",
+    "annotation",
+    "dependency-graph",
+    "approval",
+    "code-review",
+    "human-in-the-loop",
+    "markdown"
+  ],
+  "author": { "name": "Ryu", "url": "https://ryuhq.com" },
+  "repository": "https://github.com/amajorai/ryu-blueprint",
+  "homepage": "https://github.com/amajorai/ryu-blueprint",
+  "privacyPolicyUrl": "https://ryuhq.com/privacy",
+  "termsOfServiceUrl": "https://ryuhq.com/terms",
+  "id": "@ryu/blueprint",
+  "name": "Blueprint",
+  "version": "0.1.14",
+  "stability": "experimental",
+  "category": "Developer Tools",
+  "description": "Review an agent's plan before it touches a file. The agent publishes its plan over MCP; Blueprint parses the markdown into addressable blocks and renders it next to a dependency graph derived from the steps' own `depends_on` edges — so the two questions a wall of markdown cannot answer become visible at a glance: what actually has to happen first, and which step is the one everything else is waiting on. A plan reads as a sequence because prose is a sequence; the work almost never is. You annotate what you object to, anchored to the block or step it belongs to — a comment, a redline carrying the replacement text you want, a question, or a blocker — and then approve or request changes. The verdict is not a mood: it is a document. Requesting changes serializes every annotation into deterministic text the agent reads back through `blueprint.plan_status`, each finding naming the step or block it attaches to and, for a redline, the exact substitution proposed, so a revision answers what was actually written rather than what a summary of it sounded like. Re-publishing under the same plan id appends a revision instead of creating a new plan, and block ids are content-stable across revisions, so the second draft arrives as a diff against the first — the paragraphs you already read are still the paragraphs you already read.",
+  "tagline": "Read the plan as a graph, mark it up, and send back a verdict the agent can act on",
+  "keywords": [
+    "planning",
+    "review",
+    "annotation",
+    "dependency-graph",
+    "approval",
+    "code-review",
+    "human-in-the-loop",
+    "markdown"
+  ],
+  "icon": "structure-check",
+  "iconDither": { "from": 174, "to": "transparent", "direction": "down" },
+  "surfaces": {
+    "gateway": { "support": "none" },
+    "core": { "support": "full" },
+    "desktop": { "support": "full" },
+    "island": { "support": "limited" },
+    "mobile": { "support": "limited" },
+    "extension": { "support": "none" },
+    "web": { "support": "full" },
+    "cli": { "support": "limited" }
+  },
+  "engines": { "ryu": ">=0.1.0" },
+  "runnables": [
+    {
+      "id": "blueprint-companion",
+      "name": "Blueprint",
+      "kind": "companion",
+      "config": {
+        "label": "Blueprint",
+        "ui_entry": "./dist/index.html",
+        "ui_format": "html"
+      }
+    }
+  ],
+  "sidecars": [
+    {
+      "name": "blueprint",
+      "process": {
+        "kind": "local",
+        "command": "ryu-blueprint",
+        "command_env": "RYU_BLUEPRINT_BIN",
+        "port_env": "RYU_BLUEPRINT_PORT"
+      },
+      "port": 8011,
+      "health_path": "/health",
+      "lazy": true,
+      "idle_stop_secs": 900,
+      "http": {
+        "mount": "/api/blueprint",
+        "public_mount": "/api/blueprint",
+        "routes": [
+          { "path": "/plans", "method": "GET", "permission": "blueprint.view" },
+          {
+            "path": "/plans",
+            "method": "POST",
+            "permission": "blueprint.review"
+          },
+          {
+            "path": "/plans/:id",
+            "method": "GET",
+            "permission": "blueprint.view"
+          },
+          {
+            "path": "/plans/:id",
+            "method": "DELETE",
+            "permission": "blueprint.review"
+          },
+          {
+            "path": "/plans/:id/revisions",
+            "method": "GET",
+            "permission": "blueprint.view"
+          },
+          {
+            "path": "/plans/:id/revisions/:rev",
+            "method": "GET",
+            "permission": "blueprint.view"
+          },
+          {
+            "path": "/plans/:id/diff",
+            "method": "GET",
+            "permission": "blueprint.view"
+          },
+          {
+            "path": "/plans/:id/annotations",
+            "permission": "blueprint.review"
+          },
+          {
+            "path": "/plans/:id/annotations/:annotation_id",
+            "permission": "blueprint.review"
+          },
+          { "path": "/plans/:id/verdict", "permission": "blueprint.review" },
+          {
+            "path": "/plans/:id/steps/:step_id",
+            "permission": "blueprint.review"
+          },
+          {
+            "path": "/plans/:id/feedback",
+            "method": "GET",
+            "permission": "blueprint.view"
+          }
+        ]
+      }
+    }
+  ],
+  "mcp_servers": {
+    "blueprint": {
+      "command": "ryu-blueprint",
+      "args": ["mcp"],
+      "description": "Publish a plan for a human to review, and read the verdict back as text. Reach for this before a change that is expensive to undo — a migration, a refactor across many files, anything where the wrong first step wastes the rest. `plan_publish` posts numbered steps with their `depends_on` edges and returns a review url; `plan_status` polls for the verdict with a bounded wait and returns the reviewer's annotations already serialized into readable findings; `plan_get` fetches the whole plan with its annotations; `step_update` marks a step done as the work lands, so the reviewer watching the graph sees progress without being asked."
+    }
+  },
+  "provides": [
+    {
+      "capability": "plan.review",
+      "version": "1.0.0",
+      "sidecar": "blueprint",
+      "route": "/plans",
+      "grant": "blueprint:review"
+    }
+  ],
+  "permission_grants": [
+    "blueprint:review",
+    "mcp:blueprint",
+    "ui:declarative-http"
+  ],
+  "permission_levels": [
+    {
+      "id": "blueprint.view",
+      "label": "Can view",
+      "description": "Read the plans published on this node, their revisions, and the annotations other people left on them."
+    },
+    {
+      "id": "blueprint.review",
+      "label": "Can review",
+      "description": "Annotate plans and decide them — approving a plan is what releases the agent to start editing files, so this is the level that changes what happens on the machine.",
+      "implies": ["blueprint.view"]
+    }
+  ],
+  "companion": {
+    "label": "Blueprint",
+    "icon": "structure-check"
+  },
+  "contributes": {
+    "chat_widget_templates": [
+      {
+        "id": "blueprint.chat",
+        "title": "Blueprint widget",
+        "description": "Open Blueprint data in a host-rendered chat widget.",
+        "triggers": ["blueprint widget"],
+        "examples": ["Show me a blueprint widget"],
+        "backing": { "view_id": "surface:blueprint" },
+        "display_mode": "inline",
+        "safe_action_ids": [],
+        "availability": "available"
+      }
+    ],
+    "sidebar_sections": [
+      {
+        "id": "plans",
+        "title": "Plans",
+        "icon": "structure-check",
+        "order": 44,
+        "spec": {
+          "source": {
+            "http": { "method": "GET", "path": "/api/blueprint/plans" },
+            "items": "plans",
+            "map": {
+              "id": "id",
+              "title": "title",
+              "subtitle": "status",
+              "accessory": "current_revision",
+              "titleFallback": "Untitled plan"
+            },
+            "refreshMs": 10000
+          },
+          "itemTarget": "/blueprint/{{item.id}}",
+          "emptyState": {
+            "title": "No plans yet",
+            "description": "An agent can publish a plan here for review."
+          }
+        }
+      }
+    ],
+    "hook_events": [
+      {
+        "id": "@ryu/blueprint#plan.published",
+        "title": "A plan was published for review",
+        "description": "A revision was written and the plan is now `in_review`. Fires on EVERY publish, including a re-publish under an existing `plan_id` — that is a new revision of the same plan, not a new plan, so a listener sees one event per revision and not one per plan. Use `revision` to tell a first draft (1) from a response to a verdict (2 and up). Does NOT fire when someone annotates a plan or when a step's status changes; annotations and step progress do not create revisions.",
+        "payload_example": {
+          "plan_id": "migrate-billing-schema",
+          "revision": 2,
+          "title": "Migrate the billing schema off the legacy customer table",
+          "step_count": 7
+        }
+      },
+      {
+        "id": "@ryu/blueprint#plan.approved",
+        "title": "A plan was approved",
+        "description": "A reviewer recorded an `approved` verdict against a specific revision. This is the signal that an agent blocked on review may begin editing. Fires only when a verdict is posted — resolving every annotation on a plan is not a verdict, and a plan with no annotations at all is not approved by default. `note` is the reviewer's free text and is often absent; approval never depends on it. Unresolved `comment` annotations may still exist on an approved plan, and are carried into the feedback text as advisory.",
+        "payload_example": {
+          "plan_id": "migrate-billing-schema",
+          "revision": 2,
+          "note": "Fine with the two-pass approach. Keep the flag until the backfill reports zero rows."
+        }
+      },
+      {
+        "id": "@ryu/blueprint#plan.changes_requested",
+        "title": "A reviewer asked for changes",
+        "description": "A reviewer recorded a `changes_requested` verdict. `annotation_count` is how many annotations were open on that revision when the verdict landed — it is a size hint for a router deciding where to send this, not a list, and the annotations themselves are read back through `blueprint.plan_status`. Does NOT fire when a single `blocker` annotation is created: an unsubmitted blocker is one reviewer's opinion mid-read, and firing on it would page someone before the reviewer had finished forming a view.",
+        "payload_example": {
+          "plan_id": "migrate-billing-schema",
+          "revision": 1,
+          "annotation_count": 3,
+          "note": "Backup first, and split step 4."
+        }
+      },
+      {
+        "id": "@ryu/blueprint#step.completed",
+        "title": "A plan step was marked done",
+        "description": "A step's status was set to `done`, normally by the agent calling `blueprint.step_update` as the work lands. Fires once per transition into `done`; the other statuses do not fire it, so moving a step to `in_progress` or `blocked` is silent and a step that goes `done` is not reported again by later updates that leave it there. This is the event to hang progress notifications on — it is the only one that means work actually happened, as opposed to work being agreed.",
+        "payload_example": {
+          "plan_id": "migrate-billing-schema",
+          "step_id": "s_add_shadow_column",
+          "title": "Add the shadow column behind a flag"
+        }
+      }
+    ],
+    "data_categories": [
+      {
+        "id": "blueprint_plans",
+        "title": "Delete all plans",
+        "noun": "plans",
+        "confirm_word": "Blueprint",
+        "detail": "Every published plan on this node will be deleted, along with all of its revisions, its annotations and its verdicts. Plans an agent is currently waiting on disappear too, and its next `plan_status` poll will find nothing to report."
+      }
+    ],
+    "views": [
+      {
+        "id": "surface:blueprint",
+        "title": "Blueprint",
+        "view": "list-detail",
+        "spec": {
+          "view": "list-detail",
+          "items": [],
+          "emptyText": "No plans have been published yet.",
+          "source": {
+            "http": {
+              "method": "GET",
+              "path": "/api/blueprint/plans"
+            },
+            "items": "plans",
+            "map": {
+              "title": "title",
+              "subtitle": "status",
+              "accessory": "current_revision",
+              "titleFallback": "Untitled plan"
+            }
+          },
+          "itemActions": [
+            {
+              "id": "approve",
+              "label": "Approve",
+              "style": "primary",
+              "http": {
+                "method": "POST",
+                "path": "/api/blueprint/plans/{{item.id}}/verdict",
+                "body": {
+                  "verdict": "approved",
+                  "revision": "{{item.current_revision}}"
+                }
+              }
+            },
+            {
+              "id": "delete",
+              "label": "Delete plan",
+              "style": "danger",
+              "confirm": "Delete this plan, every revision of it and all of its annotations?",
+              "http": {
+                "method": "DELETE",
+                "path": "/api/blueprint/plans/{{item.id}}"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "output_styles": [
+      {
+        "id": "visual-planning",
+        "file": "output-styles/visual-planning.md"
+      }
+    ]
+  }
+}

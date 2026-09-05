@@ -1,0 +1,512 @@
+{
+  "tags": ["social", "scheduling", "publishing", "calendar", "inbox"],
+  "author": { "name": "Ryu", "url": "https://ryuhq.com" },
+  "repository": "https://github.com/amajorai/ryu-social",
+  "homepage": "https://github.com/amajorai/ryu-social",
+  "privacyPolicyUrl": "https://ryuhq.com/privacy",
+  "termsOfServiceUrl": "https://ryuhq.com/terms",
+  "id": "@ryu/social",
+  "name": "Outpost",
+  "version": "0.1.14",
+  "stability": "experimental",
+  "category": "Productivity",
+  "description": "A publishing command center for every social account you run: compose once, tailor per platform, queue it on a calendar, and let the node publish while you are away. Scheduled posts, a retrying publish queue, a unified reply inbox, engagement history, and reusable post templates — all in one local SQLite database the node owns.",
+  "tagline": "Schedule, publish, and reply across every account",
+  "keywords": ["social", "scheduling", "publishing", "calendar", "inbox"],
+  "icon": "share-08",
+  "iconDither": { "from": 198, "to": "transparent", "direction": "down" },
+  "surfaces": {
+    "gateway": { "support": "none" },
+    "core": { "support": "full" },
+    "desktop": { "support": "full" },
+    "island": { "support": "limited" },
+    "mobile": { "support": "limited" },
+    "extension": { "support": "none" },
+    "web": { "support": "full" },
+    "cli": { "support": "list" }
+  },
+  "engines": {
+    "ryu": ">=0.1.0"
+  },
+  "runnables": [
+    {
+      "id": "social-companion",
+      "name": "Outpost",
+      "kind": "companion",
+      "config": {
+        "label": "Outpost",
+        "ui_entry": "./dist/index.html",
+        "ui_format": "html"
+      }
+    }
+  ],
+  "sidecars": [
+    {
+      "name": "ryu-social",
+      "process": {
+        "kind": "local",
+        "command": "ryu-social",
+        "command_env": "RYU_SOCIAL_BIN",
+        "port_env": "RYU_SOCIAL_PORT"
+      },
+      "host_api": {
+        "grants": ["tools.invoke"]
+      },
+      "port": 8005,
+      "health_path": "/health",
+      "http": {
+        "mount": "/api/social",
+        "public_mount": "/api/social",
+        "routes": [
+          {
+            "path": "/workspaces",
+            "method": "GET",
+            "permission": "social.view"
+          },
+          {
+            "path": "/workspaces",
+            "method": "POST",
+            "permission": "social.publish"
+          },
+          {
+            "path": "/workspaces/:id",
+            "method": "GET",
+            "permission": "social.view"
+          },
+          {
+            "path": "/workspaces/:id",
+            "method": "PATCH",
+            "permission": "social.publish"
+          },
+          {
+            "path": "/workspaces/:id",
+            "method": "DELETE",
+            "permission": "social.publish"
+          },
+          { "path": "/accounts", "method": "GET", "permission": "social.view" },
+          {
+            "path": "/accounts",
+            "method": "POST",
+            "permission": "social.publish"
+          },
+          {
+            "path": "/accounts/:id",
+            "method": "GET",
+            "permission": "social.view"
+          },
+          {
+            "path": "/accounts/:id",
+            "method": "DELETE",
+            "permission": "social.publish"
+          },
+          { "path": "/accounts/:id/connect", "permission": "social.publish" },
+          { "path": "/accounts/:id/capabilities", "permission": "social.view" },
+          { "path": "/drafts", "method": "GET", "permission": "social.view" },
+          {
+            "path": "/drafts",
+            "method": "POST",
+            "permission": "social.publish"
+          },
+          {
+            "path": "/drafts/:id",
+            "method": "GET",
+            "permission": "social.view"
+          },
+          {
+            "path": "/drafts/:id",
+            "method": "PATCH",
+            "permission": "social.publish"
+          },
+          {
+            "path": "/drafts/:id",
+            "method": "DELETE",
+            "permission": "social.publish"
+          },
+          { "path": "/posts", "method": "GET", "permission": "social.view" },
+          {
+            "path": "/posts",
+            "method": "POST",
+            "permission": "social.publish"
+          },
+          { "path": "/posts/validate", "permission": "social.publish" },
+          {
+            "path": "/posts/:id",
+            "method": "GET",
+            "permission": "social.view"
+          },
+          {
+            "path": "/posts/:id",
+            "method": "PATCH",
+            "permission": "social.publish"
+          },
+          {
+            "path": "/posts/:id",
+            "method": "DELETE",
+            "permission": "social.publish"
+          },
+          { "path": "/posts/:id/schedule", "permission": "social.publish" },
+          { "path": "/posts/:id/cancel", "permission": "social.publish" },
+          { "path": "/posts/:id/publish-now", "permission": "social.publish" },
+          { "path": "/posts/:id/retry", "permission": "social.publish" },
+          { "path": "/calendar", "permission": "social.view" },
+          { "path": "/queue", "permission": "social.view" },
+          { "path": "/best-times", "permission": "social.view" },
+          { "path": "/history", "permission": "social.view" },
+          { "path": "/history/:id", "permission": "social.view" },
+          {
+            "path": "/history/:id/refresh-engagement",
+            "permission": "social.publish"
+          },
+          { "path": "/inbox", "permission": "social.view" },
+          { "path": "/inbox/refresh", "permission": "social.view" },
+          { "path": "/inbox/:id/reply", "permission": "social.publish" },
+          { "path": "/inbox/:id/read", "permission": "social.view" },
+          {
+            "path": "/templates",
+            "method": "GET",
+            "permission": "social.view"
+          },
+          {
+            "path": "/templates",
+            "method": "POST",
+            "permission": "social.publish"
+          },
+          {
+            "path": "/templates/:id",
+            "method": "GET",
+            "permission": "social.view"
+          },
+          {
+            "path": "/templates/:id",
+            "method": "PATCH",
+            "permission": "social.publish"
+          },
+          {
+            "path": "/templates/:id",
+            "method": "DELETE",
+            "permission": "social.publish"
+          },
+          { "path": "/templates/:id/use", "permission": "social.publish" },
+          { "path": "/media", "method": "GET", "permission": "social.view" },
+          {
+            "path": "/media",
+            "method": "POST",
+            "permission": "social.publish"
+          },
+          {
+            "path": "/media/:id",
+            "method": "DELETE",
+            "permission": "social.publish"
+          },
+          { "path": "/activity", "method": "GET", "permission": "social.view" },
+          { "path": "/settings", "method": "GET", "permission": "social.view" },
+          {
+            "path": "/settings",
+            "method": "PATCH",
+            "permission": "social.publish"
+          },
+          { "path": "/platforms", "permission": "social.view" }
+        ]
+      }
+    }
+  ],
+  "permission_grants": [
+    "social:crud",
+    "tools.invoke",
+    "hook:side-model",
+    "shell:integrate",
+    "core:list_agents",
+    "ui:toast",
+    "ui:declarative-http"
+  ],
+  "permission_levels": [
+    {
+      "id": "social.view",
+      "label": "Can view",
+      "description": "Read the posting calendar, the publish queue, past posts and their engagement numbers, and the replies and mentions collected in the inbox."
+    },
+    {
+      "id": "social.publish",
+      "label": "Can publish",
+      "description": "Schedule, publish, and cancel posts, and reply from the inbox — everything here goes out publicly under the connected accounts, in this workspace's name.",
+      "implies": ["social.view"]
+    }
+  ],
+  "companion": {
+    "label": "Outpost",
+    "icon": "share-08"
+  },
+  "contributes": {
+    "chat_widget_templates": [
+      {
+        "id": "social.chat",
+        "title": "Outpost widget",
+        "description": "Open Outpost data in a host-rendered chat widget.",
+        "triggers": ["outpost widget"],
+        "examples": ["Show me a outpost widget"],
+        "backing": { "view_id": "surface:social" },
+        "display_mode": "inline",
+        "safe_action_ids": [],
+        "availability": "available"
+      }
+    ],
+    "data_categories": [
+      {
+        "id": "social",
+        "title": "Delete all Outpost data",
+        "noun": "social posts",
+        "confirm_word": "Outpost",
+        "detail": "Every workspace, connected account, draft, scheduled post, publish record, inbox item, template and media reference in Outpost's database will be permanently deleted. Posts that have already gone out stay live on the platforms — this deletes Ryu's copy, not theirs."
+      }
+    ],
+    "hook_events": [
+      {
+        "id": "@ryu/social#post.scheduled",
+        "title": "Post scheduled",
+        "description": "A post was queued for a future time, with its per-account fan-out legs already written. Fires once per POST /posts, at the moment the row commits — before any provider is contacted, so it says nothing about whether the post will succeed. It does NOT fire for a publish-now (that path skips the queue), nor when a scheduled post is later cancelled, rescheduled, or retried.",
+        "payload_example": {
+          "id": "spo_9f0c2a1b4d3e4f5a8b7c6d5e4f3a2b1c",
+          "workspace_id": "default",
+          "draft_id": "dft_2b1c4d3e5f6a7b8c",
+          "scheduled_for": 1785312000000,
+          "status": "scheduled",
+          "created_at": 1785225600000,
+          "targets": [
+            {
+              "id": "tgt_7c6d5e4f3a2b1c0d",
+              "scheduled_post_id": "spo_9f0c2a1b4d3e4f5a8b7c6d5e4f3a2b1c",
+              "social_account_id": "acc_1a2b3c4d5e6f7a8b",
+              "platform": "x",
+              "status": "pending"
+            }
+          ]
+        }
+      },
+      {
+        "id": "@ryu/social#post.published",
+        "title": "Post published",
+        "description": "Every leg of a post finished and all of them succeeded. Fires once, when the last target settles — so a three-account post produces one event, not three, and the remote ids and permalinks for all of them are in `targets`. A post whose legs are still in flight does not settle, so this never fires early; a post that partly failed raises post.failed instead.",
+        "payload_example": {
+          "post_id": "spo_9f0c2a1b4d3e4f5a8b7c6d5e4f3a2b1c",
+          "workspace_id": "default",
+          "status": "published",
+          "targets": [
+            {
+              "target_id": "tgt_7c6d5e4f3a2b1c0d",
+              "platform": "x",
+              "status": "published",
+              "remote_id": "112233445566778899",
+              "remote_url": "https://x.com/acme/status/112233445566778899",
+              "error": null,
+              "attempts": 1
+            }
+          ]
+        }
+      },
+      {
+        "id": "@ryu/social#post.failed",
+        "title": "Post failed or partly failed",
+        "description": "A post settled with at least one leg that did not publish. `status` distinguishes the two cases — `partial` (some accounts went out, some did not) from `failed` (none did) — and the per-leg `error` says why. Fires once per settle, AFTER the retry budget for those legs is spent, not on each failed attempt; a leg that fails and then succeeds on retry never reaches here. Retrying a failed post can make it settle again, so the same post id can appear twice.",
+        "payload_example": {
+          "post_id": "spo_9f0c2a1b4d3e4f5a8b7c6d5e4f3a2b1c",
+          "workspace_id": "default",
+          "status": "partial",
+          "targets": [
+            {
+              "target_id": "tgt_7c6d5e4f3a2b1c0d",
+              "platform": "x",
+              "status": "published",
+              "remote_id": "112233445566778899",
+              "remote_url": "https://x.com/acme/status/112233445566778899",
+              "error": null,
+              "attempts": 1
+            },
+            {
+              "target_id": "tgt_0d1e2f3a4b5c6d7e",
+              "platform": "bluesky",
+              "status": "failed",
+              "remote_id": null,
+              "remote_url": null,
+              "error": "provider rejected the post: rate limited",
+              "attempts": 3
+            }
+          ]
+        }
+      },
+      {
+        "id": "@ryu/social#inbox.received",
+        "title": "Inbox item received",
+        "description": "One NEW reply, mention, or comment landed in the inbox, emitted per item once it is durable — so a refresh that pulls twelve new comments raises twelve events, and a crash mid-refresh can never announce an item it then loses. Only ever fires for items the dedupe did not already know, so re-polling the same thread is silent. Marking an item read or replying to it raises nothing.",
+        "payload_example": {
+          "id": "inb_4f3a2b1c0d1e2f3a",
+          "workspace_id": "default",
+          "social_account_id": "acc_1a2b3c4d5e6f7a8b",
+          "platform": "x",
+          "kind": "reply",
+          "author": "@dana",
+          "text": "Is the annual plan live yet?",
+          "permalink": "https://x.com/dana/status/112233445566778900",
+          "received_at": 1785312345000
+        }
+      }
+    ],
+    "store_tabs": [
+      {
+        "id": "post-templates",
+        "title": "Post Templates",
+        "subtitle": "Starting shapes for the posts you write over and over — pick one and it opens as a fresh draft.",
+        "icon": "lucide:layout-template",
+        "group": "catalog",
+        "order": 75,
+        "spec": {
+          "source": {
+            "http": { "method": "GET", "path": "/api/social/templates" },
+            "items": "templates"
+          },
+          "map": {
+            "id": "id",
+            "title": "name"
+          },
+          "searchPlaceholder": "Search post templates…",
+          "install": {
+            "http": {
+              "method": "POST",
+              "path": "/api/social/templates/{{item.id}}/use"
+            },
+            "label": "Use",
+            "successMessage": "Draft started from this template",
+            "openTarget": "/social"
+          },
+          "empty": {
+            "title": "No post templates found",
+            "description": "Try a different search, or write one in Outpost's Library."
+          }
+        }
+      }
+    ],
+    "sidebar_buttons": [
+      {
+        "id": "social-overview",
+        "title": "Overview",
+        "icon": "dashboard-square-02",
+        "target": "/plugin/app__social-companion",
+        "context": { "section": "overview" },
+        "order": 60
+      },
+      {
+        "id": "social-inbox",
+        "title": "Inbox",
+        "icon": "inbox",
+        "target": "/plugin/app__social-companion",
+        "context": { "section": "inbox" },
+        "order": 61
+      },
+      {
+        "id": "social-compose",
+        "title": "Compose",
+        "icon": "edit-02",
+        "target": "/plugin/app__social-companion",
+        "context": { "section": "compose" },
+        "order": 62
+      },
+      {
+        "id": "social-queue",
+        "title": "Queue",
+        "icon": "calendar-03",
+        "target": "/plugin/app__social-companion",
+        "context": { "section": "queue" },
+        "order": 63
+      },
+      {
+        "id": "social-library",
+        "title": "Library",
+        "icon": "book-02",
+        "target": "/plugin/app__social-companion",
+        "context": { "section": "library" },
+        "order": 64
+      },
+      {
+        "id": "social-calendar",
+        "title": "Calendar",
+        "icon": "calendar-01",
+        "target": "/plugin/app__social-companion",
+        "context": { "section": "calendar" },
+        "order": 65
+      },
+      {
+        "id": "social-activity",
+        "title": "Activity",
+        "icon": "chart-line-data-01",
+        "target": "/plugin/app__social-companion",
+        "context": { "section": "activity" },
+        "order": 66
+      },
+      {
+        "id": "social-settings",
+        "title": "Settings",
+        "icon": "settings-01",
+        "target": "/plugin/app__social-companion",
+        "context": { "section": "settings" },
+        "order": 67
+      }
+    ],
+    "sidebar_sections": [
+      {
+        "id": "social-queue",
+        "title": "Up next",
+        "icon": "share-08",
+        "order": 60,
+        "spec": {
+          "source": {
+            "http": { "method": "GET", "path": "/api/social/queue" },
+            "items": "queue",
+            "limit": 8,
+            "refreshMs": 60000,
+            "map": {
+              "id": "id",
+              "title": "account_label",
+              "titleFallback": "Scheduled post",
+              "subtitle": "platform_label",
+              "accessory": "status"
+            }
+          },
+          "itemTarget": "/social/{{item.scheduled_post_id}}",
+          "itemActions": [
+            {
+              "id": "cancel",
+              "label": "Cancel",
+              "icon": "lucide:calendar-x",
+              "style": "danger",
+              "http": {
+                "method": "POST",
+                "path": "/api/social/posts/{{item.scheduled_post_id}}/cancel"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "views": [
+      {
+        "id": "surface:social",
+        "title": "Outpost",
+        "view": "list-detail",
+        "spec": {
+          "view": "list-detail",
+          "items": [],
+          "emptyText": "Nothing scheduled yet — compose a post in Outpost.",
+          "source": {
+            "http": { "method": "GET", "path": "/api/social/posts" },
+            "items": "posts",
+            "map": {
+              "id": "id",
+              "titleFallback": "Scheduled post",
+              "subtitle": "status",
+              "accessory": "scheduled_for"
+            }
+          }
+        }
+      }
+    ]
+  }
+}
