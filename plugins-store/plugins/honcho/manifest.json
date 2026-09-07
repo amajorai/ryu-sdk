@@ -1,0 +1,383 @@
+{
+  "tags": ["memory", "context", "identity", "dialectic", "honcho"],
+  "author": { "name": "Ryu", "url": "https://ryuhq.com" },
+  "repository": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/honcho",
+  "homepage": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/honcho",
+  "privacyPolicyUrl": "https://ryuhq.com/privacy",
+  "termsOfServiceUrl": "https://ryuhq.com/terms",
+  "id": "@ryu/honcho",
+  "name": "Honcho",
+  "version": "0.1.14",
+  "stability": "experimental",
+  "description": "Give the swappable `memory` layer a provider that MODELS the user instead of only storing rows, via Honcho (https://honcho.dev) — the Plastic Labs identity layer Hermes uses for exactly this. Honcho watches the messages you hand it and derives a per-peer REPRESENTATION; its Dialectic endpoint (`POST /v3/workspaces/{workspace_id}/peers/{peer_id}/chat`) then answers a natural-language question about that peer with its own synthesis. That is what the canonical `memory.context` verb has always promised and no shipped provider served, so this is the first plugin to make the kernel's `context` bridge (`memory.provider-context`) do anything at all. Honcho here serves TWO verbs: `memory.context` (the Dialectic synthesis) and `memory.search` (`POST .../peers/{peer_id}/search`, documented as \"Search a Peer's messages\" — conversation text, not the conclusions Honcho derives from it, which matters because the `prefetch` bridge is on by default and will start injecting message excerpts each turn). It also binds the two WRITE verbs, `memory.sync` and `memory.store`, through an adapter. Honcho's only documented write is `POST /v3/workspaces/{workspace_id}/sessions/{session_id}/messages`, whose `messages[]` items each require a `peer_id` — a NESTED position the declarative `arg_template` cannot reach, because a template substitutes only from CALLER arguments and never sees a resolved `pref:`. That is why both verbs went unbound and why `memory.mirror-builtin` (default ON) was inert. An adapter receives those `pref:` values already resolved, so the per-install peer lands inside `messages[]` without hardcoding one bucket for every install. The session and both peers are caller-named and created on first write, so nothing has to be set up by hand; Ryu's own replies are written as a SEPARATE peer, since attributing an assistant turn to your peer would poison the representation Honcho derives about you. `memory.forget` stays unbound: Honcho documents no message-delete endpoint, which no adapter can invent. The built-in store's own `memorystore.save` tool and this node's per-turn memory write are kernel and untouched. Every call is scoped to one workspace and one peer, both set per install in the settings tab — a hardcoded pair would put every install in one shared bucket. Requires a BYOK Honcho API key.",
+  "iconUrl": "https://avatars.githubusercontent.com/u/123981229?v=4",
+  "iconDither": { "from": 330, "to": "transparent", "direction": "down" },
+  "tagline": "A standing synthesis of the user, not a list of facts",
+  "keywords": ["memory", "context", "identity", "dialectic", "honcho"],
+  "category": "Knowledge & Memory",
+  "surfaces": {
+    "gateway": { "support": "none" },
+    "core": { "support": "full" },
+    "desktop": { "support": "full" },
+    "island": { "support": "limited" },
+    "mobile": { "support": "limited" },
+    "extension": { "support": "limited" },
+    "web": { "support": "full" },
+    "cli": { "support": "full" }
+  },
+  "engines": {
+    "ryu": ">=0.1.0"
+  },
+  "runnables": [
+    {
+      "id": "tool-honcho-chat",
+      "name": "Honcho Dialectic",
+      "kind": "tool",
+      "config": {
+        "slug": "honcho.chat",
+        "backend": "http",
+        "method": "POST",
+        "url": "https://api.honcho.dev/v3/workspaces/{workspace_id}/peers/{peer_id}/chat",
+        "secret_headers": {
+          "Authorization": "Bearer env:RYU_HONCHO_API_KEY"
+        },
+        "fail_open": true,
+        "unwrap_body": true,
+        "body_defaults": {
+          "reasoning_level": "minimal"
+        },
+        "description": "Ask Honcho's Dialectic endpoint a natural-language question about one peer and get back ITS synthesis — the reasoning Honcho has derived from that peer's messages and conclusions, not a list of stored rows. Answers `{\"content\": \"…\"}`. `reasoning_level` defaults to `minimal` here rather than Honcho's own `low`, because the kernel context bridge abandons a memory provider after 4 seconds and a deeper reasoning pass routinely costs more than that; raise it in the Honcho settings tab if you call this tool directly and can wait. Streaming is deliberately not exposed — the endpoint answers `text/event-stream` when `stream` is true, which is not a JSON tool result. Requires RYU_HONCHO_API_KEY.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "workspace_id": {
+              "type": "string",
+              "description": "The Honcho workspace to query. Filled automatically from the Honcho settings tab when this runs as the `memory` layer; pass your workspace id from https://app.honcho.dev if you call this tool directly."
+            },
+            "peer_id": {
+              "type": "string",
+              "description": "The peer whose representation to query. Filled automatically from the Honcho settings tab when this runs as the `memory` layer."
+            },
+            "query": {
+              "type": "string",
+              "description": "The natural-language question to put to the peer's representation.",
+              "minLength": 1,
+              "maxLength": 10000
+            },
+            "session_id": {
+              "type": "string",
+              "description": "Optional session id to scope the representation to one conversation."
+            },
+            "target": {
+              "type": "string",
+              "description": "Optional other peer to get the representation FOR, from this peer's perspective."
+            },
+            "reasoning_level": {
+              "type": "string",
+              "description": "How much reasoning Honcho applies before answering. More reasoning is slower; Honcho's own default is `low`.",
+              "enum": ["minimal", "low", "medium", "high", "max"]
+            }
+          },
+          "required": ["workspace_id", "peer_id", "query"]
+        }
+      }
+    },
+    {
+      "id": "tool-honcho-search",
+      "name": "Honcho Search",
+      "kind": "tool",
+      "config": {
+        "slug": "honcho.search",
+        "backend": "http",
+        "method": "POST",
+        "url": "https://api.honcho.dev/v3/workspaces/{workspace_id}/peers/{peer_id}/search",
+        "secret_headers": {
+          "Authorization": "Bearer env:RYU_HONCHO_API_KEY"
+        },
+        "fail_open": true,
+        "unwrap_body": true,
+        "description": "Search one peer's MESSAGES in a Honcho workspace and return the matching messages. This searches conversation text that was handed to Honcho, not the conclusions Honcho derived from it — use honcho.chat for the derived view. Answers a bare JSON array of messages. Requires RYU_HONCHO_API_KEY.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "workspace_id": {
+              "type": "string",
+              "description": "The Honcho workspace to search. Filled automatically from the Honcho settings tab when this runs as the `memory` layer."
+            },
+            "peer_id": {
+              "type": "string",
+              "description": "The peer whose messages to search. Filled automatically from the Honcho settings tab when this runs as the `memory` layer."
+            },
+            "query": {
+              "type": "string",
+              "description": "Search query."
+            },
+            "limit": {
+              "type": "integer",
+              "description": "Number of messages to return (Honcho default 10).",
+              "minimum": 1,
+              "maximum": 100
+            }
+          },
+          "required": ["workspace_id", "peer_id", "query"]
+        }
+      }
+    },
+    {
+      "id": "tool-honcho-messages",
+      "name": "Honcho Add Messages",
+      "kind": "tool",
+      "config": {
+        "slug": "honcho.messages",
+        "backend": "http",
+        "method": "POST",
+        "url": "https://api.honcho.dev/v3/workspaces/{workspace_id}/sessions/{session_id}/messages",
+        "secret_headers": {
+          "Authorization": "Bearer env:RYU_HONCHO_API_KEY"
+        },
+        "fail_open": true,
+        "unwrap_body": true,
+        "description": "Add messages to a Honcho session. Honcho derives each peer's representation from the messages you hand it, so this is the WRITE side of the memory layer. Answers a 201 array of the created messages. The session and every named peer must exist first (see honcho.session_upsert / honcho.peer_upsert). Requires RYU_HONCHO_API_KEY.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "workspace_id": {
+              "type": "string",
+              "description": "The Honcho workspace to write to. Filled automatically from the Honcho settings tab when this runs as the `memory` layer."
+            },
+            "session_id": {
+              "type": "string",
+              "description": "The session to append to. Filled automatically when this runs as the `memory` layer."
+            },
+            "messages": {
+              "type": "array",
+              "description": "The messages to add. Each item needs a `content` and the `peer_id` that produced it.",
+              "minItems": 1,
+              "maxItems": 100,
+              "items": {
+                "type": "object",
+                "properties": {
+                  "content": {
+                    "type": "string",
+                    "description": "The message text.",
+                    "maxLength": 25000
+                  },
+                  "peer_id": {
+                    "type": "string",
+                    "description": "Which peer produced this message."
+                  },
+                  "metadata": {
+                    "type": "object",
+                    "description": "Arbitrary metadata stored alongside the message."
+                  }
+                },
+                "required": ["content", "peer_id"]
+              }
+            }
+          },
+          "required": ["workspace_id", "session_id", "messages"]
+        }
+      }
+    },
+    {
+      "id": "tool-honcho-session-upsert",
+      "name": "Honcho Get or Create Session",
+      "kind": "tool",
+      "config": {
+        "slug": "honcho.session_upsert",
+        "backend": "http",
+        "method": "POST",
+        "url": "https://api.honcho.dev/v3/workspaces/{workspace_id}/sessions",
+        "secret_headers": {
+          "Authorization": "Bearer env:RYU_HONCHO_API_KEY"
+        },
+        "fail_open": true,
+        "unwrap_body": true,
+        "description": "Get a Honcho session by id, or create it if it does not exist. The id is CHOSEN BY THE CALLER, which is what lets this node use a stable session without the user having to create one first. Requires RYU_HONCHO_API_KEY.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "workspace_id": {
+              "type": "string",
+              "description": "The Honcho workspace the session belongs to."
+            },
+            "id": {
+              "type": "string",
+              "description": "The session id to get or create."
+            }
+          },
+          "required": ["workspace_id", "id"]
+        }
+      }
+    },
+    {
+      "id": "tool-honcho-peer-upsert",
+      "name": "Honcho Get or Create Peer",
+      "kind": "tool",
+      "config": {
+        "slug": "honcho.peer_upsert",
+        "backend": "http",
+        "method": "POST",
+        "url": "https://api.honcho.dev/v3/workspaces/{workspace_id}/peers",
+        "secret_headers": {
+          "Authorization": "Bearer env:RYU_HONCHO_API_KEY"
+        },
+        "fail_open": true,
+        "unwrap_body": true,
+        "description": "Get a Honcho peer by id, or create it if it does not exist. Ryu writes the user's turns as one peer and its own replies as another, and creating them explicitly is why writing a turn never depends on a peer having been set up by hand. Requires RYU_HONCHO_API_KEY.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "workspace_id": {
+              "type": "string",
+              "description": "The Honcho workspace the peer belongs to."
+            },
+            "id": {
+              "type": "string",
+              "description": "The peer id to get or create. Honcho allows letters, digits, underscore and hyphen.",
+              "maxLength": 512,
+              "minLength": 1
+            }
+          },
+          "required": ["workspace_id", "id"]
+        }
+      }
+    }
+  ],
+  "provides": [
+    {
+      "capability": "memory",
+      "version": "1.0.0",
+      "title": "Memory",
+      "selectable": true,
+      "tools": {
+        "memory.context": {
+          "tool": "honcho.chat",
+          "arg_defaults": {
+            "workspace_id": "pref:honcho.workspace-id",
+            "peer_id": "pref:honcho.peer-id",
+            "reasoning_level": "pref:honcho.reasoning-level"
+          }
+        },
+        "memory.search": {
+          "tool": "honcho.search",
+          "args": {
+            "scope": ""
+          },
+          "arg_defaults": {
+            "workspace_id": "pref:honcho.workspace-id",
+            "peer_id": "pref:honcho.peer-id"
+          },
+          "response": {
+            "fields": {
+              "id": "id",
+              "content": "content"
+            }
+          }
+        },
+        "memory.sync": {
+          "tool": "honcho.messages",
+          "arg_defaults": {
+            "workspace_id": "pref:honcho.workspace-id",
+            "peer_id": "pref:honcho.peer-id",
+            "session_id": "pref:honcho.session-id",
+            "assistant_peer_id": "pref:honcho.assistant-peer-id"
+          },
+          "adapter": {
+            "tools": ["honcho.peer_upsert", "honcho.session_upsert"],
+            "code_file": "adapters/memory.sync.js"
+          }
+        },
+        "memory.store": {
+          "tool": "honcho.messages",
+          "arg_defaults": {
+            "workspace_id": "pref:honcho.workspace-id",
+            "peer_id": "pref:honcho.peer-id",
+            "session_id": "pref:honcho.session-id"
+          },
+          "adapter": {
+            "tools": ["honcho.peer_upsert", "honcho.session_upsert"],
+            "code_file": "adapters/memory.store.js"
+          }
+        }
+      }
+    }
+  ],
+  "permission_grants": ["tool:http-egress:api.honcho.dev", "tool:execute"],
+  "contributes": {
+    "settings_tabs": [
+      {
+        "id": "honcho.settings",
+        "title": "Honcho",
+        "scope": "node",
+        "fields": [
+          {
+            "type": "text",
+            "pref_key": "honcho.workspace-id",
+            "label": "Honcho workspace id",
+            "description": "The workspace every call is scoped to. Honcho workspaces are the isolation boundary between applications, and its SDKs use `default` unless told otherwise. Until this is set the workspace never reaches the URL and the call fails with a missing path parameter, which is the loud failure — the alternative, a workspace id baked into this manifest, would put every install in one shared bucket.",
+            "placeholder": "default",
+            "required": true
+          },
+          {
+            "type": "text",
+            "pref_key": "honcho.peer-id",
+            "label": "Honcho peer id",
+            "description": "The peer whose representation Honcho synthesizes for you — the id you already send messages under, `user` in Honcho's own quickstart. Both verbs are scoped to it, so a mismatch here means Honcho answers about somebody with no history rather than erroring.",
+            "placeholder": "user",
+            "required": true
+          },
+          {
+            "type": "text",
+            "pref_key": "honcho.session-id",
+            "label": "Honcho session id",
+            "description": "The session written turns are appended to. Honcho sessions are caller-named — Ryu creates this one on first write rather than making you set it up — so leaving this blank is fine and falls back to `ryu`. Set it if several applications share one workspace and you want their conversations kept apart.",
+            "placeholder": "ryu"
+          },
+          {
+            "type": "text",
+            "pref_key": "honcho.assistant-peer-id",
+            "label": "Assistant peer id",
+            "description": "The peer Ryu's OWN replies are written as. An assistant turn is not your utterance, and attributing it to your peer would poison the representation Honcho derives about you — so replies are stored under a separate peer, created on first write. Blank falls back to `ryu`.",
+            "placeholder": "ryu"
+          },
+          {
+            "type": "secret",
+            "pref_key": "RYU_HONCHO_API_KEY",
+            "label": "Honcho API key",
+            "description": "Create a key at https://app.honcho.dev under API Keys and paste it here. Ryu sends it as `Authorization: Bearer <key>`, the scheme Honcho's OpenAPI declares (HTTPBearer). A key may be scoped to a workspace, peer or session in the Honcho dashboard; a workspace-scoped key is enough for both tools here. Stored encrypted on this node and never shown again — re-paste to change it. Without a key the Honcho tools stay installed but return nothing, so `memory` falls back to whichever other provider you select."
+          },
+          {
+            "type": "select",
+            "pref_key": "honcho.reasoning-level",
+            "label": "Dialectic reasoning level",
+            "description": "How hard Honcho thinks before answering a context query. The kernel gives a memory provider 4 seconds per turn and then continues without it, so anything above `minimal` risks the standing summary silently never arriving in chat — raise it only if you mostly call the tool directly.",
+            "options": [
+              {
+                "value": "minimal",
+                "label": "Minimal — fastest, fits the 4s in-chat budget (default)"
+              },
+              {
+                "value": "low",
+                "label": "Low — Honcho's own default"
+              },
+              {
+                "value": "medium",
+                "label": "Medium"
+              },
+              {
+                "value": "high",
+                "label": "High"
+              },
+              {
+                "value": "max",
+                "label": "Max — deepest, slowest"
+              }
+            ],
+            "default": "minimal"
+          }
+        ]
+      }
+    ]
+  }
+}

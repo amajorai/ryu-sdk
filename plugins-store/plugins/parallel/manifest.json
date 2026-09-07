@@ -1,0 +1,229 @@
+{
+  "tags": ["search", "web", "extract", "mcp"],
+  "author": { "name": "Ryu", "url": "https://ryuhq.com" },
+  "repository": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/parallel",
+  "homepage": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/parallel",
+  "privacyPolicyUrl": "https://ryuhq.com/privacy",
+  "termsOfServiceUrl": "https://ryuhq.com/terms",
+  "id": "@ryu/parallel",
+  "name": "Parallel Search",
+  "version": "0.1.14",
+  "stability": "experimental",
+  "description": "Web search and content extraction via Parallel (https://parallel.ai), exposed as three declarative HTTP tools. Provides the swappable `web.search` and `web.extract` layers, so selecting it in the layer picker re-points the stable `web.search` / `web.extract` tools at Parallel without changing what agents call. Search works with NO key through Parallel's public Search MCP endpoint; a BYOK Parallel API key unlocks the higher-limit REST API and extraction.",
+  "iconUrl": "https://avatars.githubusercontent.com/u/210743255?v=4",
+  "iconDither": { "from": 168, "to": "transparent", "direction": "down" },
+  "tagline": "Objective-driven web search built for agent loops",
+  "keywords": ["search", "web", "extract", "mcp"],
+  "category": "Search",
+  "surfaces": {
+    "gateway": { "support": "none" },
+    "core": { "support": "full" },
+    "desktop": { "support": "full" },
+    "island": { "support": "limited" },
+    "mobile": { "support": "limited" },
+    "extension": { "support": "limited" },
+    "web": { "support": "full" },
+    "cli": { "support": "full" }
+  },
+  "engines": {
+    "ryu": ">=0.1.0"
+  },
+  "runnables": [
+    {
+      "id": "tool-parallel-search",
+      "name": "Parallel Search",
+      "kind": "tool",
+      "config": {
+        "slug": "parallel.search",
+        "backend": "http",
+        "method": "POST",
+        "url": "https://api.parallel.ai/v1/search",
+        "secret_headers": {
+          "x-api-key": "env:RYU_PARALLEL_API_KEY"
+        },
+        "fail_open": true,
+        "unwrap_body": true,
+        "body_defaults": {
+          "mode": "basic"
+        },
+        "description": "Web search that takes a natural-language objective plus 2-3 keyword queries and returns ranked URLs with long, LLM-ready markdown excerpts. There is no result-count parameter: size the response with max_chars_total instead. Requires RYU_PARALLEL_API_KEY.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "objective": {
+              "type": "string",
+              "description": "Natural-language description of the question driving the search. Should be self-contained and atomic — one specific piece of information."
+            },
+            "search_queries": {
+              "type": "array",
+              "description": "Concise keyword search queries, 3-6 words each. At least one is required; 2-3 give the best results.",
+              "items": {
+                "type": "string"
+              }
+            },
+            "mode": {
+              "type": "string",
+              "description": "Search preset. turbo is the fastest, basic is the low-latency agent-loop default used here, advanced does more retrieval and compression (Parallel's own default when omitted).",
+              "enum": ["turbo", "basic", "advanced"]
+            },
+            "max_chars_total": {
+              "type": "integer",
+              "description": "Upper bound on total characters across the excerpts of all results.",
+              "minimum": 1
+            }
+          },
+          "required": ["search_queries"]
+        }
+      }
+    },
+    {
+      "id": "tool-parallel-free-search",
+      "name": "Parallel Search (no key)",
+      "kind": "tool",
+      "config": {
+        "slug": "parallel.free_search",
+        "backend": "http",
+        "method": "POST",
+        "url": "https://search.parallel.ai/mcp",
+        "fail_open": true,
+        "unwrap_body": true,
+        "description": "Web search through Parallel's PUBLIC Search MCP endpoint, which needs no API key. Rate-limited free tier, intended as the zero-setup path when RYU_PARALLEL_API_KEY is unset; add a key to use the higher-limit parallel.search instead. Speaks JSON-RPC: the caller supplies the whole `tools/call` envelope, and the reply is a plain JSON-RPC response whose result payload is a JSON string, so the capability adapter parses it rather than a response map.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "jsonrpc": {
+              "type": "string",
+              "description": "JSON-RPC version, always \"2.0\"."
+            },
+            "id": {
+              "type": "integer",
+              "description": "JSON-RPC request id."
+            },
+            "method": {
+              "type": "string",
+              "description": "JSON-RPC method, always \"tools/call\"."
+            },
+            "params": {
+              "type": "object",
+              "description": "`{name, arguments}` naming the Parallel MCP tool to call (web_search or web_fetch) and its arguments."
+            }
+          },
+          "required": ["jsonrpc", "id", "method", "params"]
+        }
+      }
+    },
+    {
+      "id": "tool-parallel-extract",
+      "name": "Parallel Extract",
+      "kind": "tool",
+      "config": {
+        "slug": "parallel.extract",
+        "backend": "http",
+        "method": "POST",
+        "url": "https://api.parallel.ai/v1/extract",
+        "secret_headers": {
+          "x-api-key": "env:RYU_PARALLEL_API_KEY"
+        },
+        "fail_open": true,
+        "unwrap_body": true,
+        "body_defaults": {
+          "advanced_settings": {
+            "full_content": true
+          }
+        },
+        "description": "Fetch up to 20 URLs and return their readable content as markdown. Parallel returns objective-focused excerpts by default; this tool asks for full page content instead, so a caller that wanted the whole page gets it. Requires RYU_PARALLEL_API_KEY.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "urls": {
+              "type": "array",
+              "description": "URLs to extract content from. Up to 20 per request.",
+              "items": {
+                "type": "string"
+              }
+            },
+            "objective": {
+              "type": "string",
+              "description": "Natural-language description of what to look for in these URLs, used to focus the excerpts."
+            },
+            "search_queries": {
+              "type": "array",
+              "description": "Keyword queries (3-6 words each) used with the objective to focus excerpts. Pass the queries from the search that surfaced these URLs.",
+              "items": {
+                "type": "string"
+              }
+            },
+            "max_chars_total": {
+              "type": "integer",
+              "description": "Upper bound on total characters across all extracted results.",
+              "minimum": 1
+            }
+          },
+          "required": ["urls"]
+        }
+      }
+    }
+  ],
+  "provides": [
+    {
+      "capability": "web.search",
+      "version": "1.0.0",
+      "title": "Search",
+      "selectable": true,
+      "tools": {
+        "web.search": {
+          "tool": "parallel.search",
+          "adapter": {
+            "tools": ["parallel.free_search"],
+            "code_file": "adapters/web.search.js"
+          }
+        }
+      }
+    },
+    {
+      "capability": "web.extract",
+      "version": "1.0.0",
+      "title": "Extract",
+      "selectable": true,
+      "tools": {
+        "web.extract": {
+          "tool": "parallel.extract",
+          "args": {
+            "url": "urls[]",
+            "format": ""
+          },
+          "response": {
+            "results": "results",
+            "fields": {
+              "url": "url",
+              "content": "full_content",
+              "markdown": "full_content"
+            }
+          }
+        }
+      }
+    }
+  ],
+  "permission_grants": [
+    "tool:http-egress:api.parallel.ai",
+    "tool:http-egress:search.parallel.ai",
+    "tool:execute"
+  ],
+  "contributes": {
+    "settings_tabs": [
+      {
+        "id": "parallel.settings",
+        "title": "Parallel Search",
+        "scope": "node",
+        "fields": [
+          {
+            "type": "secret",
+            "pref_key": "RYU_PARALLEL_API_KEY",
+            "label": "Parallel API key",
+            "description": "Create a key at https://platform.parallel.ai and paste it here. Stored encrypted on this node and never shown again — re-paste to change it. Without a key `web.search` still works through Parallel's free public Search MCP endpoint, but `web.extract` returns nothing and falls back to whichever other provider you select."
+          }
+        ]
+      }
+    ]
+  }
+}

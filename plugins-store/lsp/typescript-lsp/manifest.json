@@ -1,0 +1,86 @@
+{
+  "tags": [
+    "typescript",
+    "javascript",
+    "ts",
+    "js",
+    "language-server",
+    "developer"
+  ],
+  "author": { "name": "Ryu", "url": "https://ryuhq.com" },
+  "repository": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/lsp/typescript-lsp",
+  "homepage": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/lsp/typescript-lsp",
+  "privacyPolicyUrl": "https://ryuhq.com/privacy",
+  "termsOfServiceUrl": "https://ryuhq.com/terms",
+  "id": "@ryu/typescript-lsp",
+  "name": "TypeScript & JavaScript LSP",
+  "version": "0.1.14",
+  "stability": "experimental",
+  "category": "Developer Tools",
+  "description": "TypeScript/JavaScript language server for the ryu agent: definitions, references, hover, symbols, implementations, call hierarchies and diagnostics after every edit. You install typescript-language-server; the plugin ships config.",
+  "tagline": "TS/JS code intelligence via typescript-language-server",
+  "keywords": [
+    "typescript",
+    "javascript",
+    "ts",
+    "js",
+    "language-server",
+    "developer"
+  ],
+  "icon": "file-code-01",
+  "iconDither": {
+    "from": 384,
+    "to": "transparent",
+    "direction": "down"
+  },
+  "surfaces": {
+    "gateway": {
+      "support": "none"
+    },
+    "core": {
+      "support": "full"
+    },
+    "desktop": {
+      "support": "full"
+    },
+    "island": {
+      "support": "limited"
+    },
+    "mobile": {
+      "support": "limited"
+    },
+    "extension": {
+      "support": "limited"
+    },
+    "web": {
+      "support": "limited"
+    },
+    "cli": {
+      "support": "full"
+    }
+  },
+  "engines": {
+    "ryu": ">=0.1.0"
+  },
+  "runnables": [],
+  "permission_grants": ["pi:extension"],
+  "activation_events": ["*"],
+  "contributes": {
+    "lsp_servers": {
+      "typescript": {
+        "command": "typescript-language-server",
+        "args": ["--stdio"],
+        "extensionToLanguage": {
+          ".ts": "typescript",
+          ".tsx": "typescriptreact",
+          ".js": "javascript",
+          ".jsx": "javascriptreact",
+          ".mts": "typescript",
+          ".cts": "typescript",
+          ".mjs": "javascript",
+          ".cjs": "javascript"
+        }
+      }
+    }
+  }
+}

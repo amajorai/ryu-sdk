@@ -1,0 +1,191 @@
+{
+  "tags": [
+    "drafts",
+    "queue",
+    "outbox",
+    "composer",
+    "scheduling",
+    "usage-limits",
+    "concurrency"
+  ],
+  "author": { "name": "Ryu", "url": "https://ryuhq.com" },
+  "repository": "https://github.com/amajorai/ryu-drafts",
+  "homepage": "https://github.com/amajorai/ryu-drafts",
+  "privacyPolicyUrl": "https://ryuhq.com/privacy",
+  "termsOfServiceUrl": "https://ryuhq.com/terms",
+  "id": "@ryu/drafts",
+  "name": "Drafts",
+  "version": "0.1.14",
+  "stability": "experimental",
+  "category": "Productivity",
+  "description": "A durable outbox for messages you have not sent yet. Anything you type into a composer and walk away from is kept as a draft instead of being lost with the tab, and every draft lives in one node-wide store rather than inside the chat it happened to be typed in — so it survives closing the conversation, restarting the app, and moving to another project. A draft can also be armed: give it a condition and it sends itself when the condition holds. The two conditions that exist are the two that actually block work — 'fewer than N agents are running' (so a queued prompt starts the moment a slot frees instead of piling onto a machine already at capacity) and 'this agent's usage window has room again' (so a prompt written against a capped subscription goes out when the cap lifts rather than failing on send). Both are evaluated against readings the app takes from this node, and a draft whose condition never becomes true simply stays a draft — nothing is sent on a guess.",
+  "tagline": "Every unsent message, kept and queued until it can go",
+  "keywords": [
+    "drafts",
+    "queue",
+    "outbox",
+    "composer",
+    "scheduling",
+    "usage-limits",
+    "concurrency"
+  ],
+  "icon": "lucide:file-pen-line",
+  "iconDither": { "from": 40, "to": "transparent", "direction": "down" },
+  "surfaces": {
+    "gateway": { "support": "none" },
+    "core": { "support": "full" },
+    "desktop": { "support": "full" },
+    "island": { "support": "none" },
+    "mobile": { "support": "none" },
+    "extension": { "support": "none" },
+    "web": { "support": "none" },
+    "cli": { "support": "none" }
+  },
+  "engines": {
+    "ryu": ">=0.1.0"
+  },
+  "runnables": [],
+  "sidecars": [
+    {
+      "name": "drafts",
+      "process": {
+        "kind": "local",
+        "command": "ryu-drafts",
+        "command_env": "RYU_DRAFTS_BIN",
+        "port_env": "RYU_DRAFTS_PORT"
+      },
+      "port": 8012,
+      "health_path": "/health",
+      "http": {
+        "mount": "/api/drafts",
+        "public_mount": "/api/drafts",
+        "routes": [
+          { "path": "/list", "permission": "drafts.view" },
+          { "path": "/queue", "permission": "drafts.view" },
+          { "path": "/drafts", "method": "GET", "permission": "drafts.view" },
+          { "path": "/drafts", "method": "POST", "permission": "drafts.edit" },
+          {
+            "path": "/drafts",
+            "method": "DELETE",
+            "permission": "drafts.edit"
+          },
+          {
+            "path": "/drafts/:id",
+            "method": "GET",
+            "permission": "drafts.view"
+          },
+          {
+            "path": "/drafts/:id",
+            "method": "PATCH",
+            "permission": "drafts.edit"
+          },
+          {
+            "path": "/drafts/:id",
+            "method": "DELETE",
+            "permission": "drafts.edit"
+          },
+          { "path": "/drafts/:id/arm", "permission": "drafts.edit" },
+          { "path": "/drafts/:id/disarm", "permission": "drafts.edit" },
+          { "path": "/drafts/:id/claim", "permission": "drafts.edit" },
+          { "path": "/drafts/:id/sent", "permission": "drafts.edit" },
+          { "path": "/drafts/:id/failed", "permission": "drafts.edit" },
+          { "path": "/settings", "method": "GET", "permission": "drafts.view" },
+          { "path": "/settings", "method": "PUT", "permission": "drafts.edit" }
+        ]
+      },
+      "host_api": {
+        "grants": ["chat.sendFollowUp", "core:readings"]
+      }
+    }
+  ],
+  "permission_grants": [
+    "drafts:crud",
+    "chat.sendFollowUp",
+    "core:readings",
+    "ui:declarative-http"
+  ],
+  "permission_levels": [
+    {
+      "id": "drafts.view",
+      "label": "Can view",
+      "description": "See the drafts kept on this node and what each one is waiting for."
+    },
+    {
+      "id": "drafts.edit",
+      "label": "Can edit",
+      "description": "Write, arm, and delete drafts. Arming a draft is what lets it send itself later, so this is the level that can cause a message to go out unattended.",
+      "implies": ["drafts.view"]
+    }
+  ],
+  "contributes": {
+    "chat_widget_templates": [
+      {
+        "id": "drafts.chat",
+        "title": "Drafts widget",
+        "description": "Drafts chat widget metadata is coming soon; no render tool is available yet.",
+        "triggers": ["drafts widget"],
+        "examples": ["Show me a drafts widget"],
+        "backing": {},
+        "display_mode": "inline",
+        "safe_action_ids": [],
+        "availability": "coming-soon"
+      }
+    ],
+    "data_categories": [
+      {
+        "id": "drafts",
+        "title": "Delete all Drafts data",
+        "noun": "drafts",
+        "confirm_word": "Drafts",
+        "detail": "Every draft on this node — autosaved composer text, armed queue entries and the record of drafts already sent — will be permanently deleted. Messages that have already been sent stay in their conversations; this deletes the outbox, not the chats."
+      }
+    ],
+    "sidebar_buttons": [
+      {
+        "id": "home",
+        "title": "Drafts",
+        "icon": "hugeicons:file-edit",
+        "target": "/drafts",
+        "order": 42
+      }
+    ],
+    "sidebar_sections": [
+      {
+        "id": "drafts",
+        "title": "Drafts",
+        "icon": "lucide:file-pen-line",
+        "order": 6,
+        "spec": {
+          "source": {
+            "http": {
+              "method": "GET",
+              "path": "/api/drafts/list"
+            },
+            "items": "drafts",
+            "map": {
+              "id": "id",
+              "title": "preview",
+              "titleFallback": "Empty draft",
+              "subtitle": "waiting_for"
+            },
+            "refreshMs": 5000,
+            "limit": 50
+          },
+          "itemTarget": "/drafts",
+          "itemPreview": {
+            "description": "{{item.text}}",
+            "meta": [
+              { "label": "Status", "value": "{{item.state_label}}" },
+              { "label": "Waiting for", "value": "{{item.waiting_for}}" },
+              { "label": "Project", "value": "{{item.folder_path}}" }
+            ]
+          },
+          "emptyState": {
+            "title": "No drafts",
+            "description": "Type into a composer and leave without sending — the text is kept here instead of being lost."
+          }
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,64 @@
+{
+  "tags": ["lua", "lua-language-server", "language-server", "developer"],
+  "author": { "name": "Ryu", "url": "https://ryuhq.com" },
+  "repository": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/lsp/lua-lsp",
+  "homepage": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/lsp/lua-lsp",
+  "privacyPolicyUrl": "https://ryuhq.com/privacy",
+  "termsOfServiceUrl": "https://ryuhq.com/terms",
+  "id": "@ryu/lua-lsp",
+  "name": "Lua LSP",
+  "version": "0.1.14",
+  "stability": "experimental",
+  "category": "Developer Tools",
+  "description": "Lua language server (lua-language-server) for the ryu agent: definitions, references, hover, symbols, implementations, call hierarchies and diagnostics after every edit. You install lua-language-server; the plugin ships config.",
+  "tagline": "Lua code intelligence via lua-language-server",
+  "keywords": ["lua", "lua-language-server", "language-server", "developer"],
+  "icon": "code-circle-01",
+  "iconDither": {
+    "from": 192,
+    "to": "transparent",
+    "direction": "down"
+  },
+  "surfaces": {
+    "gateway": {
+      "support": "none"
+    },
+    "core": {
+      "support": "full"
+    },
+    "desktop": {
+      "support": "full"
+    },
+    "island": {
+      "support": "limited"
+    },
+    "mobile": {
+      "support": "limited"
+    },
+    "extension": {
+      "support": "limited"
+    },
+    "web": {
+      "support": "limited"
+    },
+    "cli": {
+      "support": "full"
+    }
+  },
+  "engines": {
+    "ryu": ">=0.1.0"
+  },
+  "runnables": [],
+  "permission_grants": ["pi:extension"],
+  "activation_events": ["*"],
+  "contributes": {
+    "lsp_servers": {
+      "lua": {
+        "command": "lua-language-server",
+        "extensionToLanguage": {
+          ".lua": "lua"
+        }
+      }
+    }
+  }
+}

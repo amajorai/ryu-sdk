@@ -1,0 +1,52 @@
+{
+  "tags": ["automation", "continuation", "agent", "loop", "productivity"],
+  "author": { "name": "Ryu", "url": "https://ryuhq.com" },
+  "repository": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/auto-continue",
+  "homepage": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/auto-continue",
+  "privacyPolicyUrl": "https://ryuhq.com/privacy",
+  "termsOfServiceUrl": "https://ryuhq.com/terms",
+  "id": "@ryu/auto-continue",
+  "name": "Auto Continue",
+  "version": "0.1.14",
+  "stability": "experimental",
+  "description": "After each turn while armed, a local sub-agent scans the reply and the workspace for work that is genuinely unfinished and that another turn could complete; if it finds any, it injects a follow-up turn automatically, so a task never stalls waiting for you to type \"continue\". '/auto-continue off' stops it.",
+  "tagline": "Never type \"continue\" again",
+  "keywords": ["automation", "continuation", "agent", "loop", "productivity"],
+  "category": "Productivity",
+  "icon": "refresh-ccw-02",
+  "iconDither": { "from": 198, "to": "transparent", "direction": "down" },
+  "surfaces": {
+    "gateway": { "support": "none" },
+    "core": { "support": "full" },
+    "desktop": { "support": "full" },
+    "island": { "support": "limited" },
+    "mobile": { "support": "limited" },
+    "extension": { "support": "limited" },
+    "web": { "support": "full" },
+    "cli": { "support": "full" }
+  },
+  "engines": { "ryu": ">=0.1.0" },
+  "runnables": [],
+  "permission_grants": ["hook:run-agent", "storage:kv"],
+  "activation_events": ["*"],
+  "contributes": {
+    "slash_commands": [
+      {
+        "id": "auto-continue.toggle",
+        "command": "/auto-continue",
+        "description": "Arm or disarm the auto-continue loop for this chat ('/auto-continue on' | '/auto-continue off')."
+      }
+    ],
+    "turn_hooks": [
+      {
+        "id": "auto-continue.loop",
+        "on": "post_assistant_turn",
+        "match": {
+          "commands": ["/auto-continue"],
+          "stateful": true
+        },
+        "code_file": "hooks/loop.js"
+      }
+    ]
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "tags": ["agents.md", "context", "instructions", "prompt", "acp"],
+  "author": { "name": "Ryu", "url": "https://ryuhq.com" },
+  "repository": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/agents-md-tail",
+  "homepage": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/agents-md-tail",
+  "privacyPolicyUrl": "https://ryuhq.com/privacy",
+  "termsOfServiceUrl": "https://ryuhq.com/terms",
+  "id": "@ryu/agents-md-tail",
+  "name": "AGENTS.md Tail",
+  "version": "0.1.14",
+  "stability": "experimental",
+  "description": "Experimental context hook that keeps the active AGENTS.md instructions at the head and repeats the latest copy at the tail of each model turn without adding either injection to chat history.",
+  "tagline": "Keep project instructions fresh at the end of every turn",
+  "keywords": ["agents.md", "context", "instructions", "prompt", "acp"],
+  "category": "Developer Tools",
+  "icon": "file-check-02",
+  "iconDither": { "from": 214, "to": "transparent", "direction": "down" },
+  "surfaces": {
+    "gateway": { "support": "none" },
+    "core": { "support": "full" },
+    "desktop": { "support": "full" },
+    "island": { "support": "limited" },
+    "mobile": { "support": "limited" },
+    "extension": { "support": "limited" },
+    "web": { "support": "full" },
+    "cli": { "support": "full" }
+  },
+  "engines": { "ryu": ">=0.1.0" },
+  "runnables": [],
+  "permission_grants": ["preferences:read"],
+  "activation_events": ["*"],
+  "contributes": {
+    "settings_tabs": [
+      {
+        "id": "agents-md-tail.settings",
+        "title": "AGENTS.md Tail",
+        "scope": "node",
+        "fields": [
+          {
+            "type": "toggle",
+            "pref_key": "agents-md-tail-remove-head",
+            "label": "Remove the head injection",
+            "description": "Keep only the latest hidden AGENTS.md copy at the end of each turn. The default keeps both the original head and the latest tail copy.",
+            "default": false
+          }
+        ]
+      }
+    ],
+    "turn_hooks": [
+      {
+        "id": "agents-md-tail.context",
+        "on": "context",
+        "code_file": "hooks/inject.js"
+      }
+    ]
+  }
+}

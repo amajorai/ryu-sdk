@@ -1,0 +1,54 @@
+{
+  "tags": [
+    "monitor",
+    "watch",
+    "background",
+    "stream",
+    "websocket",
+    "developer"
+  ],
+  "author": { "name": "Ryu", "url": "https://ryuhq.com" },
+  "repository": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/pi-monitor",
+  "homepage": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/pi-monitor",
+  "privacyPolicyUrl": "https://ryuhq.com/privacy",
+  "termsOfServiceUrl": "https://ryuhq.com/terms",
+  "id": "@ryu/pi-monitor",
+  "name": "Monitor",
+  "version": "0.1.14",
+  "stability": "experimental",
+  "category": "Developer Tools",
+  "description": "Adds the monitor tool to the managed Pi agent, so it can watch a command or WebSocket in the background and react when events arrive.",
+  "tagline": "Watch a command or stream and react when it changes",
+  "keywords": [
+    "monitor",
+    "watch",
+    "background",
+    "stream",
+    "websocket",
+    "developer"
+  ],
+  "icon": "monitor-02",
+  "iconDither": { "from": 12, "to": "transparent", "direction": "down" },
+  "surfaces": {
+    "gateway": { "support": "none" },
+    "core": { "support": "full" },
+    "desktop": { "support": "full" },
+    "island": { "support": "limited" },
+    "mobile": { "support": "limited" },
+    "extension": { "support": "limited" },
+    "web": { "support": "limited" },
+    "cli": { "support": "full" }
+  },
+  "engines": { "ryu": ">=0.1.0" },
+  "runnables": [],
+  "activation_events": ["*"],
+  "contributes": {
+    "pi_extensions": [
+      {
+        "id": "monitor",
+        "file": "pi-extensions/ryu-monitor.ts",
+        "description": "Background watches (commands and WebSockets) for the managed Pi agent."
+      }
+    ]
+  }
+}

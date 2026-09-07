@@ -1,0 +1,130 @@
+{
+  "tags": ["output-style", "tone", "prompt", "accessibility", "writing"],
+  "author": { "name": "Ryu", "url": "https://ryuhq.com" },
+  "repository": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/output-styles",
+  "homepage": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/output-styles",
+  "privacyPolicyUrl": "https://ryuhq.com/privacy",
+  "termsOfServiceUrl": "https://ryuhq.com/terms",
+  "id": "@ryu/output-styles",
+  "name": "Output Styles",
+  "version": "0.1.15",
+  "stability": "experimental",
+  "category": "Productivity",
+  "description": "The eleven built-in personality profiles \u2014 ELI5, I have ADHD, Explanatory, Learning, Proactive, Plain text, Plain Technical, No AI slop, No Hype, Bro and Gen Z. Assign a profile to each agent to shape how it talks \u2014 role, tone, default response shape \u2014 without changing what it knows, which tools it has, or which model runs. Browse profiles here and choose one in the agent editor.",
+  "tagline": "Give each agent its own voice",
+  "keywords": ["output-style", "tone", "prompt", "accessibility", "writing"],
+  "icon": "file-export",
+  "iconDither": {
+    "from": 150,
+    "to": "transparent",
+    "direction": "down"
+  },
+  "surfaces": {
+    "gateway": {
+      "support": "none"
+    },
+    "core": {
+      "support": "full"
+    },
+    "desktop": {
+      "support": "full"
+    },
+    "island": {
+      "support": "limited"
+    },
+    "mobile": {
+      "support": "limited"
+    },
+    "extension": {
+      "support": "limited"
+    },
+    "web": {
+      "support": "full"
+    },
+    "cli": {
+      "support": "full"
+    }
+  },
+  "engines": {
+    "ryu": ">=0.1.0"
+  },
+  "runnables": [],
+  "activation_events": ["*"],
+  "contributes": {
+    "output_styles": [
+      {
+        "id": "eli5",
+        "file": "output-styles/eli5.md"
+      },
+      {
+        "id": "i-have-adhd",
+        "file": "output-styles/i-have-adhd.md"
+      },
+      {
+        "id": "explanatory",
+        "file": "output-styles/explanatory.md"
+      },
+      {
+        "id": "learning",
+        "file": "output-styles/learning.md"
+      },
+      {
+        "id": "proactive",
+        "file": "output-styles/proactive.md"
+      },
+      {
+        "id": "plain-text",
+        "file": "output-styles/plain-text.md"
+      },
+      {
+        "id": "plain-technical",
+        "file": "output-styles/plain-technical.md"
+      },
+      {
+        "id": "no-ai-slop",
+        "file": "output-styles/no-ai-slop.md"
+      },
+      {
+        "id": "no-hype",
+        "file": "output-styles/no-hype.md"
+      },
+      {
+        "id": "bro",
+        "file": "output-styles/bro.md"
+      },
+      {
+        "id": "gen-z",
+        "file": "output-styles/gen-z.md"
+      }
+    ],
+    "store_tabs": [
+      {
+        "id": "output-styles",
+        "title": "Personality Profiles",
+        "subtitle": "Profiles change how an agent talks \u2014 its role, tone and answer shape. Assign them per agent; they never change what the agent knows or which model runs.",
+        "icon": "file-export",
+        "group": "catalog",
+        "order": 80,
+        "spec": {
+          "source": {
+            "http": {
+              "method": "GET",
+              "path": "/api/output-styles"
+            },
+            "items": "styles"
+          },
+          "map": {
+            "id": "id",
+            "title": "name",
+            "description": "description"
+          },
+          "searchPlaceholder": "Search personality profiles\u2026",
+          "empty": {
+            "title": "No personality profiles found",
+            "description": "Try a different search."
+          }
+        }
+      }
+    ]
+  }
+}

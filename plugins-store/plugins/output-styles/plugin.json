@@ -1,0 +1,25 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "ryu.output-styles",
+  "version": "0.1.15",
+  "description": "The eleven built-in personality profiles — ELI5, I have ADHD, Explanatory, Learning, Proactive, Plain text, Plain Technical, No AI slop, No Hype, Bro and Gen Z. Assign a profile to each agent to shape how it talks — role, tone, default response shape — without changing what it knows, which tools it has, or which model runs. Browse profiles here and choose one in the agent editor.",
+  "author": {
+    "name": "Ryu",
+    "url": "https://ryuhq.com"
+  },
+  "homepage": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/output-styles",
+  "repository": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/output-styles",
+  "keywords": [
+    "output-style",
+    "tone",
+    "prompt",
+    "accessibility",
+    "writing"
+  ],
+  "extensions": {
+    "com.ryuhq.ryu": {
+      "id": "@ryu/output-styles",
+      "displayName": "Output Styles"
+    }
+  }
+}

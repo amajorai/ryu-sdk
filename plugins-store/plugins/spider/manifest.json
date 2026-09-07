@@ -1,0 +1,116 @@
+{
+  "tags": ["web", "scraping"],
+  "author": { "name": "Ryu", "url": "https://ryuhq.com" },
+  "repository": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/spider",
+  "homepage": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/spider",
+  "privacyPolicyUrl": "https://ryuhq.com/privacy",
+  "termsOfServiceUrl": "https://ryuhq.com/terms",
+  "id": "@ryu/spider",
+  "name": "Spider",
+  "version": "0.1.14",
+  "stability": "experimental",
+  "description": "High-performance web crawling and content extraction via the Spider CLI (https://spider.cloud), exposed as a declarative `command` tool that shells out to the locally-installed `spider` binary. No API key.",
+  "iconUrl": "https://avatars.githubusercontent.com/u/112983871?v=4",
+  "iconDither": { "from": 233, "to": "transparent", "direction": "down" },
+  "tagline": "Crawl and extract web pages for agents",
+  "keywords": ["web", "scraping"],
+  "category": "Search",
+  "surfaces": {
+    "gateway": { "support": "none" },
+    "core": { "support": "full" },
+    "desktop": { "support": "full" },
+    "island": { "support": "full" },
+    "mobile": { "support": "full" },
+    "extension": { "support": "full" },
+    "web": { "support": "full" },
+    "cli": { "support": "full" }
+  },
+  "engines": {
+    "ryu": ">=0.1.0"
+  },
+  "runnables": [
+    {
+      "id": "tool-spider-crawl",
+      "name": "Spider Crawl",
+      "kind": "tool",
+      "config": {
+        "slug": "spider.crawl",
+        "backend": "command",
+        "bin": "spider",
+        "command_args": [
+          "crawl",
+          "--depth",
+          "{depth}",
+          "--limit",
+          "{limit}",
+          "--output",
+          "json",
+          "--",
+          "{url}"
+        ],
+        "output": "json",
+        "timeout_secs": 120,
+        "egress_url_arg": "url",
+        "description": "Crawl a URL with the Spider web crawler and return the extracted page content. Use depth=0 for a single page; depth>0 follows links up to that many hops.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "url": {
+              "type": "string",
+              "description": "The URL to crawl and extract content from."
+            },
+            "depth": {
+              "type": "integer",
+              "description": "How many link hops to follow from the start URL (default 1 — single page only).",
+              "default": 1,
+              "minimum": 0,
+              "maximum": 10
+            },
+            "limit": {
+              "type": "integer",
+              "description": "Maximum number of pages to crawl (default 10).",
+              "default": 10,
+              "minimum": 1,
+              "maximum": 500
+            }
+          },
+          "required": ["url"]
+        }
+      }
+    }
+  ],
+  "provides": [
+    {
+      "capability": "web.extract",
+      "version": "1.0.0",
+      "title": "Extract",
+      "selectable": true,
+      "default": true,
+      "tools": {
+        "web.extract": {
+          "tool": "spider.crawl",
+          "args": {
+            "format": ""
+          },
+          "arg_defaults": {
+            "depth": 0,
+            "limit": 1
+          }
+        }
+      }
+    },
+    {
+      "capability": "web.crawl",
+      "version": "1.0.0",
+      "title": "Crawl",
+      "selectable": true,
+      "default": true,
+      "tools": {
+        "web.crawl": {
+          "tool": "spider.crawl"
+        }
+      }
+    }
+  ],
+  "permission_grants": ["tool:command:spider"]
+}

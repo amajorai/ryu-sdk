@@ -1,0 +1,127 @@
+{
+  "tags": ["secrets", "bitwarden", "credentials", "security", "env"],
+  "author": { "name": "Ryu", "url": "https://ryuhq.com" },
+  "repository": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/bitwarden",
+  "homepage": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/bitwarden",
+  "privacyPolicyUrl": "https://ryuhq.com/privacy",
+  "termsOfServiceUrl": "https://ryuhq.com/terms",
+  "id": "@ryu/bitwarden",
+  "name": "Bitwarden Secrets Manager",
+  "version": "0.1.14",
+  "stability": "experimental",
+  "description": "Pull API keys from Bitwarden Secrets Manager on demand instead of storing them in plaintext — one machine-account bootstrap token (BWS_ACCESS_TOKEN) replaces N provider keys, and rotating a credential is one change in the Bitwarden web app. Declarative `command` tools that shell out to the locally-installed `bws` CLI (BYO binary, no API key in the manifest).",
+  "tagline": "Pull credentials from Bitwarden, not plaintext",
+  "keywords": ["secrets", "bitwarden", "credentials", "security", "env"],
+  "category": "Security",
+  "icon": "shield-key",
+  "iconDither": { "from": 261, "to": "transparent", "direction": "down" },
+  "surfaces": {
+    "gateway": { "support": "none" },
+    "core": { "support": "full" },
+    "desktop": { "support": "full" },
+    "island": { "support": "limited" },
+    "mobile": { "support": "limited" },
+    "extension": { "support": "limited" },
+    "web": { "support": "full" },
+    "cli": { "support": "full" }
+  },
+  "engines": { "ryu": ">=0.1.0" },
+  "runnables": [
+    {
+      "id": "tool-bitwarden-status",
+      "name": "Bitwarden Status",
+      "kind": "tool",
+      "config": {
+        "slug": "bitwarden.status",
+        "backend": "command",
+        "bin": "bws",
+        "timeout_secs": 60,
+        "description": "Check that the Bitwarden Secrets Manager CLI (`bws`) is installed and report its version. Does not contact Bitwarden — no token needed. Use this FIRST to confirm the binary is present before calling the other bitwarden. tools.",
+        "input_schema": {
+          "type": "object",
+          "properties": {}
+        },
+        "command_args": ["--version"]
+      }
+    },
+    {
+      "id": "tool-bitwarden-projects",
+      "name": "Bitwarden Projects",
+      "kind": "tool",
+      "config": {
+        "slug": "bitwarden.projects",
+        "backend": "command",
+        "bin": "bws",
+        "timeout_secs": 60,
+        "output": "json",
+        "description": "List the Bitwarden Secrets Manager projects the machine account can read. Returns an array of { id, name }. Use the returned id as `project_id` for the bitwarden.list / bitwarden.get tools. Requires BWS_ACCESS_TOKEN in the environment.",
+        "input_schema": {
+          "type": "object",
+          "properties": {}
+        },
+        "command_env": {
+          "BWS_ACCESS_TOKEN": "env:BWS_ACCESS_TOKEN",
+          "BWS_SERVER_URL": "env:BWS_SERVER_URL"
+        }
+      }
+    },
+    {
+      "id": "tool-bitwarden-list",
+      "name": "Bitwarden List Secrets",
+      "kind": "tool",
+      "config": {
+        "slug": "bitwarden.list",
+        "backend": "command",
+        "bin": "bws",
+        "timeout_secs": 60,
+        "output": "json",
+        "description": "List every secret in a Bitwarden Secrets Manager project. Returns an array of { id, key, value, note, projectId }. The secret `key` is the environment-variable name Bitwarden manages; the `value` is the credential itself. Use this to pull credentials on demand instead of storing them in config or env. Requires BWS_ACCESS_TOKEN in the environment.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "project_id": {
+              "type": "string",
+              "description": "The project UUID to list secrets from — the `id` returned by bitwarden.projects."
+            }
+          },
+          "required": ["project_id"]
+        },
+        "command_args": ["secret", "list", "{project_id}"],
+        "command_env": {
+          "BWS_ACCESS_TOKEN": "env:BWS_ACCESS_TOKEN",
+          "BWS_SERVER_URL": "env:BWS_SERVER_URL"
+        }
+      }
+    },
+    {
+      "id": "tool-bitwarden-get",
+      "name": "Bitwarden Get Secret",
+      "kind": "tool",
+      "config": {
+        "slug": "bitwarden.get",
+        "backend": "command",
+        "bin": "bws",
+        "timeout_secs": 60,
+        "output": "json",
+        "description": "Fetch a single secret by its Bitwarden id (the `id` from bitwarden.list). Returns { id, key, value, note, projectId }. Prefer bitwarden.list when you want several secrets or do not know the id.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "secret_id": {
+              "type": "string",
+              "description": "The secret UUID — the `id` field returned by bitwarden.list."
+            }
+          },
+          "required": ["secret_id"]
+        },
+        "command_args": ["secret", "get", "{secret_id}"],
+        "command_env": {
+          "BWS_ACCESS_TOKEN": "env:BWS_ACCESS_TOKEN",
+          "BWS_SERVER_URL": "env:BWS_SERVER_URL"
+        }
+      }
+    }
+  ],
+  "permission_grants": ["tool:command:bws"],
+  "activation_events": []
+}

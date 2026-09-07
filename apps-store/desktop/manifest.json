@@ -1,0 +1,122 @@
+{
+  "tags": ["desktop", "devices", "vnc", "stream", "remote", "computer-use"],
+  "author": { "name": "Ryu", "url": "https://ryuhq.com" },
+  "repository": "https://github.com/amajorai/ryu-desktop",
+  "homepage": "https://github.com/amajorai/ryu-desktop",
+  "privacyPolicyUrl": "https://ryuhq.com/privacy",
+  "termsOfServiceUrl": "https://ryuhq.com/terms",
+  "id": "@ryu/desktop",
+  "name": "Virtual Desktop",
+  "version": "0.1.14",
+  "stability": "experimental",
+  "description": "An interactive Linux virtual desktop for Ryu nodes. The app sidecar owns stable per-Bot screens on the shared node device and exposes them through Core's authenticated WebSocket proxy with mouse and keyboard input. Files and installed applications remain shared.",
+  "keywords": ["desktop", "devices", "vnc", "stream", "remote", "computer-use"],
+  "icon": "monitor-02",
+  "iconDither": { "from": 210, "to": "transparent", "direction": "down" },
+  "tagline": "A live, interactive desktop for the node — watch and drive it",
+  "category": "Developer Tools",
+  "surfaces": {
+    "gateway": { "support": "none" },
+    "core": { "support": "none" },
+    "desktop": { "support": "full" },
+    "island": { "support": "limited" },
+    "mobile": { "support": "limited" },
+    "extension": { "support": "none" },
+    "web": { "support": "full" },
+    "cli": { "support": "list" }
+  },
+  "engines": {
+    "ryu": ">=0.1.0"
+  },
+  "runnables": [],
+  "sidecars": [
+    {
+      "name": "desktop",
+      "process": {
+        "kind": "local",
+        "command": "ryu-desktop",
+        "command_env": "RYU_DESKTOP_BIN",
+        "port_env": "RYU_DESKTOP_PORT"
+      },
+      "port": 8015,
+      "health_path": "/health",
+      "lazy": true,
+      "idle_stop_secs": 300,
+      "http": {
+        "public_mount": "/api/desktop",
+        "routes": [
+          { "path": "/", "permission": "desktop.control" },
+          { "path": "/health" },
+          { "path": "/capabilities", "permission": "desktop.view" },
+          { "path": "/screen", "permission": "desktop.view" },
+          {
+            "path": "/bots/:agent_id/screen",
+            "permission": "agent.view",
+            "resource_param": "agent_id"
+          },
+          {
+            "path": "/bots/:agent_id/ws",
+            "permission": "agent.run",
+            "resource_param": "agent_id"
+          },
+          {
+            "path": "/bots/:agent_id/input",
+            "permission": "agent.run",
+            "resource_param": "agent_id"
+          },
+          { "path": "/ws", "permission": "desktop.control" },
+          { "path": "/input", "permission": "desktop.control" }
+        ]
+      }
+    }
+  ],
+  "permission_grants": ["desktop:view", "desktop:control"],
+  "permission_levels": [
+    {
+      "id": "desktop.view",
+      "label": "Can view",
+      "description": "See the node's virtual desktop as a live stream."
+    },
+    {
+      "id": "desktop.control",
+      "label": "Can control",
+      "description": "Drive the virtual desktop with mouse and keyboard input.",
+      "implies": ["desktop.view"]
+    },
+    {
+      "id": "agent.view",
+      "label": "Can view agent devices",
+      "description": "See the persistent virtual desktop assigned to an allowed agent."
+    },
+    {
+      "id": "agent.run",
+      "label": "Can control agent devices",
+      "description": "Drive the persistent virtual desktop assigned to an allowed agent.",
+      "implies": ["agent.view"]
+    }
+  ],
+  "contributes": {
+    "chat_widget_templates": [
+      {
+        "id": "desktop.chat",
+        "title": "Virtual Desktop widget",
+        "description": "Virtual Desktop chat widget metadata is coming soon; no render tool is available yet.",
+        "triggers": ["virtual desktop widget"],
+        "examples": ["Show me a virtual desktop widget"],
+        "backing": {},
+        "display_mode": "inline",
+        "safe_action_ids": [],
+        "availability": "coming-soon"
+      }
+    ],
+    "dock_panels": [
+      {
+        "id": "desktop",
+        "title": "Virtual Desktop",
+        "icon": "hugeicons:monitor-02",
+        "placement": "right",
+        "panel": "native"
+      }
+    ]
+  }
+}

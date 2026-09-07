@@ -1,0 +1,37 @@
+{
+  "tags": ["testing", "browser", "qa", "playwright"],
+  "author": { "name": "Ryu", "url": "https://ryuhq.com" },
+  "repository": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/expect",
+  "privacyPolicyUrl": "https://ryuhq.com/privacy",
+  "termsOfServiceUrl": "https://ryuhq.com/terms",
+  "id": "@ryu/expect",
+  "name": "Expect",
+  "version": "0.1.15",
+  "stability": "experimental",
+  "description": "Browser-based QA for agent code. Expect reads the current changes, creates a test plan, and runs it in a real browser with Playwright to catch regressions in behavior, performance, security, and design.",
+  "homepage": "https://www.expect.dev/",
+  "tagline": "Test agent code in a real browser",
+  "keywords": ["testing", "browser", "qa", "playwright"],
+  "category": "Developer Tools",
+  "iconDither": { "from": 16, "to": "transparent", "direction": "down" },
+  "surfaces": {
+    "gateway": { "support": "none" },
+    "core": { "support": "full" },
+    "desktop": { "support": "full" },
+    "island": { "support": "full" },
+    "mobile": { "support": "full" },
+    "extension": { "support": "full" },
+    "web": { "support": "full" },
+    "cli": { "support": "full" }
+  },
+  "engines": { "ryu": ">=0.1.0" },
+  "runnables": [],
+  "permission_grants": ["mcp:expect"],
+  "mcp_servers": {
+    "expect": {
+      "command": "npx",
+      "args": ["-y", "expect-cli@0.1.3", "mcp"],
+      "description": "Expect — test the current agent changes in a real browser with Playwright. Launched via `npx -y expect-cli@0.1.3 mcp`; requires Node.js and downloads the pinned CLI on first use. Ask the agent to run the Expect workflow after making UI changes."
+    }
+  }
+}

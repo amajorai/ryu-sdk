@@ -1,0 +1,50 @@
+{
+  "tags": ["rules", "cursor", "claude", "context", "agents"],
+  "author": { "name": "Ryu", "url": "https://ryuhq.com" },
+  "repository": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/rules",
+  "homepage": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/rules",
+  "privacyPolicyUrl": "https://ryuhq.com/privacy",
+  "termsOfServiceUrl": "https://ryuhq.com/terms",
+  "id": "@ryu/rules",
+  "name": "Rules",
+  "version": "0.1.14",
+  "stability": "experimental",
+  "description": "Discover Cursor- and Claude-style project rules and apply them to agent context, with per-agent controls for automatic injection, matching mode, and plan-turn budgets.",
+  "tagline": "Project rules that follow every agent",
+  "keywords": ["rules", "cursor", "claude", "context", "agents"],
+  "category": "Developer Tools",
+  "icon": "file-check-02",
+  "iconDither": { "from": 214, "to": "transparent", "direction": "down" },
+  "surfaces": {
+    "gateway": { "support": "none" },
+    "core": { "support": "full" },
+    "desktop": { "support": "full" },
+    "island": { "support": "limited" },
+    "mobile": { "support": "limited" },
+    "extension": { "support": "limited" },
+    "web": { "support": "full" },
+    "cli": { "support": "full" }
+  },
+  "engines": { "ryu": ">=0.1.0" },
+  "runnables": [],
+  "permission_grants": ["preferences:read", "storage:kv"],
+  "activation_events": ["*"],
+  "contributes": {
+    "agent_edit_panels": [
+      {
+        "id": "rules",
+        "type": "rules",
+        "title": "Rules",
+        "description": "Configure project and agent rules, matching mode, automatic context injection, and turns per plan.",
+        "pref_key_prefix": "rules.agent."
+      }
+    ],
+    "turn_hooks": [
+      {
+        "id": "rules.context",
+        "on": "context",
+        "code_file": "hooks/inject.js"
+      }
+    ]
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "id": "@ryu/hardware",
+  "name": "Hardware Devices",
+  "version": "1.0.0",
+  "category": "Core",
+  "mandatory": true,
+  "description": "Physical Ryu hardware: pair, manage, and control ESP32-based devices from the node, with device CRUD backed by the local device store.",
+  "tagline": "Pair and control your Ryu devices",
+  "keywords": ["hardware", "devices", "esp32", "iot"],
+  "engines": {
+    "ryu": ">=0.0.1"
+  },
+  "runnables": [],
+  "permission_grants": [],
+  "permission_levels": [
+    {
+      "id": "hardware.view",
+      "label": "Can view",
+      "description": "See the paired Ryu devices and their status."
+    },
+    {
+      "id": "hardware.pair",
+      "label": "Can pair",
+      "description": "Pair new devices and unpair existing ones, which decides what physical hardware may talk to this node.",
+      "implies": ["hardware.view"]
+    },
+    {
+      "id": "hardware.control",
+      "label": "Can control",
+      "description": "Send commands and dashboards to a paired device, changing what it shows and does in the room it sits in.",
+      "implies": ["hardware.view"]
+    }
+  ]
+}

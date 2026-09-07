@@ -1,0 +1,67 @@
+{
+  "tags": ["kotlin", "kotlin-lsp", "jvm", "language-server", "developer"],
+  "author": { "name": "Ryu", "url": "https://ryuhq.com" },
+  "repository": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/lsp/kotlin-lsp",
+  "homepage": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/lsp/kotlin-lsp",
+  "privacyPolicyUrl": "https://ryuhq.com/privacy",
+  "termsOfServiceUrl": "https://ryuhq.com/terms",
+  "id": "@ryu/kotlin-lsp",
+  "name": "Kotlin LSP",
+  "version": "0.1.14",
+  "stability": "experimental",
+  "category": "Developer Tools",
+  "description": "Kotlin language server for the ryu agent: definitions, references, hover, symbols, implementations, call hierarchies and diagnostics after every edit. You install kotlin-lsp; the plugin ships config.",
+  "tagline": "Kotlin code intelligence via the Kotlin LSP",
+  "keywords": ["kotlin", "kotlin-lsp", "jvm", "language-server", "developer"],
+  "icon": "code-square-02",
+  "iconDither": {
+    "from": 160,
+    "to": "transparent",
+    "direction": "down"
+  },
+  "surfaces": {
+    "gateway": {
+      "support": "none"
+    },
+    "core": {
+      "support": "full"
+    },
+    "desktop": {
+      "support": "full"
+    },
+    "island": {
+      "support": "limited"
+    },
+    "mobile": {
+      "support": "limited"
+    },
+    "extension": {
+      "support": "limited"
+    },
+    "web": {
+      "support": "limited"
+    },
+    "cli": {
+      "support": "full"
+    }
+  },
+  "engines": {
+    "ryu": ">=0.1.0"
+  },
+  "runnables": [],
+  "permission_grants": ["pi:extension"],
+  "activation_events": ["*"],
+  "contributes": {
+    "lsp_servers": {
+      "kotlin-lsp": {
+        "command": "kotlin-lsp",
+        "args": ["--stdio"],
+        "extensionToLanguage": {
+          ".kt": "kotlin",
+          ".kts": "kotlin"
+        },
+        "startupTimeout": 120000
+      }
+    }
+  }
+}

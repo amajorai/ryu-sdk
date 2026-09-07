@@ -1,0 +1,71 @@
+{
+  "tags": ["audio", "ambient", "agents", "focus", "music"],
+  "author": { "name": "Ryu", "url": "https://ryuhq.com" },
+  "repository": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/ambient-elevator",
+  "homepage": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/ambient-elevator",
+  "privacyPolicyUrl": "https://ryuhq.com/privacy",
+  "termsOfServiceUrl": "https://ryuhq.com/terms",
+  "id": "@ryu/ambient-elevator",
+  "name": "Ambient Elevator",
+  "version": "0.1.0",
+  "stability": "experimental",
+  "description": "Plays one low-volume elevator track while any Ryu agent is actively working, then stops when the last working run ends or needs input.",
+  "tagline": "One shared elevator track for active agent runs",
+  "keywords": ["audio", "ambient", "agents", "focus", "music"],
+  "category": "Productivity",
+  "icon": "lucide:music-2",
+  "iconDither": { "from": 312, "to": "transparent", "direction": "down" },
+  "surfaces": {
+    "gateway": { "support": "none" },
+    "core": { "support": "none" },
+    "desktop": { "support": "full" },
+    "island": { "support": "none" },
+    "mobile": { "support": "none" },
+    "extension": { "support": "none" },
+    "web": { "support": "none" },
+    "cli": { "support": "none" }
+  },
+  "engines": { "ryu": ">=0.1.0" },
+  "runnables": [],
+  "contributes": {
+    "settings_tabs": [
+      {
+        "id": "ambient-elevator.settings",
+        "title": "Elevator music",
+        "scope": "user",
+        "fields": [
+          {
+            "type": "toggle",
+            "pref_key": "ambient-elevator-enabled",
+            "label": "Play while agents work",
+            "description": "Use one shared player whenever at least one agent run is working. It stops when no run is actively working.",
+            "default": true
+          },
+          {
+            "type": "number",
+            "pref_key": "ambient-elevator-volume",
+            "label": "Volume",
+            "description": "Ambient playback volume. The default is intentionally quiet.",
+            "default": 35,
+            "min": 0,
+            "max": 100,
+            "step": 5
+          }
+        ]
+      }
+    ],
+    "live_activities": [
+      {
+        "id": "ambient-audio",
+        "title": "Agent ambient audio",
+        "icon": "lucide:music-2",
+        "spec": {
+          "audio": {
+            "src": "/sounds/elevator-4.mp3",
+            "loop": true
+          }
+        }
+      }
+    ]
+  }
+}

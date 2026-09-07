@@ -1,0 +1,194 @@
+{
+  "tags": ["search", "web"],
+  "author": { "name": "Ryu", "url": "https://ryuhq.com" },
+  "repository": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/exa",
+  "homepage": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/exa",
+  "privacyPolicyUrl": "https://ryuhq.com/privacy",
+  "termsOfServiceUrl": "https://ryuhq.com/terms",
+  "id": "@ryu/exa",
+  "name": "Exa Search",
+  "version": "0.1.14",
+  "stability": "experimental",
+  "description": "Neural and keyword web search via the Exa API (https://exa.ai), exposed as two declarative HTTP tools: search and find-similar. Requires a BYOK Exa API key.",
+  "iconUrl": "https://avatars.githubusercontent.com/u/77906174?v=4",
+  "iconDither": { "from": 213, "to": "transparent", "direction": "down" },
+  "tagline": "Neural web search for agents",
+  "keywords": ["search", "web"],
+  "category": "Search",
+  "surfaces": {
+    "gateway": { "support": "none" },
+    "core": { "support": "full" },
+    "desktop": { "support": "full" },
+    "island": { "support": "limited" },
+    "mobile": { "support": "limited" },
+    "extension": { "support": "limited" },
+    "web": { "support": "full" },
+    "cli": { "support": "full" }
+  },
+  "engines": {
+    "ryu": ">=0.1.0"
+  },
+  "runnables": [
+    {
+      "id": "tool-exa-search",
+      "name": "Exa Neural Search",
+      "kind": "tool",
+      "config": {
+        "slug": "exa.search",
+        "backend": "http",
+        "method": "POST",
+        "url": "https://api.exa.ai/search",
+        "secret_headers": {
+          "Authorization": "Bearer env:RYU_EXA_API_KEY"
+        },
+        "fail_open": true,
+        "unwrap_body": true,
+        "body_defaults": {
+          "num_results": 10,
+          "use_autoprompt": true,
+          "contents": {
+            "text": true
+          }
+        },
+        "description": "Neural and keyword web search via the Exa API. Returns relevant web pages with titles, URLs, published dates, and full page text. Requires RYU_EXA_API_KEY.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "query": {
+              "type": "string",
+              "description": "The search query. Supports natural-language and keyword queries."
+            },
+            "num_results": {
+              "type": "integer",
+              "description": "Number of results to return (default 10).",
+              "minimum": 1,
+              "maximum": 100
+            },
+            "use_autoprompt": {
+              "type": "boolean",
+              "description": "Let Exa rephrase the query for better neural search results (default true)."
+            }
+          },
+          "required": ["query"]
+        }
+      }
+    },
+    {
+      "id": "tool-exa-free-search",
+      "name": "Exa Search (no key)",
+      "kind": "tool",
+      "config": {
+        "slug": "exa.free_search",
+        "backend": "http",
+        "method": "POST",
+        "url": "https://mcp.exa.ai/mcp",
+        "header_params": ["Accept"],
+        "fail_open": true,
+        "unwrap_body": true,
+        "description": "Web search through Exa's PUBLIC MCP endpoint, which needs no API key. Rate-limited free tier, intended as the zero-setup fallback when RYU_EXA_API_KEY is unset; add a key to use the higher-limit exa.search instead. Speaks JSON-RPC: the caller supplies the whole `tools/call` envelope, and the reply is a text/event-stream frame, so the capability adapter parses it rather than a response map.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "Accept": {
+              "type": "string",
+              "description": "Sent as the Accept header. The endpoint 406s unless it names BOTH application/json and text/event-stream."
+            },
+            "jsonrpc": {
+              "type": "string",
+              "description": "JSON-RPC version, always \"2.0\"."
+            },
+            "id": {
+              "type": "integer",
+              "description": "JSON-RPC request id."
+            },
+            "method": {
+              "type": "string",
+              "description": "JSON-RPC method, always \"tools/call\"."
+            },
+            "params": {
+              "type": "object",
+              "description": "`{name, arguments}` naming the Exa MCP tool to call and its arguments."
+            }
+          },
+          "required": ["Accept", "jsonrpc", "id", "method", "params"]
+        }
+      }
+    },
+    {
+      "id": "tool-exa-find-similar",
+      "name": "Exa Find Similar",
+      "kind": "tool",
+      "config": {
+        "slug": "exa.find_similar",
+        "backend": "http",
+        "method": "POST",
+        "url": "https://api.exa.ai/findSimilar",
+        "secret_headers": {
+          "Authorization": "Bearer env:RYU_EXA_API_KEY"
+        },
+        "fail_open": true,
+        "unwrap_body": true,
+        "body_defaults": {
+          "num_results": 10
+        },
+        "description": "Find pages similar to a given URL using Exa's neural search. Requires RYU_EXA_API_KEY.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "url": {
+              "type": "string",
+              "description": "URL to find similar pages for."
+            },
+            "num_results": {
+              "type": "integer",
+              "description": "Number of similar results to return (default 10).",
+              "minimum": 1,
+              "maximum": 100
+            }
+          },
+          "required": ["url"]
+        }
+      }
+    }
+  ],
+  "provides": [
+    {
+      "capability": "web.search",
+      "version": "1.0.0",
+      "title": "Search",
+      "selectable": true,
+      "default": true,
+      "tools": {
+        "web.search": {
+          "tool": "exa.search",
+          "adapter": {
+            "tools": ["exa.free_search"],
+            "code_file": "adapters/web.search.js"
+          }
+        }
+      }
+    }
+  ],
+  "permission_grants": [
+    "tool:http-egress:api.exa.ai",
+    "tool:http-egress:mcp.exa.ai",
+    "tool:execute"
+  ],
+  "contributes": {
+    "settings_tabs": [
+      {
+        "id": "exa.settings",
+        "title": "Exa Search",
+        "scope": "node",
+        "fields": [
+          {
+            "type": "secret",
+            "pref_key": "RYU_EXA_API_KEY",
+            "label": "Exa API key",
+            "description": "Create a key at https://dashboard.exa.ai/api-keys and paste it here. Stored encrypted on this node and never shown again — re-paste to change it. Without a key the Exa tools stay installed but return nothing, so `web.search` falls back to whichever other provider you select."
+          }
+        ]
+      }
+    ]
+  }
+}

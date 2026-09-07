@@ -1,0 +1,49 @@
+{
+  "tags": ["chat", "stats", "tokens", "usage", "context"],
+  "author": { "name": "Ryu", "url": "https://ryuhq.com" },
+  "repository": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/stats",
+  "homepage": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/stats",
+  "privacyPolicyUrl": "https://ryuhq.com/privacy",
+  "termsOfServiceUrl": "https://ryuhq.com/terms",
+  "id": "@ryu/stats",
+  "name": "Session Stats",
+  "version": "0.1.0",
+  "stability": "experimental",
+  "category": "Productivity",
+  "description": "Show provider-neutral session tokens, cache efficiency, throughput, context, compactions, cost, and usage windows in chat.",
+  "tagline": "See what each chat turn costs",
+  "keywords": ["chat", "stats", "tokens", "cache", "context", "usage"],
+  "icon": "chart",
+  "iconDither": { "from": 120, "to": "transparent", "direction": "down" },
+  "surfaces": {
+    "gateway": { "support": "none" },
+    "core": { "support": "full" },
+    "desktop": { "support": "full" },
+    "island": { "support": "limited" },
+    "mobile": { "support": "limited" },
+    "extension": { "support": "limited" },
+    "web": { "support": "limited" },
+    "cli": { "support": "full" }
+  },
+  "engines": { "ryu": ">=0.1.0" },
+  "runnables": [],
+  "activation_events": ["*"],
+  "contributes": {
+    "chat_features": [
+      {
+        "id": "session-stats",
+        "kind": "session-stats",
+        "renderer": "session-stats",
+        "context": "main-chat",
+        "persistence": "transcript",
+        "scope": "current-chat",
+        "options": {
+          "cacheTtlMinutes": [5, 60],
+          "rollingWindowSeconds": [0, 5, 15, 30, 60, 120],
+          "contextFallback": 200000,
+          "hideEmpty": true
+        }
+      }
+    ]
+  }
+}

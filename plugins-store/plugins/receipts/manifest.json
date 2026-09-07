@@ -1,0 +1,98 @@
+{
+  "tags": [
+    "verify",
+    "work",
+    "evidence",
+    "screenshot",
+    "recording",
+    "proof",
+    "agent"
+  ],
+  "author": { "name": "Ryu", "url": "https://ryuhq.com" },
+  "repository": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/receipts",
+  "homepage": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/receipts",
+  "privacyPolicyUrl": "https://ryuhq.com/privacy",
+  "termsOfServiceUrl": "https://ryuhq.com/terms",
+  "id": "@ryu/receipts",
+  "name": "Receipts",
+  "version": "0.1.14",
+  "stability": "experimental",
+  "description": "Verify work with visual evidence: `/receipt <goal>` makes the agent capture a screenshot or screen recording of the thing actually working, then an INDEPENDENT verifier agent opens that artifact and judges what it can SEE against the goal. Where `/proof` verifies by re-reading the workspace, this one requires a durable artifact a human can look at afterwards. Resubmitting an old capture does not count. `/receipt clear` stops the loop.",
+  "tagline": "No claim ships without a screenshot",
+  "keywords": [
+    "verify",
+    "work",
+    "evidence",
+    "screenshot",
+    "recording",
+    "proof",
+    "agent"
+  ],
+  "category": "Security",
+  "icon": "eye",
+  "iconDither": { "from": 198, "to": "transparent", "direction": "down" },
+  "surfaces": {
+    "gateway": { "support": "none" },
+    "core": { "support": "full" },
+    "desktop": { "support": "full" },
+    "island": { "support": "limited" },
+    "mobile": { "support": "limited" },
+    "extension": { "support": "limited" },
+    "web": { "support": "full" },
+    "cli": { "support": "full" }
+  },
+  "engines": { "ryu": ">=0.1.0" },
+  "runnables": [],
+  "permission_grants": ["hook:run-agent", "storage:kv", "preferences:read"],
+  "activation_events": ["*"],
+  "contributes": {
+    "slash_commands": [
+      {
+        "id": "receipts.set",
+        "command": "/receipt",
+        "description": "Pursue a goal until the agent captures a screenshot or screen recording of it working AND an independent verifier agent confirms, from the artifact itself, that it shows the goal done. Use '/receipt clear' to stop."
+      }
+    ],
+    "settings_tabs": [
+      {
+        "id": "receipts.settings",
+        "title": "Receipts",
+        "fields": [
+          {
+            "type": "select",
+            "pref_key": "receipts-evidence-kind",
+            "label": "Required evidence",
+            "description": "What the agent must capture. Also narrows which file types are accepted as evidence.",
+            "default": "any",
+            "options": [
+              { "value": "any", "label": "Screenshot or recording" },
+              { "value": "still", "label": "Screenshot only" },
+              { "value": "recording", "label": "Screen recording only" }
+            ]
+          },
+          {
+            "type": "number",
+            "pref_key": "receipts-max-rounds",
+            "label": "Maximum verification rounds",
+            "description": "How many times a verifier agent may reject the evidence before the loop gives up.",
+            "default": 8,
+            "min": 1,
+            "max": 25,
+            "step": 1
+          }
+        ]
+      }
+    ],
+    "turn_hooks": [
+      {
+        "id": "receipts.loop",
+        "on": "post_assistant_turn",
+        "match": {
+          "commands": ["/receipt"],
+          "stateful": true
+        },
+        "code_file": "hooks/loop.js"
+      }
+    ]
+  }
+}

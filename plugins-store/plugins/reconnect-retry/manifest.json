@@ -1,0 +1,43 @@
+{
+  "tags": ["chat", "reliability", "network", "reconnect", "retry"],
+  "author": { "name": "Ryu", "url": "https://ryuhq.com" },
+  "repository": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/reconnect-retry",
+  "homepage": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/reconnect-retry",
+  "privacyPolicyUrl": "https://ryuhq.com/privacy",
+  "termsOfServiceUrl": "https://ryuhq.com/terms",
+  "id": "@ryu/reconnect-retry",
+  "name": "Reconnect Retry",
+  "version": "0.1.0",
+  "stability": "experimental",
+  "category": "Productivity",
+  "description": "Remember chats that were running when the selected node or network went away, then retry each eligible interrupted turn once when the connection returns.",
+  "tagline": "Pick up chats after Wi-Fi or LAN returns",
+  "keywords": ["chat", "reconnect", "network", "retry", "reliability"],
+  "icon": "refresh-02",
+  "iconDither": { "from": 188, "to": "transparent", "direction": "down" },
+  "surfaces": {
+    "gateway": { "support": "none" },
+    "core": { "support": "full" },
+    "desktop": { "support": "full" },
+    "island": { "support": "none" },
+    "mobile": { "support": "none" },
+    "extension": { "support": "none" },
+    "web": { "support": "none" },
+    "cli": { "support": "none" }
+  },
+  "engines": { "ryu": ">=0.1.0" },
+  "runnables": [],
+  "activation_events": ["*"],
+  "contributes": {
+    "chat_features": [
+      {
+        "id": "reconnect-retry",
+        "kind": "reconnect-retry",
+        "scope": "all-chats",
+        "persistence": "node-local",
+        "max_attempts": 1,
+        "trigger": "connection-restored"
+      }
+    ]
+  }
+}
