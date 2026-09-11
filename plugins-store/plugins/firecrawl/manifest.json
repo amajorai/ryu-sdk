@@ -1,0 +1,229 @@
+{
+  "tags": ["search", "web", "extract", "scrape"],
+  "author": { "name": "Ryu", "url": "https://ryuhq.com" },
+  "repository": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/firecrawl",
+  "homepage": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/firecrawl",
+  "privacyPolicyUrl": "https://ryuhq.com/privacy",
+  "termsOfServiceUrl": "https://ryuhq.com/terms",
+  "id": "@ryu/firecrawl",
+  "name": "Firecrawl",
+  "version": "0.1.14",
+  "stability": "experimental",
+  "description": "Web search and page scraping via the Firecrawl v2 API (https://firecrawl.dev), exposed as two declarative HTTP tools. Provides the swappable `web.search` and `web.extract` layers, so selecting it in the layer picker re-points the stable `web.search` / `web.extract` tools at Firecrawl without changing what agents call. Requires a BYOK Firecrawl API key.",
+  "icon": "svgl:firecrawl|firecrawl-dark",
+  "iconPadding": "md",
+  "iconDither": { "from": 315, "to": "transparent", "direction": "down" },
+  "tagline": "Search and scrape the web for agents",
+  "keywords": ["search", "web", "extract", "scrape"],
+  "category": "Search",
+  "surfaces": {
+    "gateway": { "support": "none" },
+    "core": { "support": "full" },
+    "desktop": { "support": "full" },
+    "island": { "support": "limited" },
+    "mobile": { "support": "limited" },
+    "extension": { "support": "limited" },
+    "web": { "support": "full" },
+    "cli": { "support": "full" }
+  },
+  "engines": {
+    "ryu": ">=0.1.0"
+  },
+  "runnables": [
+    {
+      "id": "tool-firecrawl-search",
+      "name": "Firecrawl Search",
+      "kind": "tool",
+      "config": {
+        "slug": "firecrawl.search",
+        "backend": "http",
+        "method": "POST",
+        "url": "https://api.firecrawl.dev/v2/search",
+        "secret_headers": {
+          "Authorization": "Bearer env:RYU_FIRECRAWL_API_KEY"
+        },
+        "fail_open": true,
+        "unwrap_body": true,
+        "description": "Web search via Firecrawl. Returns ranked web results with titles, URLs, and descriptions. Requires RYU_FIRECRAWL_API_KEY.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "query": {
+              "type": "string",
+              "description": "The search query."
+            },
+            "limit": {
+              "type": "integer",
+              "description": "Number of results to return (default 10).",
+              "minimum": 1,
+              "maximum": 100
+            }
+          },
+          "required": ["query"]
+        }
+      }
+    },
+    {
+      "id": "tool-firecrawl-scrape",
+      "name": "Firecrawl Scrape",
+      "kind": "tool",
+      "config": {
+        "slug": "firecrawl.scrape",
+        "backend": "http",
+        "method": "POST",
+        "url": "https://api.firecrawl.dev/v2/scrape",
+        "secret_headers": {
+          "Authorization": "Bearer env:RYU_FIRECRAWL_API_KEY"
+        },
+        "fail_open": true,
+        "unwrap_body": true,
+        "description": "Scrape a single web page with Firecrawl and return its main content as markdown. Requires RYU_FIRECRAWL_API_KEY.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "url": {
+              "type": "string",
+              "description": "The URL of the page to scrape."
+            }
+          },
+          "required": ["url"]
+        }
+      }
+    },
+    {
+      "id": "tool-firecrawl-crawl-start",
+      "name": "Firecrawl Crawl (start)",
+      "kind": "tool",
+      "config": {
+        "slug": "firecrawl.crawl_start",
+        "backend": "http",
+        "method": "POST",
+        "url": "https://api.firecrawl.dev/v2/crawl",
+        "secret_headers": {
+          "Authorization": "Bearer env:RYU_FIRECRAWL_API_KEY"
+        },
+        "fail_open": true,
+        "unwrap_body": true,
+        "description": "Start a Firecrawl crawl job and return its id. Asynchronous: poll firecrawl.crawl_status with the returned id. Requires RYU_FIRECRAWL_API_KEY.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "url": {
+              "type": "string",
+              "description": "The start URL to crawl from."
+            },
+            "limit": {
+              "type": "integer",
+              "description": "Maximum pages to fetch.",
+              "minimum": 1,
+              "maximum": 10000
+            },
+            "maxDiscoveryDepth": {
+              "type": "integer",
+              "description": "Link-discovery hops to follow from the start URL."
+            }
+          },
+          "required": ["url"]
+        }
+      }
+    },
+    {
+      "id": "tool-firecrawl-crawl-status",
+      "name": "Firecrawl Crawl (status)",
+      "kind": "tool",
+      "config": {
+        "slug": "firecrawl.crawl_status",
+        "backend": "http",
+        "method": "GET",
+        "url": "https://api.firecrawl.dev/v2/crawl/{id}",
+        "secret_headers": {
+          "Authorization": "Bearer env:RYU_FIRECRAWL_API_KEY"
+        },
+        "fail_open": true,
+        "unwrap_body": true,
+        "description": "Read the status and accumulated pages of a Firecrawl crawl job started by firecrawl.crawl_start. Requires RYU_FIRECRAWL_API_KEY.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "The crawl job id returned by firecrawl.crawl_start."
+            }
+          },
+          "required": ["id"]
+        }
+      }
+    }
+  ],
+  "provides": [
+    {
+      "capability": "web.search",
+      "version": "1.0.0",
+      "title": "Search",
+      "selectable": true,
+      "tools": {
+        "web.search": {
+          "tool": "firecrawl.search",
+          "args": {
+            "limit": "limit"
+          },
+          "response": {
+            "results": "data.web",
+            "fields": {
+              "title": "title",
+              "url": "url",
+              "snippet": "description"
+            }
+          }
+        }
+      }
+    },
+    {
+      "capability": "web.extract",
+      "version": "1.0.0",
+      "title": "Extract",
+      "selectable": true,
+      "tools": {
+        "web.extract": {
+          "tool": "firecrawl.scrape",
+          "adapter": {
+            "code_file": "adapters/web.extract.js"
+          }
+        }
+      }
+    },
+    {
+      "capability": "web.crawl",
+      "version": "1.0.0",
+      "title": "Crawl",
+      "selectable": true,
+      "tools": {
+        "web.crawl": {
+          "tool": "firecrawl.crawl_start",
+          "adapter": {
+            "tools": ["firecrawl.crawl_status"],
+            "code_file": "adapters/web.crawl.js"
+          }
+        }
+      }
+    }
+  ],
+  "permission_grants": ["tool:http-egress:api.firecrawl.dev", "tool:execute"],
+  "contributes": {
+    "settings_tabs": [
+      {
+        "id": "firecrawl.settings",
+        "title": "Firecrawl",
+        "scope": "node",
+        "fields": [
+          {
+            "type": "secret",
+            "pref_key": "RYU_FIRECRAWL_API_KEY",
+            "label": "Firecrawl API key",
+            "description": "Create a key at https://www.firecrawl.dev/app/api-keys and paste it here. Stored encrypted on this node and never shown again — re-paste to change it. Without a key the Firecrawl tools stay installed but return nothing, so `web.search` / `web.extract` fall back to whichever other provider you select."
+          }
+        ]
+      }
+    ]
+  }
+}

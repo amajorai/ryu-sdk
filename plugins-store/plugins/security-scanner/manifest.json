@@ -1,0 +1,177 @@
+{
+  "tags": [
+    "security",
+    "scanner",
+    "vulnerability",
+    "threat-model",
+    "diff",
+    "secrets",
+    "verification"
+  ],
+  "author": { "name": "Ryu", "url": "https://ryuhq.com" },
+  "repository": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/security-scanner",
+  "homepage": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/security-scanner",
+  "privacyPolicyUrl": "https://ryuhq.com/privacy",
+  "termsOfServiceUrl": "https://ryuhq.com/terms",
+  "id": "@ryu/security-scanner",
+  "name": "Security Scanner",
+  "version": "0.1.14",
+  "stability": "experimental",
+  "description": "A model-agnostic security workbench for Ryu: map the architecture, hunt for vulnerabilities, validate findings with independent agents, review diffs, and draft safe fixes without changing files.",
+  "tagline": "Threat model, hunt, verify, and safely fix",
+  "keywords": [
+    "security",
+    "scanner",
+    "vulnerability",
+    "threat-model",
+    "diff",
+    "secrets",
+    "verification"
+  ],
+  "category": "Security",
+  "icon": "shield-check",
+  "iconDither": {
+    "from": 312,
+    "to": "transparent",
+    "direction": "down"
+  },
+  "surfaces": {
+    "gateway": {
+      "support": "none"
+    },
+    "core": {
+      "support": "full"
+    },
+    "desktop": {
+      "support": "full"
+    },
+    "island": {
+      "support": "limited"
+    },
+    "mobile": {
+      "support": "limited"
+    },
+    "extension": {
+      "support": "limited"
+    },
+    "web": {
+      "support": "full"
+    },
+    "cli": {
+      "support": "full"
+    }
+  },
+  "engines": {
+    "ryu": ">=0.1.0"
+  },
+  "runnables": [],
+  "permission_grants": [
+    "hook:run-agent",
+    "hook:side-model",
+    "storage:kv",
+    "preferences:read"
+  ],
+  "activation_events": ["*"],
+  "contributes": {
+    "composer_controls": [
+      {
+        "id": "security-scanner.auto-review",
+        "type": "toggle",
+        "flag": "io.ryu.security-scanner.auto-review",
+        "label": "Security review",
+        "description": "Review security-sensitive code in each completed answer with static signals and a configurable second model."
+      }
+    ],
+    "settings_tabs": [
+      {
+        "id": "security-scanner.settings",
+        "title": "Security Scanner",
+        "scope": "node",
+        "fields": [
+          {
+            "type": "model_picker",
+            "pref_key": "security-scanner-model",
+            "label": "Scanner model",
+            "description": "Optional model for report synthesis and automatic reviews. Leave empty to use the node default."
+          },
+          {
+            "type": "select",
+            "pref_key": "security-scanner-effort",
+            "label": "Synthesis effort",
+            "description": "How much reasoning the report synthesizer should use.",
+            "default": "high",
+            "options": [
+              {
+                "value": "medium",
+                "label": "Balanced"
+              },
+              {
+                "value": "high",
+                "label": "Thorough"
+              },
+              {
+                "value": "max",
+                "label": "Deep"
+              }
+            ]
+          },
+          {
+            "type": "number",
+            "pref_key": "security-scanner-workers",
+            "label": "Standard scan workers",
+            "description": "Independent agents used by standard and diff scans. Deep scans always use five.",
+            "default": 4,
+            "min": 2,
+            "max": 5,
+            "step": 1
+          }
+        ]
+      }
+    ],
+    "slash_commands": [
+      {
+        "id": "security-scanner.scan",
+        "command": "/security-scan",
+        "description": "Run a model-agnostic multi-agent security scan. Add quick, deep, or diff plus an optional scope."
+      },
+      {
+        "id": "security-scanner.verify",
+        "command": "/security-verify",
+        "description": "Independently try to falsify the latest scan findings and update their status."
+      },
+      {
+        "id": "security-scanner.fix",
+        "command": "/security-fix",
+        "description": "Draft a minimal patch and validation plan for the latest finding. It never applies changes."
+      },
+      {
+        "id": "security-scanner.clear",
+        "command": "/security-clear",
+        "description": "Forget the latest scan, verification, and patch suggestion for this conversation."
+      }
+    ],
+    "turn_hooks": [
+      {
+        "id": "security-scanner.command",
+        "on": "pre_user_turn",
+        "match": {
+          "commands": [
+            "/security-scan",
+            "/security-verify",
+            "/security-fix",
+            "/security-clear"
+          ]
+        },
+        "code_file": "hooks/command.js"
+      },
+      {
+        "id": "security-scanner.auto-review",
+        "on": "post_assistant_turn",
+        "match": {
+          "flag": "io.ryu.security-scanner.auto-review"
+        },
+        "code_file": "hooks/auto-review.js"
+      }
+    ]
+  }
+}

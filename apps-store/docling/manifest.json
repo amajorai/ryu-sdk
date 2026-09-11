@@ -1,0 +1,115 @@
+{
+  "tags": [
+    "document",
+    "parse",
+    "pdf",
+    "docx",
+    "tables",
+    "layout",
+    "ocr",
+    "extraction"
+  ],
+  "author": { "name": "Ryu", "url": "https://ryuhq.com" },
+  "repository": "https://github.com/amajorai/ryu-docling",
+  "homepage": "https://github.com/amajorai/ryu-docling",
+  "privacyPolicyUrl": "https://ryuhq.com/privacy",
+  "termsOfServiceUrl": "https://ryuhq.com/terms",
+  "id": "@ryu/docling",
+  "name": "Docling",
+  "version": "0.1.14",
+  "stability": "experimental",
+  "description": "Document parsing via IBM's MIT-licensed Docling — the highest-fidelity `document.parse` backend. Where a text extractor hands a model a stream of characters, Docling runs real layout analysis: a page-segmentation model finds the reading order, a table-structure model rebuilds merged cells and spanning headers, and the result is exported as markdown whose headings, lists and tables mirror the document's actual structure. That is what makes a multi-column paper or a financial statement survive chunking instead of interleaving into nonsense. The cost is weight: the first parse downloads its models (hundreds of MB) and can take minutes, and every parse after that is CPU-bound inference rather than a string copy. Everything runs locally — Docling explicitly supports air-gapped operation once the models are cached — and no document ever leaves the node. Parses run as jobs: submit returns 202 + a job_id, the caller polls.",
+  "icon": "document-attachment",
+  "iconDither": { "from": 303, "to": "transparent", "direction": "down" },
+  "tagline": "Layout-aware parsing, tables that survive chunking",
+  "keywords": [
+    "document",
+    "parse",
+    "pdf",
+    "docx",
+    "tables",
+    "layout",
+    "ocr",
+    "extraction"
+  ],
+  "category": "Documents",
+  "surfaces": {
+    "gateway": { "support": "none" },
+    "core": { "support": "full" },
+    "desktop": { "support": "full" },
+    "island": { "support": "full" },
+    "mobile": { "support": "full" },
+    "extension": { "support": "full" },
+    "web": { "support": "full" },
+    "cli": { "support": "full" }
+  },
+  "engines": {
+    "ryu": ">=0.1.0"
+  },
+  "runnables": [],
+  "provides": [
+    {
+      "capability": "document.parse",
+      "version": "1.0.0",
+      "title": "Document Parsing",
+      "selectable": true,
+      "sidecar": "docling",
+      "route": "/parse"
+    }
+  ],
+  "permission_grants": [],
+  "sidecars": [
+    {
+      "name": "docling",
+      "port": 8095,
+      "health_path": "/health",
+      "lazy": true,
+      "idle_stop_secs": 3600,
+      "process": {
+        "kind": "python",
+        "entry": "ryu_docling",
+        "port_env": "RYU_DOCLING_PORT",
+        "python_version": "3.11",
+        "pyproject_extra": "parse",
+        "source": {
+          "url": "https://github.com/amajorai/ryu/releases/download/docling-sidecar-v1/ryu-docling-sidecar.tar.gz",
+          "format": "tar.gz"
+        },
+        "env": {
+          "RYU_DOCLING_HOST": "127.0.0.1",
+          "RYU_DOCLING_ROOTS": "${RYU_DIR}",
+          "RYU_DOCLING_WORKDIR": "${RYU_DIR}/cache/docling",
+          "DOCLING_CACHE_DIR": "${RYU_DIR}/cache/docling/docling",
+          "HF_HOME": "${RYU_DIR}/models/hf",
+          "TORCH_HOME": "${RYU_DIR}/models/torch",
+          "HF_HUB_DISABLE_TELEMETRY": "1",
+          "SCARF_NO_ANALYTICS": "true"
+        }
+      },
+      "http": {
+        "routes": [
+          { "path": "/health" },
+          { "path": "/capability" },
+          { "path": "/parse" },
+          { "path": "/jobs" },
+          { "path": "/jobs/:job_id" }
+        ]
+      }
+    }
+  ],
+  "contributes": {
+    "chat_widget_templates": [
+      {
+        "id": "docling.chat",
+        "title": "Docling widget",
+        "description": "Docling chat widget metadata is coming soon; no render tool is available yet.",
+        "triggers": ["docling widget"],
+        "examples": ["Show me a docling widget"],
+        "backing": {},
+        "display_mode": "inline",
+        "safe_action_ids": [],
+        "availability": "coming-soon"
+      }
+    ]
+  }
+}

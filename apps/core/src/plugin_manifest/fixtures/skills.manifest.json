@@ -1,0 +1,28 @@
+{
+  "id": "@ryu/skills",
+  "name": "Skills",
+  "version": "1.0.0",
+  "category": "Core",
+  "mandatory": true,
+  "description": "Agent Skills: discover, install, and manage SKILL.md skills across ~/.claude/skills and ~/.agents/skills, injected into agents and searchable via the skills catalog.",
+  "tagline": "Install and manage agent skills",
+  "keywords": ["skills", "catalog", "agents"],
+  "engines": {
+    "ryu": ">=0.0.1"
+  },
+  "runnables": [],
+  "permission_grants": [],
+  "permission_levels": [
+    {
+      "id": "skills.view",
+      "label": "Can view",
+      "description": "Browse the skills installed on this node and read what each instructs an agent to do."
+    },
+    {
+      "id": "skills.install",
+      "label": "Can install",
+      "description": "Install and remove skills, which adds instructions every agent that loads them will follow.",
+      "implies": ["skills.view"]
+    }
+  ]
+}

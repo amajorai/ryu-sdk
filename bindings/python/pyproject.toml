@@ -1,0 +1,44 @@
+[project]
+name = "ryu-sdk"
+version = "0.3.1"
+description = "Ryu developer SDK — Python binding generated from the shared Rust kernel via UniFFI."
+readme = "README.md"
+requires-python = ">=3.8"
+license = { text = "Apache-2.0" }
+authors = [{ name = "A Major Pte. Ltd." }]
+keywords = ["ryu", "sdk", "uniffi", "agents", "gateway"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: Apache Software License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Rust",
+]
+
+[project.urls]
+Homepage = "https://ryuhq.com"
+Documentation = "https://docs.ryuhq.com/docs/extend/develop/sdk/language-bindings"
+Repository = "https://github.com/amajorai/ryu-sdk"
+
+# The importable package `ryu_sdk` is GENERATED, not committed: the CI job
+# (.github/workflows/sdk-bindings.yml) builds the cdylib, runs
+# `uniffi-bindgen generate --library ... --language python --out-dir ryu_sdk`,
+# and copies the matching compiled library alongside the generated module. The
+# generated `ryu_sdk/` directory is gitignored; only this packaging shell + the
+# smoke test are committed. See docs/multi-language-bindings-spec.md.
+[tool.hatch.build.targets.wheel]
+packages = ["ryu_sdk"]
+artifacts = [
+  "ryu_sdk/*.py",
+  "ryu_sdk/*.so",
+  "ryu_sdk/*.dylib",
+  "ryu_sdk/*.dll",
+]
+
+[tool.hatch.build.targets.wheel.hooks.custom]
+path = "hatch_build.py"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

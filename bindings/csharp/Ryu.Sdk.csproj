@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <AssemblyName>Ryu.Sdk</AssemblyName>
+    <RootNamespace>Ryu.Sdk</RootNamespace>
+    <PackageId>Ryu.Sdk</PackageId>
+    <Version>0.3.1</Version>
+    <Authors>A Major Pte. Ltd.</Authors>
+    <Description>Ryu SDK C# binding generated from the shared Rust kernel with UniFFI.</Description>
+    <PackageTags>ryu;sdk;uniffi;agents;gateway</PackageTags>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/amajorai/ryu-sdk</RepositoryUrl>
+    <PackageProjectUrl>https://docs.ryuhq.com/docs/extend/develop/sdk/language-bindings</PackageProjectUrl>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="ryu_sdk.cs" />
+    <None Include="README.md" Pack="true" PackagePath="/" />
+    <None Include="runtimes/linux-x64/native/libryu_sdk_uniffi.so" Pack="true" PackagePath="runtimes/linux-x64/native/" />
+    <None Include="runtimes/osx-x64/native/libryu_sdk_uniffi.dylib" Pack="true" PackagePath="runtimes/osx-x64/native/" />
+    <None Include="runtimes/osx-arm64/native/libryu_sdk_uniffi.dylib" Pack="true" PackagePath="runtimes/osx-arm64/native/" />
+    <None Include="runtimes/win-x64/native/ryu_sdk_uniffi.dll" Pack="true" PackagePath="runtimes/win-x64/native/" />
+  </ItemGroup>
+</Project>

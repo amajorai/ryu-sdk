@@ -1,0 +1,39 @@
+{
+  "tags": ["docs", "documentation", "reference"],
+  "author": { "name": "Ryu", "url": "https://ryuhq.com" },
+  "repository": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/docs",
+  "homepage": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/docs",
+  "privacyPolicyUrl": "https://ryuhq.com/privacy",
+  "termsOfServiceUrl": "https://ryuhq.com/terms",
+  "id": "@ryu/docs",
+  "name": "Ryu Docs",
+  "version": "0.1.14",
+  "system": true,
+  "builtin": true,
+  "category": "Developer Tools",
+  "description": "Read-only MCP access to the Ryu documentation on docs.ryuhq.com — search the docs and pull any page into context as Markdown, without leaving your agent. Backed by the same content /llms.txt serves, exposed as tools by the hosted docs MCP server at https://docs.ryuhq.com/mcp. Ships pre-installed and enabled.",
+  "tagline": "The Ryu docs, as MCP tools",
+  "icon": "book-open-01",
+  "iconDither": { "from": 208, "to": "transparent", "direction": "down" },
+  "keywords": ["docs", "documentation", "reference"],
+  "surfaces": {
+    "gateway": { "support": "full" },
+    "core": { "support": "full" },
+    "desktop": { "support": "full" },
+    "island": { "support": "full" },
+    "mobile": { "support": "full" },
+    "extension": { "support": "full" },
+    "web": { "support": "full" },
+    "cli": { "support": "full" }
+  },
+  "engines": { "ryu": ">=0.1.0" },
+  "runnables": [],
+  "permission_grants": ["mcp:docs"],
+  "mcp_servers": {
+    "docs": {
+      "type": "http",
+      "url": "https://docs.ryuhq.com/mcp",
+      "description": "Ryu Docs — read-only search + page content over the Ryu documentation (docs.ryuhq.com). Tools: docs_search (search the docs), docs_get_page (fetch a page as Markdown), docs_index (list pages, optionally per section)."
+    }
+  }
+}
