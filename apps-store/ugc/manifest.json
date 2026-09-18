@@ -1,0 +1,338 @@
+{
+  "tags": ["ugc", "creators", "campaigns", "payouts", "marketing"],
+  "author": { "name": "Ryu", "url": "https://ryuhq.com" },
+  "repository": "https://github.com/amajorai/ryu-ugc",
+  "homepage": "https://github.com/amajorai/ryu-ugc",
+  "privacyPolicyUrl": "https://ryuhq.com/privacy",
+  "termsOfServiceUrl": "https://ryuhq.com/terms",
+  "id": "@ryu/ugc",
+  "name": "UGC",
+  "version": "0.1.14",
+  "stability": "experimental",
+  "category": "Productivity",
+  "description": "Creator-marketing campaign tracker: briefs, a creator roster, post submissions with review, per-post metric snapshots refreshed through a curated Composio action map, and CPM/flat payout accrual against a campaign budget.",
+  "tagline": "Run a UGC campaign and know what you owe",
+  "keywords": ["ugc", "creators", "campaigns", "payouts", "marketing"],
+  "icon": "megaphone-01",
+  "iconDither": { "from": 18, "to": "transparent", "direction": "down" },
+  "surfaces": {
+    "gateway": { "support": "none" },
+    "core": { "support": "full" },
+    "desktop": { "support": "full" },
+    "island": { "support": "limited" },
+    "mobile": { "support": "limited" },
+    "extension": { "support": "none" },
+    "web": { "support": "full" },
+    "cli": { "support": "list" }
+  },
+  "engines": {
+    "ryu": ">=0.1.0"
+  },
+  "runnables": [],
+  "sidecars": [
+    {
+      "name": "ugc",
+      "process": {
+        "kind": "local",
+        "command": "ryu-ugc",
+        "command_env": "RYU_UGC_BIN",
+        "port_env": "RYU_UGC_PORT"
+      },
+      "host_api": {
+        "grants": ["tools.invoke"]
+      },
+      "port": 8004,
+      "health_path": "/health",
+      "lazy": true,
+      "idle_stop_secs": 300,
+      "http": {
+        "mount": "/api/ugc",
+        "public_mount": "/api/ugc",
+        "routes": [
+          { "path": "/", "method": "GET", "permission": "ugc.view" },
+          { "path": "/health" },
+          { "path": "/platforms", "method": "GET", "permission": "ugc.view" },
+          { "path": "/campaigns", "method": "GET", "permission": "ugc.view" },
+          {
+            "path": "/campaigns",
+            "method": "POST",
+            "permission": "ugc.manage"
+          },
+          {
+            "path": "/campaigns/:id",
+            "method": "GET",
+            "permission": "ugc.view"
+          },
+          {
+            "path": "/campaigns/:id",
+            "method": "PUT",
+            "permission": "ugc.manage"
+          },
+          {
+            "path": "/campaigns/:id",
+            "method": "DELETE",
+            "permission": "ugc.manage"
+          },
+          {
+            "path": "/campaigns/:id/summary",
+            "method": "GET",
+            "permission": "ugc.view"
+          },
+          {
+            "path": "/campaigns/:id/leaderboard",
+            "method": "GET",
+            "permission": "ugc.view"
+          },
+          {
+            "path": "/campaigns/:id/submissions",
+            "method": "GET",
+            "permission": "ugc.view"
+          },
+          {
+            "path": "/campaigns/:id/refresh",
+            "method": "POST",
+            "permission": "ugc.manage"
+          },
+          { "path": "/creators", "method": "GET", "permission": "ugc.view" },
+          { "path": "/creators", "method": "POST", "permission": "ugc.manage" },
+          {
+            "path": "/creators/:id",
+            "method": "GET",
+            "permission": "ugc.view"
+          },
+          {
+            "path": "/creators/:id",
+            "method": "PUT",
+            "permission": "ugc.manage"
+          },
+          {
+            "path": "/creators/:id",
+            "method": "DELETE",
+            "permission": "ugc.manage"
+          },
+          { "path": "/submissions", "method": "GET", "permission": "ugc.view" },
+          {
+            "path": "/submissions",
+            "method": "POST",
+            "permission": "ugc.manage"
+          },
+          {
+            "path": "/submissions/:id",
+            "method": "GET",
+            "permission": "ugc.view"
+          },
+          {
+            "path": "/submissions/:id",
+            "method": "PUT",
+            "permission": "ugc.manage"
+          },
+          {
+            "path": "/submissions/:id",
+            "method": "DELETE",
+            "permission": "ugc.manage"
+          },
+          {
+            "path": "/submissions/:id/review",
+            "method": "POST",
+            "permission": "ugc.manage"
+          },
+          {
+            "path": "/submissions/:id/metrics",
+            "method": "GET",
+            "permission": "ugc.view"
+          },
+          {
+            "path": "/submissions/:id/metrics",
+            "method": "POST",
+            "permission": "ugc.manage"
+          },
+          {
+            "path": "/submissions/:id/refresh",
+            "method": "POST",
+            "permission": "ugc.manage"
+          },
+          { "path": "/payouts", "method": "GET", "permission": "ugc.view" },
+          { "path": "/payouts/:id", "method": "GET", "permission": "ugc.view" },
+          {
+            "path": "/payouts/:id/approve",
+            "method": "POST",
+            "permission": "ugc.payouts"
+          },
+          {
+            "path": "/payouts/:id/paid",
+            "method": "POST",
+            "permission": "ugc.payouts"
+          }
+        ]
+      }
+    }
+  ],
+  "permission_grants": ["tools.invoke", "ui:declarative-http"],
+  "permission_levels": [
+    {
+      "id": "ugc.view",
+      "label": "Can view",
+      "description": "See campaigns, the creator roster, submissions and their metric history, and what each payout is worth."
+    },
+    {
+      "id": "ugc.manage",
+      "label": "Can manage",
+      "description": "Create and edit campaigns and creators, approve or reject submissions, and refresh post metrics — which decides what this node fetches and what each creator accrues.",
+      "implies": ["ugc.view"]
+    },
+    {
+      "id": "ugc.payouts",
+      "label": "Can settle payouts",
+      "description": "Approve accrued payouts and mark them paid. Marking a payout paid freezes its amount — it is never re-priced afterwards, even if the post keeps gaining views — and is the record this campaign's spend is reconciled against.",
+      "implies": ["ugc.view"]
+    }
+  ],
+  "contributes": {
+    "chat_widget_templates": [
+      {
+        "id": "ugc.chat",
+        "title": "UGC widget",
+        "description": "Open UGC data in a host-rendered chat widget.",
+        "triggers": ["ugc widget"],
+        "examples": ["Show me a ugc widget"],
+        "backing": { "view_id": "surface:ugc" },
+        "display_mode": "inline",
+        "safe_action_ids": [],
+        "availability": "available"
+      }
+    ],
+    "dock_panels": [
+      {
+        "id": "ugc",
+        "title": "UGC",
+        "icon": "hugeicons:megaphone-01",
+        "placement": "both",
+        "panel": "native"
+      }
+    ],
+    "hook_events": [
+      {
+        "id": "@ryu/ugc#submission.received",
+        "title": "Submission received",
+        "description": "A creator's post was recorded against a campaign — once per `submissions` row actually CREATED. Re-submitting the same post is refused by the `(campaign_id, platform, external_post_id)` unique index (409), so a duplicate never re-emits. `external_post_id` is empty when the URL could not be parsed: that submission is still reviewable by hand, it just cannot auto-refresh.",
+        "payload_example": {
+          "submission_id": "sub_1f7c9a2e4b6d4c1a8e3f5b7d9c0a2e46",
+          "campaign_id": "cmp_4b2d8e1a6f3c4d5e9a7b0c2d4e6f8a13",
+          "creator_id": "crt_9d3e5f7a1b2c4d6e8f0a2b4c6d8e0f21",
+          "platform": "tiktok",
+          "post_url": "https://www.tiktok.com/@creator/video/7301234567890123456",
+          "external_post_id": "7301234567890123456",
+          "status": "pending",
+          "submitted_at": "2026-08-10T09:14:00Z"
+        }
+      },
+      {
+        "id": "@ryu/ugc#submission.approved",
+        "title": "Submission approved",
+        "description": "A submission passed review and its payout row was created or re-priced. TRANSITION-GATED: fires once per pending → approved move. Approving an already-approved submission is a 200 no-op that emits nothing, so a double-click in the panel never doubles a consumer's work.",
+        "payload_example": {
+          "submission_id": "sub_1f7c9a2e4b6d4c1a8e3f5b7d9c0a2e46",
+          "campaign_id": "cmp_4b2d8e1a6f3c4d5e9a7b0c2d4e6f8a13",
+          "creator_id": "crt_9d3e5f7a1b2c4d6e8f0a2b4c6d8e0f21",
+          "platform": "tiktok",
+          "post_url": "https://www.tiktok.com/@creator/video/7301234567890123456",
+          "payout_id": "pay_2c4e6a8b0d2f4a6c8e0b2d4f6a8c0e12",
+          "amount_cents": 10300,
+          "reviewed_at": "2026-08-10T09:40:00Z"
+        }
+      },
+      {
+        "id": "@ryu/ugc#submission.rejected",
+        "title": "Submission rejected",
+        "description": "A submission was turned down and any accrued (not yet paid) payout for it was removed. TRANSITION-GATED like the approval: re-rejecting an already-rejected submission is a 200 no-op that emits nothing. `reason` is the free text the reviewer typed and is what a consumer should relay to the creator.",
+        "payload_example": {
+          "submission_id": "sub_1f7c9a2e4b6d4c1a8e3f5b7d9c0a2e46",
+          "campaign_id": "cmp_4b2d8e1a6f3c4d5e9a7b0c2d4e6f8a13",
+          "creator_id": "crt_9d3e5f7a1b2c4d6e8f0a2b4c6d8e0f21",
+          "platform": "tiktok",
+          "reason": "missing the required #ryupartner hashtag",
+          "reviewed_at": "2026-08-10T09:41:00Z"
+        }
+      },
+      {
+        "id": "@ryu/ugc#metrics.refreshed",
+        "title": "Post metrics refreshed",
+        "description": "A metric snapshot came back from the curated Composio action for this submission's platform and was appended. NOT transition-gated: this fires on EVERY successful refresh, including one where every counter is unchanged, because \"we looked and nothing moved\" is itself the answer a nightly report wants. The payload carries both the new sample and the delta against the previous snapshot, so a consumer that only cares about movement can gate on `delta.views`. A refresh that failed upstream emits nothing — the API reports it per-submission instead, and one platform being down never fails the batch.",
+        "payload_example": {
+          "submission_id": "sub_1f7c9a2e4b6d4c1a8e3f5b7d9c0a2e46",
+          "campaign_id": "cmp_4b2d8e1a6f3c4d5e9a7b0c2d4e6f8a13",
+          "platform": "tiktok",
+          "source": "composio",
+          "captured_at": "2026-08-10T10:00:00Z",
+          "metrics": {
+            "views": 41200,
+            "likes": 812,
+            "comments": 45,
+            "shares": 61,
+            "saves": 130
+          },
+          "delta": { "views": 3100, "likes": 44, "comments": 2 }
+        }
+      },
+      {
+        "id": "@ryu/ugc#payout.accrued",
+        "title": "Payout amount changed",
+        "description": "A payout row's `amount_cents` CHANGED — either the row was created on approval, or the accrual pass re-priced it in place as views grew. Accrual is idempotent re-pricing, not appending, so there is exactly one row per submission and a refresh that leaves the amount equal emits NOTHING: a nightly refresh of a finished campaign is silent. Rows already at status `paid` are never re-priced and therefore never emit. `reason` is the human sentence the pass wrote for the amount.",
+        "payload_example": {
+          "payout_id": "pay_2c4e6a8b0d2f4a6c8e0b2d4f6a8c0e12",
+          "campaign_id": "cmp_4b2d8e1a6f3c4d5e9a7b0c2d4e6f8a13",
+          "creator_id": "crt_9d3e5f7a1b2c4d6e8f0a2b4c6d8e0f21",
+          "submission_id": "sub_1f7c9a2e4b6d4c1a8e3f5b7d9c0a2e46",
+          "amount_cents": 10300,
+          "previous_cents": 9525,
+          "status": "accrued",
+          "reason": "cpm 250c x 41.2k views + bonus @25k"
+        }
+      },
+      {
+        "id": "@ryu/ugc#campaign.budget.reached",
+        "title": "Campaign budget reached",
+        "description": "Total accrued payouts for a campaign first crossed its `budget_cents`, so further accrual is clamped and new approvals will pay nothing. TRANSITION-GATED: fires ONCE on the crossing and does not re-fire while the campaign stays over. It re-arms only if the budget is raised back above the accrued total — which is exactly the moment an operator wants to be told again if it is crossed a second time. A campaign with `budget_cents` 0 is uncapped and never emits this.",
+        "payload_example": {
+          "campaign_id": "cmp_4b2d8e1a6f3c4d5e9a7b0c2d4e6f8a13",
+          "brand": "Northwind Coffee",
+          "budget_cents": 500000,
+          "accrued_cents": 502750,
+          "reached_at": "2026-08-10T10:00:04Z"
+        }
+      }
+    ],
+    "views": [
+      {
+        "id": "surface:ugc",
+        "title": "UGC campaigns",
+        "view": "list-detail",
+        "spec": {
+          "view": "list-detail",
+          "items": [],
+          "emptyText": "No campaigns yet.",
+          "source": {
+            "http": { "method": "GET", "path": "/api/ugc/campaigns" },
+            "items": "campaigns",
+            "map": {
+              "title": "brand",
+              "subtitle": "brief",
+              "accessory": "status"
+            }
+          },
+          "itemActions": [
+            {
+              "id": "refresh",
+              "label": "Refresh metrics",
+              "style": "primary",
+              "http": {
+                "method": "POST",
+                "path": "/api/ugc/campaigns/{{item.id}}/refresh"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

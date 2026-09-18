@@ -1,0 +1,553 @@
+{
+  "id": "@ryu/video-studio",
+  "name": "Video Studio",
+  "version": "0.1.14",
+  "stability": "experimental",
+  "author": {
+    "name": "Ryu",
+    "url": "https://ryuhq.com"
+  },
+  "description": "Edit layered video timelines, review storyboards, add timed captions, and render finished videos on your Ryu node.",
+  "tagline": "From your first cut to the finished film",
+  "category": "Creative",
+  "icon": "film-01",
+  "tags": ["video", "editing", "timeline", "production"],
+  "engines": {
+    "ryu": ">=0.1.0"
+  },
+  "surfaces": {
+    "gateway": {
+      "support": "none"
+    },
+    "core": {
+      "support": "full"
+    },
+    "desktop": {
+      "support": "full"
+    },
+    "island": {
+      "support": "none"
+    },
+    "mobile": {
+      "support": "none"
+    },
+    "extension": {
+      "support": "none"
+    },
+    "web": {
+      "support": "none"
+    },
+    "cli": {
+      "support": "none"
+    }
+  },
+  "permission_grants": [
+    "app:http",
+    "media:generate",
+    "hook:side-model",
+    "sidecar:process",
+    "media:transcribe",
+    "spaces:docs",
+    "usage:read"
+  ],
+  "runnables": [
+    {
+      "id": "video-studio-companion",
+      "name": "Video Studio",
+      "kind": "companion",
+      "config": {
+        "label": "Video Studio",
+        "ui_entry": "./dist/index.html",
+        "ui_format": "html"
+      }
+    }
+  ],
+  "sidecars": [
+    {
+      "name": "video-studio",
+      "process": {
+        "kind": "local",
+        "command": "ryu-video-studio",
+        "command_env": "RYU_VIDEO_STUDIO_BIN",
+        "port_env": "RYU_VIDEO_STUDIO_PORT"
+      },
+      "port": 8040,
+      "health_path": "/health",
+      "http": {
+        "mount": "/api/video-studio",
+        "public_mount": "/api/video-studio",
+        "routes": [
+          {
+            "path": "/timelines",
+            "method": "GET",
+            "permission": "video-studio.view"
+          },
+          {
+            "path": "/timelines",
+            "method": "POST",
+            "permission": "video-studio.edit"
+          },
+          {
+            "path": "/timelines/:id",
+            "method": "GET",
+            "permission": "video-studio.view"
+          },
+          {
+            "path": "/capabilities",
+            "method": "GET",
+            "permission": "video-studio.view"
+          },
+          {
+            "path": "/budget",
+            "method": "GET",
+            "permission": "video-studio.view"
+          },
+          {
+            "path": "/soundtrack",
+            "method": "POST",
+            "permission": "video-studio.edit"
+          },
+          {
+            "path": "/stock/search",
+            "method": "GET",
+            "permission": "video-studio.view"
+          },
+          {
+            "path": "/stock",
+            "method": "POST",
+            "permission": "video-studio.edit"
+          },
+          {
+            "path": "/projects",
+            "method": "GET",
+            "permission": "video-studio.view"
+          },
+          {
+            "path": "/projects",
+            "method": "POST",
+            "permission": "video-studio.edit"
+          },
+          {
+            "path": "/projects/:id",
+            "method": "GET",
+            "permission": "video-studio.view"
+          },
+          {
+            "path": "/projects/:id/timeline",
+            "method": "GET",
+            "permission": "video-studio.view"
+          },
+          {
+            "path": "/projects/:id/duplicate",
+            "method": "POST",
+            "permission": "video-studio.edit"
+          },
+          {
+            "path": "/projects/:id/sequence",
+            "method": "POST",
+            "permission": "video-studio.edit"
+          },
+          {
+            "path": "/projects/:id/markers",
+            "method": "POST",
+            "permission": "video-studio.edit"
+          },
+          {
+            "path": "/projects/:id/add",
+            "method": "POST",
+            "permission": "video-studio.edit"
+          },
+          {
+            "path": "/projects/:id/move",
+            "method": "POST",
+            "permission": "video-studio.edit"
+          },
+          {
+            "path": "/projects/:id/split",
+            "method": "POST",
+            "permission": "video-studio.edit"
+          },
+          {
+            "path": "/projects/:id/remove",
+            "method": "POST",
+            "permission": "video-studio.edit"
+          },
+          {
+            "path": "/projects/:id/keyframes",
+            "method": "POST",
+            "permission": "video-studio.edit"
+          },
+          {
+            "path": "/projects/:id/readiness",
+            "method": "GET",
+            "permission": "video-studio.view"
+          },
+          {
+            "path": "/projects/:id/preflight",
+            "method": "GET",
+            "permission": "video-studio.view"
+          },
+          {
+            "path": "/projects/:id/stages",
+            "method": "GET",
+            "permission": "video-studio.view"
+          },
+          {
+            "path": "/projects/:id/stages",
+            "method": "POST",
+            "permission": "video-studio.edit"
+          },
+          {
+            "path": "/projects/:id/stage-world",
+            "method": "POST",
+            "permission": "video-studio.edit"
+          },
+          {
+            "path": "/projects/:id/research",
+            "method": "POST",
+            "permission": "video-studio.edit"
+          },
+          {
+            "path": "/projects/:id/activity",
+            "method": "GET",
+            "permission": "video-studio.view"
+          },
+          {
+            "path": "/projects/:id/decisions",
+            "method": "GET",
+            "permission": "video-studio.view"
+          },
+          {
+            "path": "/projects/:id/decisions",
+            "method": "POST",
+            "permission": "video-studio.edit"
+          },
+          {
+            "path": "/projects/:id/budget",
+            "method": "GET",
+            "permission": "video-studio.view"
+          },
+          {
+            "path": "/projects/:id/package",
+            "method": "GET",
+            "permission": "video-studio.view"
+          },
+          {
+            "path": "/projects/:id/interchange",
+            "method": "GET",
+            "permission": "video-studio.view"
+          },
+          {
+            "path": "/projects/:id/settings",
+            "method": "POST",
+            "permission": "video-studio.edit"
+          },
+          {
+            "path": "/projects/:id/multicam",
+            "method": "GET",
+            "permission": "video-studio.view"
+          },
+          {
+            "path": "/projects/:id/multicam",
+            "method": "POST",
+            "permission": "video-studio.edit"
+          },
+          {
+            "path": "/projects/:id/clip-properties",
+            "method": "POST",
+            "permission": "video-studio.edit"
+          },
+          {
+            "path": "/projects/:id/copy-clip-settings",
+            "method": "POST",
+            "permission": "video-studio.edit"
+          },
+          {
+            "path": "/projects/:id/swap-clip-media",
+            "method": "POST",
+            "permission": "video-studio.edit"
+          },
+          {
+            "path": "/projects/package",
+            "method": "POST",
+            "permission": "video-studio.edit"
+          },
+          {
+            "path": "/projects/:id",
+            "method": "PUT",
+            "permission": "video-studio.edit"
+          },
+          {
+            "path": "/projects/:id/history",
+            "method": "GET",
+            "permission": "video-studio.view"
+          },
+          {
+            "path": "/projects/:id/undo",
+            "method": "POST",
+            "permission": "video-studio.edit"
+          },
+          {
+            "path": "/projects/:id/render",
+            "method": "POST",
+            "permission": "video-studio.edit"
+          },
+          {
+            "path": "/projects/:id/subtitles",
+            "method": "GET",
+            "permission": "video-studio.view"
+          },
+          {
+            "path": "/assets",
+            "method": "GET",
+            "permission": "video-studio.view"
+          },
+          {
+            "path": "/assets/import",
+            "method": "POST",
+            "permission": "video-studio.edit"
+          },
+          {
+            "path": "/search",
+            "method": "GET",
+            "permission": "video-studio.view"
+          },
+          {
+            "path": "/assets/:id/data",
+            "method": "GET",
+            "permission": "video-studio.view"
+          },
+          {
+            "path": "/assets/:id/thumbnail",
+            "method": "GET",
+            "permission": "video-studio.view"
+          },
+          {
+            "path": "/uploads",
+            "method": "POST",
+            "permission": "video-studio.edit"
+          },
+          {
+            "path": "/uploads/:id",
+            "method": "PUT",
+            "permission": "video-studio.edit"
+          },
+          {
+            "path": "/uploads/:id/finish",
+            "method": "POST",
+            "permission": "video-studio.edit"
+          },
+          {
+            "path": "/renders",
+            "method": "GET",
+            "permission": "video-studio.view"
+          },
+          {
+            "path": "/renders/:id",
+            "method": "GET",
+            "permission": "video-studio.view"
+          },
+          {
+            "path": "/renders/:id/data",
+            "method": "GET",
+            "permission": "video-studio.view"
+          },
+          {
+            "path": "/renders/:id/cancel",
+            "method": "POST",
+            "permission": "video-studio.edit"
+          },
+          {
+            "path": "/assets/:id/analyze",
+            "method": "POST",
+            "permission": "video-studio.edit"
+          },
+          {
+            "path": "/assets/:id/analysis",
+            "method": "GET",
+            "permission": "video-studio.view"
+          },
+          {
+            "path": "/assets/:id/beats",
+            "method": "GET",
+            "permission": "video-studio.view"
+          },
+          {
+            "path": "/assets/:id/silence",
+            "method": "GET",
+            "permission": "video-studio.view"
+          },
+          {
+            "path": "/assets/:id/cancel-analysis",
+            "method": "POST",
+            "permission": "video-studio.edit"
+          },
+          {
+            "path": "/projects/:id/approve-scene",
+            "method": "POST",
+            "permission": "video-studio.approve"
+          },
+          {
+            "path": "/generations",
+            "method": "GET",
+            "permission": "video-studio.view"
+          },
+          {
+            "path": "/generations",
+            "method": "POST",
+            "permission": "video-studio.edit"
+          },
+          {
+            "path": "/generations/:id",
+            "method": "GET",
+            "permission": "video-studio.view"
+          },
+          {
+            "path": "/generations/:id",
+            "method": "PUT",
+            "permission": "video-studio.edit"
+          },
+          {
+            "path": "/projects/:id/assemble",
+            "method": "POST",
+            "permission": "video-studio.edit"
+          },
+          {
+            "path": "/projects/:id/recipe",
+            "method": "POST",
+            "permission": "video-studio.edit"
+          },
+          {
+            "path": "/projects/:id/ripple-delete",
+            "method": "POST",
+            "permission": "video-studio.edit"
+          },
+          {
+            "path": "/projects/:id/tracks",
+            "method": "POST",
+            "permission": "video-studio.edit"
+          },
+          {
+            "path": "/projects/:id/layout",
+            "method": "POST",
+            "permission": "video-studio.edit"
+          },
+          {
+            "path": "/projects/:id/insert",
+            "method": "POST",
+            "permission": "video-studio.edit"
+          },
+          {
+            "path": "/projects/:id/sync",
+            "method": "POST",
+            "permission": "video-studio.edit"
+          },
+          {
+            "path": "/projects/:id/capture-frame",
+            "method": "POST",
+            "permission": "video-studio.edit"
+          },
+          {
+            "path": "/projects/:id/inspect-frame",
+            "method": "GET",
+            "permission": "video-studio.view"
+          },
+          {
+            "path": "/assets/:id/audio-window",
+            "method": "POST",
+            "permission": "video-studio.view"
+          },
+          {
+            "path": "/assets/:id/transcript",
+            "method": "GET",
+            "permission": "video-studio.view"
+          },
+          {
+            "path": "/assets/:id/transcript",
+            "method": "POST",
+            "permission": "video-studio.edit"
+          },
+          {
+            "path": "/assets/:id/transcript",
+            "method": "PUT",
+            "permission": "video-studio.edit"
+          },
+          {
+            "path": "/assets/:id/stop-transcript",
+            "method": "POST",
+            "permission": "video-studio.edit"
+          },
+          {
+            "path": "/assets/:id/import-transcript",
+            "method": "POST",
+            "permission": "video-studio.edit"
+          },
+          {
+            "path": "/search-indexes",
+            "method": "GET",
+            "permission": "video-studio.view"
+          },
+          {
+            "path": "/assets/:id/index",
+            "method": "POST",
+            "permission": "video-studio.edit"
+          },
+          {
+            "path": "/assets/:id/index",
+            "method": "PUT",
+            "permission": "video-studio.edit"
+          },
+          {
+            "path": "/assets/:id/prune-index",
+            "method": "POST",
+            "permission": "video-studio.edit"
+          },
+          {
+            "path": "/assets/:id/organize",
+            "method": "POST",
+            "permission": "video-studio.edit"
+          },
+          {
+            "path": "/assets/:id/upscale",
+            "method": "POST",
+            "permission": "video-studio.edit"
+          },
+          {
+            "path": "/assets/:id/refresh-sequence",
+            "method": "POST",
+            "permission": "video-studio.edit"
+          },
+          {
+            "path": "/assets/:id/scopes",
+            "method": "GET",
+            "permission": "video-studio.view"
+          }
+        ]
+      }
+    }
+  ],
+  "permission_levels": [
+    {
+      "id": "video-studio.view",
+      "label": "Can view",
+      "description": "Read project timelines, imported media, and exported videos."
+    },
+    {
+      "id": "video-studio.edit",
+      "label": "Can edit",
+      "description": "Import media, edit projects and storyboards, and start or cancel video exports.",
+      "implies": ["video-studio.view"]
+    },
+    {
+      "id": "video-studio.approve",
+      "label": "Can approve scenes",
+      "description": "Approve or reopen review of exact saved storyboard scenes and selected takes.",
+      "implies": ["video-studio.view"]
+    }
+  ],
+  "companion": {
+    "label": "Video Studio",
+    "icon": "film-01"
+  },
+  "contributes": {}
+}

@@ -1,0 +1,59 @@
+{
+  "tags": ["context", "compression"],
+  "author": { "name": "Ryu", "url": "https://ryuhq.com" },
+  "repository": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/headroom",
+  "homepage": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/headroom",
+  "privacyPolicyUrl": "https://ryuhq.com/privacy",
+  "termsOfServiceUrl": "https://ryuhq.com/terms",
+  "id": "@ryu/headroom",
+  "name": "Headroom Compression",
+  "version": "0.1.14",
+  "stability": "experimental",
+  "category": "Developer Tools",
+  "description": "Context compression (chopratejas/headroom): compress tool outputs, logs, files, and RAG chunks. 60-95% fewer tokens, reversible retrieval. Requires headroom-ai[mcp].",
+  "tagline": "Compress noisy context down to a fraction of its tokens",
+  "icon": "arrow-shrink-02",
+  "iconDither": { "from": 228, "to": "transparent", "direction": "down" },
+  "keywords": ["context", "compression"],
+  "surfaces": {
+    "gateway": { "support": "none" },
+    "core": { "support": "full" },
+    "desktop": { "support": "full" },
+    "island": { "support": "full" },
+    "mobile": { "support": "full" },
+    "extension": { "support": "full" },
+    "web": { "support": "full" },
+    "cli": { "support": "full" }
+  },
+  "engines": { "ryu": ">=0.1.0" },
+  "runnables": [
+    {
+      "id": "policy-headroom-compression",
+      "name": "Gateway egress compression (headroom)",
+      "kind": "policy",
+      "config": {
+        "policy_type": "compression",
+        "definition": {
+          "service": "headroom",
+          "url": "http://127.0.0.1:8787",
+          "timeout_ms": 4000,
+          "min_messages": 4
+        }
+      }
+    }
+  ],
+  "sidecars": [
+    {
+      "name": "headroom",
+      "process": {
+        "kind": "local",
+        "command": "headroom",
+        "command_env": "RYU_HEADROOM_BIN",
+        "args": ["proxy", "--host", "127.0.0.1", "--port", "8787"]
+      },
+      "port": 8787,
+      "health_path": "/health"
+    }
+  ],
+  "permission_grants": []
+}

@@ -1,0 +1,117 @@
+name: SDK CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sdk-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  javascript:
+    name: TypeScript packages and NAPI
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version: 1.3.14
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+      - uses: dtolnay/rust-toolchain@4cda84d5c5c54efe2404f9d843567869ab1699d4 # stable
+      - uses: Swatinem/rust-cache@c19371144df3bb44fab255c43d04cbc2ab54d1c4 # v2.9.1
+        with:
+          workspaces: crates/sdk/napi
+      - run: bun install --frozen-lockfile --ignore-scripts
+      - run: bun run build:native
+      - run: bun run build
+      - run: bun run check-types
+      - run: bun run test:packages
+      - run: bun run test:native
+
+  rust:
+    name: Rust kernel and bindings
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: dtolnay/rust-toolchain@4cda84d5c5c54efe2404f9d843567869ab1699d4 # stable
+        with:
+          components: rustfmt
+      - uses: Swatinem/rust-cache@c19371144df3bb44fab255c43d04cbc2ab54d1c4 # v2.9.1
+        with:
+          workspaces: |
+            crates/core/kernel-contracts
+            crates/sdk/core
+            crates/sdk/ffi
+            crates/sdk/uniffi
+            crates/sdk/napi
+      - run: cargo fmt --all --check
+      - run: cargo test --workspace --locked --all-targets
+
+  foreign:
+    name: ${{ matrix.language }} binding
+    needs: [javascript, rust]
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - language: Python
+            os: ubuntu-latest
+            setup: python
+            command: bash bindings/python/test.sh
+          - language: Go
+            os: ubuntu-latest
+            setup: go
+            command: bash bindings/go/test.sh
+          - language: C#
+            os: ubuntu-latest
+            setup: dotnet
+            command: bash bindings/csharp/test.sh
+          - language: Java
+            os: ubuntu-latest
+            setup: java
+            command: bash bindings/java/test.sh
+          - language: Kotlin
+            os: ubuntu-latest
+            setup: kotlin
+            command: bash bindings/kotlin/test.sh
+          - language: Swift
+            os: macos-latest
+            setup: swift
+            command: bash bindings/swift/test.sh
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: dtolnay/rust-toolchain@4cda84d5c5c54efe2404f9d843567869ab1699d4 # stable
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        if: matrix.setup == 'python'
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
+        if: matrix.setup == 'go'
+        with:
+          go-version: "1.23"
+      - uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # v4
+        if: matrix.setup == 'dotnet'
+        with:
+          dotnet-version: "8.0.x"
+      - uses: actions/setup-java@cf277c60eb25467037889841efdb72551f06f6c3 # v4
+        if: matrix.setup == 'kotlin' || matrix.setup == 'java'
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: gradle/actions/setup-gradle@ed408507eac070d1f99cc633dbcf757c94c7933a # v4
+        if: matrix.setup == 'kotlin'
+        with:
+          gradle-version: "8.14"
+      - name: Install C# generator
+        if: matrix.setup == 'dotnet'
+        run: cargo install uniffi-bindgen-cs --git https://github.com/NordSecurity/uniffi-bindgen-cs --rev 3264197034c028e6c7502159607daf9f238b72c5
+      - run: ${{ matrix.command }}

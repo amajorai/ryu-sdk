@@ -1,0 +1,193 @@
+{
+  "tags": [
+    "security",
+    "vulnerability",
+    "code review",
+    "threat model",
+    "findings",
+    "static analysis"
+  ],
+  "author": { "name": "Ryu", "url": "https://ryuhq.com" },
+  "repository": "https://github.com/amajorai/ryu/tree/main/apps-store/security",
+  "homepage": "https://github.com/amajorai/ryu/tree/main/apps-store/security",
+  "privacyPolicyUrl": "https://ryuhq.com/privacy",
+  "termsOfServiceUrl": "https://ryuhq.com/terms",
+  "id": "@ryu/security",
+  "name": "Security",
+  "version": "0.1.0",
+  "stability": "experimental",
+  "category": "Security",
+  "description": "A local-first security workbench for reviewing authorized repositories, validating static findings, and keeping scan evidence and safe remediation proposals together.",
+  "tagline": "Find, confirm, and safely fix vulnerabilities",
+  "keywords": [
+    "security",
+    "vulnerability",
+    "code review",
+    "threat model",
+    "findings"
+  ],
+  "icon": "shield-check",
+  "iconDither": { "from": 312, "to": "transparent", "direction": "down" },
+  "surfaces": {
+    "gateway": { "support": "none" },
+    "core": { "support": "full" },
+    "desktop": { "support": "full" },
+    "island": { "support": "limited" },
+    "mobile": { "support": "limited" },
+    "extension": { "support": "none" },
+    "web": { "support": "limited" },
+    "cli": { "support": "list" }
+  },
+  "engines": { "ryu": ">=0.1.0" },
+  "runnables": [
+    {
+      "id": "security-companion",
+      "name": "Security",
+      "kind": "companion",
+      "config": {
+        "label": "Security",
+        "ui_entry": "./dist/index.html",
+        "ui_format": "html"
+      }
+    }
+  ],
+  "permission_grants": ["app:http"],
+  "permission_levels": [
+    {
+      "id": "security.view",
+      "label": "Can view security evidence",
+      "description": "Browse repositories, saved scans, findings, coverage, and retained evidence."
+    },
+    {
+      "id": "security.run",
+      "label": "Can run security scans",
+      "description": "Start read-only local static scans for repositories and scoped folders.",
+      "implies": ["security.view"]
+    },
+    {
+      "id": "security.manage",
+      "label": "Can triage findings",
+      "description": "Change finding status and prepare read-only remediation proposals; the app never applies a patch.",
+      "implies": ["security.view"]
+    }
+  ],
+  "companion": {
+    "label": "Security",
+    "icon": "shield-check"
+  },
+  "sidecars": [
+    {
+      "name": "security",
+      "process": {
+        "kind": "local",
+        "command": "ryu-security",
+        "command_env": "RYU_SECURITY_BIN",
+        "port_env": "RYU_SECURITY_PORT"
+      },
+      "port": 8044,
+      "health_path": "/health",
+      "lazy": true,
+      "idle_stop_secs": 900,
+      "http": {
+        "mount": "/api/security",
+        "public_mount": "/api/security",
+        "max_body_bytes": 262144,
+        "routes": [
+          {
+            "path": "/bootstrap",
+            "method": "GET",
+            "permission": "security.view"
+          },
+          {
+            "path": "/repositories",
+            "method": "GET",
+            "permission": "security.view"
+          },
+          {
+            "path": "/repositories",
+            "method": "POST",
+            "permission": "security.run"
+          },
+          {
+            "path": "/repositories/:id",
+            "method": "GET",
+            "permission": "security.view"
+          },
+          { "path": "/scans", "method": "GET", "permission": "security.view" },
+          { "path": "/scans", "method": "POST", "permission": "security.run" },
+          {
+            "path": "/scans/:id",
+            "method": "GET",
+            "permission": "security.view"
+          },
+          {
+            "path": "/scans/:id/cancel",
+            "method": "POST",
+            "permission": "security.run"
+          },
+          {
+            "path": "/findings",
+            "method": "GET",
+            "permission": "security.view"
+          },
+          {
+            "path": "/findings/:id",
+            "method": "GET",
+            "permission": "security.view"
+          },
+          {
+            "path": "/findings/:id/status",
+            "method": "POST",
+            "permission": "security.manage"
+          },
+          {
+            "path": "/findings/:id/patch",
+            "method": "POST",
+            "permission": "security.manage"
+          }
+        ]
+      }
+    }
+  ],
+  "contributes": {
+    "sidebar_buttons": [
+      {
+        "id": "security-scans",
+        "title": "Scans",
+        "icon": "shield-check",
+        "target": "/plugin/app__security-companion",
+        "context": { "screen": "scans" },
+        "order": 50
+      },
+      {
+        "id": "security-findings",
+        "title": "Findings",
+        "icon": "alert-02",
+        "target": "/plugin/app__security-companion",
+        "context": { "screen": "findings" },
+        "order": 51
+      },
+      {
+        "id": "security-repositories",
+        "title": "Repositories",
+        "icon": "folder-01",
+        "target": "/plugin/app__security-companion",
+        "context": { "screen": "repositories" },
+        "order": 52
+      }
+    ],
+    "chat_widget_templates": [
+      {
+        "id": "security.chat",
+        "title": "Security widget",
+        "description": "Security chat widget metadata is coming soon; use the Security workbench for scans and findings.",
+        "triggers": ["security widget"],
+        "examples": ["Show me security findings"],
+        "backing": {},
+        "display_mode": "inline",
+        "safe_action_ids": [],
+        "availability": "coming-soon"
+      }
+    ]
+  }
+}

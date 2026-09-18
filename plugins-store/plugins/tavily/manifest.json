@@ -1,0 +1,171 @@
+{
+  "tags": ["search", "web", "extract"],
+  "author": { "name": "Ryu", "url": "https://ryuhq.com" },
+  "repository": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/tavily",
+  "homepage": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/tavily",
+  "privacyPolicyUrl": "https://ryuhq.com/privacy",
+  "termsOfServiceUrl": "https://ryuhq.com/terms",
+  "id": "@ryu/tavily",
+  "name": "Tavily Search",
+  "version": "0.1.14",
+  "stability": "experimental",
+  "description": "Search-and-extract for agents via the Tavily API (https://tavily.com), exposed as two declarative HTTP tools. Provides the swappable `web.search` and `web.extract` layers, so selecting it in the layer picker re-points the stable `web.search` / `web.extract` tools at Tavily without changing what agents call. Requires a BYOK Tavily API key.",
+  "iconUrl": "https://www.tavily.com/favicon.ico",
+  "iconPadding": "md",
+  "iconDither": { "from": 272, "to": "transparent", "direction": "down" },
+  "tagline": "Agent-tuned web search and extraction",
+  "keywords": ["search", "web", "extract"],
+  "category": "Search",
+  "surfaces": {
+    "gateway": { "support": "none" },
+    "core": { "support": "full" },
+    "desktop": { "support": "full" },
+    "island": { "support": "limited" },
+    "mobile": { "support": "limited" },
+    "extension": { "support": "limited" },
+    "web": { "support": "full" },
+    "cli": { "support": "full" }
+  },
+  "engines": {
+    "ryu": ">=0.1.0"
+  },
+  "runnables": [
+    {
+      "id": "tool-tavily-search",
+      "name": "Tavily Search",
+      "kind": "tool",
+      "config": {
+        "slug": "tavily.search",
+        "backend": "http",
+        "method": "POST",
+        "url": "https://api.tavily.com/search",
+        "secret_headers": {
+          "Authorization": "Bearer env:RYU_TAVILY_API_KEY"
+        },
+        "fail_open": true,
+        "unwrap_body": true,
+        "body_defaults": {
+          "max_results": 10,
+          "search_depth": "basic"
+        },
+        "description": "Web search tuned for agents. Returns ranked results with titles, URLs, and extracted content. Requires RYU_TAVILY_API_KEY.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "query": {
+              "type": "string",
+              "description": "The search query."
+            },
+            "max_results": {
+              "type": "integer",
+              "description": "Number of results to return (default 10).",
+              "minimum": 1,
+              "maximum": 20
+            },
+            "search_depth": {
+              "type": "string",
+              "description": "How much work Tavily does per query.",
+              "enum": ["basic", "advanced"]
+            }
+          },
+          "required": ["query"]
+        }
+      }
+    },
+    {
+      "id": "tool-tavily-extract",
+      "name": "Tavily Extract",
+      "kind": "tool",
+      "config": {
+        "slug": "tavily.extract",
+        "backend": "http",
+        "method": "POST",
+        "url": "https://api.tavily.com/extract",
+        "secret_headers": {
+          "Authorization": "Bearer env:RYU_TAVILY_API_KEY"
+        },
+        "fail_open": true,
+        "unwrap_body": true,
+        "description": "Extract the readable content of one or more URLs. Requires RYU_TAVILY_API_KEY.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "urls": {
+              "type": "array",
+              "description": "URLs to extract content from.",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "required": ["urls"]
+        }
+      }
+    }
+  ],
+  "provides": [
+    {
+      "capability": "web.search",
+      "version": "1.0.0",
+      "title": "Search",
+      "selectable": true,
+      "tools": {
+        "web.search": {
+          "tool": "tavily.search",
+          "args": {
+            "limit": "max_results"
+          },
+          "response": {
+            "results": "results",
+            "fields": {
+              "title": "title",
+              "url": "url",
+              "snippet": "content",
+              "score": "score"
+            }
+          }
+        }
+      }
+    },
+    {
+      "capability": "web.extract",
+      "version": "1.0.0",
+      "title": "Extract",
+      "selectable": true,
+      "tools": {
+        "web.extract": {
+          "tool": "tavily.extract",
+          "args": {
+            "url": "urls[]",
+            "format": ""
+          },
+          "response": {
+            "results": "results",
+            "fields": {
+              "url": "url",
+              "content": "raw_content"
+            }
+          }
+        }
+      }
+    }
+  ],
+  "permission_grants": ["tool:http-egress:api.tavily.com"],
+  "contributes": {
+    "settings_tabs": [
+      {
+        "id": "tavily.settings",
+        "title": "Tavily Search",
+        "scope": "node",
+        "fields": [
+          {
+            "type": "secret",
+            "pref_key": "RYU_TAVILY_API_KEY",
+            "label": "Tavily API key",
+            "description": "Create a key at https://app.tavily.com/home and paste it here. Stored encrypted on this node and never shown again — re-paste to change it. Without a key the Tavily tools stay installed but return nothing, so `web.search` / `web.extract` fall back to whichever other provider you select."
+          }
+        ]
+      }
+    ]
+  }
+}

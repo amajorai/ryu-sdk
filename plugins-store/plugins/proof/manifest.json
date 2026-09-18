@@ -1,0 +1,66 @@
+{
+  "tags": ["agent", "verification", "autonomy", "goals"],
+  "author": { "name": "Ryu", "url": "https://ryuhq.com" },
+  "repository": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/proof",
+  "homepage": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/proof",
+  "privacyPolicyUrl": "https://ryuhq.com/privacy",
+  "termsOfServiceUrl": "https://ryuhq.com/terms",
+  "id": "@ryu/proof",
+  "name": "Proof of Work",
+  "version": "0.1.14",
+  "stability": "experimental",
+  "description": "The stricter sibling of `/goal`: an independent verifier agent has to prove with tool-gathered evidence that the goal is actually done, rather than judging the transcript alone. The loop runs until that proof lands; `/proof clear` stops it and the verifier model is configurable.",
+  "tagline": "Keep going until a verifier proves it's done",
+  "keywords": ["agent", "verification", "autonomy", "goals"],
+  "category": "Security",
+  "icon": "stamp-01",
+  "iconDither": { "from": 306, "to": "transparent", "direction": "down" },
+  "surfaces": {
+    "gateway": { "support": "none" },
+    "core": { "support": "full" },
+    "desktop": { "support": "full" },
+    "island": { "support": "limited" },
+    "mobile": { "support": "limited" },
+    "extension": { "support": "limited" },
+    "web": { "support": "full" },
+    "cli": { "support": "full" }
+  },
+  "engines": { "ryu": ">=0.1.0" },
+  "runnables": [],
+  "permission_grants": ["hook:run-agent", "storage:kv"],
+  "activation_events": ["*"],
+  "contributes": {
+    "slash_commands": [
+      {
+        "id": "proof.set",
+        "command": "/proof",
+        "description": "Pursue a goal until an INDEPENDENT verifier agent proves — with tool-gathered evidence — that it is actually done. Stronger than /goal, which only judges the transcript. Use '/proof clear' to stop."
+      }
+    ],
+    "settings_tabs": [
+      {
+        "id": "proof.settings",
+        "title": "Proof of Work",
+        "fields": [
+          {
+            "type": "model_picker",
+            "pref_key": "proof-verifier-model",
+            "label": "Verifier model",
+            "description": "Optional model that checks the evidence. Leave empty to use the node's default."
+          }
+        ]
+      }
+    ],
+    "turn_hooks": [
+      {
+        "id": "proof.loop",
+        "on": "post_assistant_turn",
+        "match": {
+          "commands": ["/proof"],
+          "stateful": true
+        },
+        "code_file": "hooks/loop.js"
+      }
+    ]
+  }
+}

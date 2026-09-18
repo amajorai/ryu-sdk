@@ -1,0 +1,60 @@
+{
+  "tags": ["tokens", "cost", "proxy", "compression", "context"],
+  "author": { "name": "Ryu", "url": "https://ryuhq.com" },
+  "repository": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/pxpipe",
+  "homepage": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/pxpipe",
+  "privacyPolicyUrl": "https://ryuhq.com/privacy",
+  "termsOfServiceUrl": "https://ryuhq.com/terms",
+  "id": "@ryu/pxpipe",
+  "name": "pxpipe",
+  "version": "0.1.14",
+  "stability": "experimental",
+  "category": "Developer Tools",
+  "description": "Token-saving loopback proxy (https://github.com/teamchong/pxpipe): it renders the bulky, static parts of a request — the system prompt, the tool-schema block, large tool results and older history — into PNG pages and sends them as image blocks, which vision models price by pixel area rather than by character. Dense text lands at roughly 3.1 characters per image-token against 1 per text-token, so the same budget carries ~4.7x more context; recent turns and sparse content stay as text. This plugin owns the process lifecycle (spawn, health, restart) and mounts pxpipe's dashboard behind Core auth. It is a TRANSPARENT proxy and holds no credential of its own: it forwards whatever key its caller sends, so point a custom provider at http://127.0.0.1:47821 with your own API key (see README). Runs `npx -y pxpipe-proxy@0.11.1`; needs Node on PATH and fetches the package on first start.",
+  "tagline": "Pay vision-token prices for the boring half of every prompt",
+  "icon": "ai-image",
+  "iconDither": { "from": 24, "to": "transparent", "direction": "down" },
+  "keywords": ["tokens", "cost", "proxy", "compression", "context"],
+  "surfaces": {
+    "gateway": { "support": "none" },
+    "core": { "support": "full" },
+    "desktop": { "support": "full" },
+    "island": { "support": "full" },
+    "mobile": { "support": "full" },
+    "extension": { "support": "full" },
+    "web": { "support": "full" },
+    "cli": { "support": "full" }
+  },
+  "engines": { "ryu": ">=0.1.0" },
+  "runnables": [],
+  "permission_grants": [],
+  "sidecars": [
+    {
+      "name": "pxpipe",
+      "process": {
+        "kind": "local",
+        "command": "npx",
+        "args": ["-y", "pxpipe-proxy@0.11.1"],
+        "port_env": "PORT"
+      },
+      "port": 47821,
+      "health_path": "/proxy-stats",
+      "http": {
+        "max_body_bytes": 4194304,
+        "routes": [
+          { "path": "/" },
+          { "path": "/dashboard" },
+          { "path": "/proxy-stats" },
+          { "path": "/proxy-recent" },
+          { "path": "/proxy-latest-png" },
+          { "path": "/api/stats.json" },
+          { "path": "/api/sessions.json" },
+          { "path": "/api/current-session.json" },
+          { "path": "/api/compression" },
+          { "path": "/api/image-source" },
+          { "path": "/fragments/*rest" }
+        ]
+      }
+    }
+  ]
+}

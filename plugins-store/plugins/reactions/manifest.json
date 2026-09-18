@@ -1,0 +1,48 @@
+{
+  "tags": ["chat", "emoji", "reactions", "messages"],
+  "author": { "name": "Ryu", "url": "https://ryuhq.com" },
+  "repository": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/reactions",
+  "homepage": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/reactions",
+  "privacyPolicyUrl": "https://ryuhq.com/privacy",
+  "termsOfServiceUrl": "https://ryuhq.com/terms",
+  "id": "@ryu/reactions",
+  "name": "Message Reactions",
+  "version": "0.1.0",
+  "stability": "experimental",
+  "category": "Productivity",
+  "description": "Adds emoji reactions to persisted chat messages through the shared message-action contribution surface.",
+  "tagline": "React to messages with emoji",
+  "keywords": ["chat", "emoji", "reactions", "messages"],
+  "icon": "smile",
+  "iconDither": { "from": 50, "to": "transparent", "direction": "down" },
+  "surfaces": {
+    "gateway": { "support": "none" },
+    "core": { "support": "full" },
+    "desktop": { "support": "full" },
+    "island": { "support": "limited" },
+    "mobile": { "support": "limited" },
+    "extension": { "support": "limited" },
+    "web": { "support": "limited" },
+    "cli": { "support": "none" }
+  },
+  "engines": { "ryu": ">=0.1.0" },
+  "runnables": [],
+  "activation_events": ["*"],
+  "contributes": {
+    "message_actions": [
+      {
+        "id": "reactions.picker",
+        "label": "Add reaction",
+        "icon": "smile",
+        "target": "any",
+        "kind": "menu",
+        "capability": "reactions.toggle",
+        "args": {
+          "renderer": "reaction-picker",
+          "dispatch": "reactions.toggle"
+        },
+        "order": 100
+      }
+    ]
+  }
+}
