@@ -1,0 +1,46 @@
+{
+  "tags": ["content", "creator", "publishing", "scheduling", "analytics"],
+  "author": { "name": "Ryu", "url": "https://ryuhq.com" },
+  "repository": "https://github.com/amajorai/ryu-content",
+  "homepage": "https://github.com/amajorai/ryu-content",
+  "privacyPolicyUrl": "https://ryuhq.com/privacy",
+  "termsOfServiceUrl": "https://ryuhq.com/terms",
+  "id": "@ryu/content",
+  "name": "Content",
+  "version": "0.1.14",
+  "stability": "experimental",
+  "description": "A list-only catalog preview for planned local-first content projects, schedules, and performance signals.",
+  "tagline": "Shape ideas into a repeatable publishing system",
+  "keywords": ["content", "creator", "publishing", "scheduling", "analytics"],
+  "category": "Creative",
+  "icon": "film-01",
+  "iconDither": { "from": 198, "to": "transparent", "direction": "down" },
+  "surfaces": {
+    "gateway": { "support": "none" },
+    "core": { "support": "list" },
+    "desktop": { "support": "list" },
+    "island": { "support": "none" },
+    "mobile": { "support": "none" },
+    "extension": { "support": "none" },
+    "web": { "support": "list" },
+    "cli": { "support": "list" }
+  },
+  "engines": { "ryu": ">=0.1.0" },
+  "runnables": [],
+  "permission_grants": [],
+  "contributes": {
+    "chat_widget_templates": [
+      {
+        "id": "content.chat",
+        "title": "Content widget",
+        "description": "Content chat widget metadata is coming soon; no render tool is available yet.",
+        "triggers": ["content widget"],
+        "examples": ["Show me a content widget"],
+        "backing": {},
+        "display_mode": "inline",
+        "safe_action_ids": [],
+        "availability": "coming-soon"
+      }
+    ]
+  }
+}

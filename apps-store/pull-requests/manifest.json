@@ -1,0 +1,179 @@
+{
+  "tags": ["github", "git", "pull requests", "issues", "code review", "ci"],
+  "author": { "name": "Ryu", "url": "https://ryuhq.com" },
+  "repository": "https://github.com/amajorai/ryu-pull-requests",
+  "homepage": "https://github.com/amajorai/ryu-pull-requests",
+  "privacyPolicyUrl": "https://ryuhq.com/privacy",
+  "termsOfServiceUrl": "https://ryuhq.com/terms",
+  "id": "@ryu/pull-requests",
+  "name": "Pull Requests",
+  "version": "0.1.14",
+  "stability": "experimental",
+  "category": "Developer Tools",
+  "description": "A focused GitHub work inbox for Ryu. Browse pull requests and issues across repositories, inspect summaries and discussion, then review, manage stacked pull requests, merge changes, or close and comment on issues through the locally authenticated GitHub CLI.",
+  "tagline": "Review GitHub pull requests and issues without leaving Ryu",
+  "keywords": ["github", "git", "pull requests", "issues", "code review", "ci"],
+  "icon": "git-pull-request",
+  "iconDither": { "from": 221, "to": "transparent", "direction": "down" },
+  "surfaces": {
+    "gateway": { "support": "none" },
+    "core": { "support": "none" },
+    "desktop": { "support": "full" },
+    "island": { "support": "limited" },
+    "mobile": { "support": "limited" },
+    "extension": { "support": "none" },
+    "web": { "support": "limited" },
+    "cli": { "support": "list" }
+  },
+  "engines": { "ryu": ">=0.1.0" },
+  "runnables": [
+    {
+      "id": "pull-requests-companion",
+      "name": "Pull Requests",
+      "kind": "companion",
+      "config": {
+        "label": "Pull Requests",
+        "ui_entry": "./dist/index.html",
+        "ui_format": "html"
+      }
+    }
+  ],
+  "sidecars": [
+    {
+      "name": "pull-requests",
+      "process": {
+        "kind": "local",
+        "command": "ryu-pull-requests",
+        "command_env": "RYU_PULL_REQUESTS_BIN",
+        "port_env": "RYU_PULL_REQUESTS_PORT"
+      },
+      "port": 8016,
+      "health_path": "/health",
+      "lazy": true,
+      "idle_stop_secs": 300,
+      "http": {
+        "mount": "/api/pull-requests",
+        "public_mount": "/api/pull-requests",
+        "routes": [
+          { "path": "/auth/device", "permission": "pull-requests.review" },
+          { "path": "/status", "permission": "pull-requests.view" },
+          { "path": "/repository", "permission": "pull-requests.view" },
+          {
+            "path": "/repository/create",
+            "permission": "pull-requests.review"
+          },
+          { "path": "/pulls", "permission": "pull-requests.view" },
+          { "path": "/pulls/branch", "permission": "pull-requests.view" },
+          {
+            "path": "/pulls/:owner/:repo/:number",
+            "permission": "pull-requests.view"
+          },
+          {
+            "path": "/pulls/:owner/:repo/:number/diff",
+            "permission": "pull-requests.view"
+          },
+          {
+            "path": "/pulls/:owner/:repo/:number/stack",
+            "permission": "pull-requests.review"
+          },
+          {
+            "path": "/pulls/:owner/:repo/:number/stack/add",
+            "permission": "pull-requests.review"
+          },
+          {
+            "path": "/pulls/:owner/:repo/:number/stack/unstack",
+            "permission": "pull-requests.review"
+          },
+          {
+            "path": "/pulls/:owner/:repo/:number/comment",
+            "permission": "pull-requests.review"
+          },
+          {
+            "path": "/pulls/:owner/:repo/:number/review",
+            "permission": "pull-requests.review"
+          },
+          {
+            "path": "/pulls/:owner/:repo/:number/merge",
+            "permission": "pull-requests.review"
+          },
+          {
+            "path": "/pulls/:owner/:repo/:number/merge-async",
+            "permission": "pull-requests.review"
+          },
+          {
+            "path": "/pulls/:owner/:repo/:number/merge-async/status",
+            "permission": "pull-requests.view"
+          },
+          {
+            "path": "/pulls/:owner/:repo/:number/ready",
+            "permission": "pull-requests.review"
+          },
+          { "path": "/issues", "permission": "pull-requests.view" },
+          {
+            "path": "/issues/:owner/:repo/:number",
+            "permission": "pull-requests.view"
+          },
+          {
+            "path": "/issues/:owner/:repo/:number/comment",
+            "permission": "pull-requests.review"
+          },
+          {
+            "path": "/issues/:owner/:repo/:number/state",
+            "permission": "pull-requests.review"
+          }
+        ]
+      }
+    }
+  ],
+  "permission_grants": ["app:http", "shell:integrate"],
+  "permission_levels": [
+    {
+      "id": "pull-requests.view",
+      "label": "Can view",
+      "description": "Use your local GitHub CLI login to list pull requests and issues and read their summaries and discussion."
+    },
+    {
+      "id": "pull-requests.review",
+      "label": "Can review",
+      "description": "Post comments and reviews, mark drafts ready, manage stacked pull requests, merge pull requests, and comment on or close issues using your local GitHub CLI credentials.",
+      "implies": ["pull-requests.view"]
+    }
+  ],
+  "companion": {
+    "label": "Pull Requests",
+    "icon": "git-pull-request"
+  },
+  "contributes": {
+    "sidebar_buttons": [
+      {
+        "id": "pull-requests-pulls",
+        "title": "Pull requests",
+        "icon": "git-pull-request",
+        "target": "/plugin/app__pull-requests-companion",
+        "context": { "view": "pulls" },
+        "order": 33
+      },
+      {
+        "id": "pull-requests-issues",
+        "title": "Issues",
+        "icon": "issue-opened",
+        "target": "/plugin/app__pull-requests-companion",
+        "context": { "view": "issues" },
+        "order": 34
+      }
+    ],
+    "chat_widget_templates": [
+      {
+        "id": "pull-requests.chat",
+        "title": "Pull Requests widget",
+        "description": "Pull Requests chat widget metadata is coming soon; no render tool is available yet.",
+        "triggers": ["pull requests widget"],
+        "examples": ["Show me a pull requests widget"],
+        "backing": {},
+        "display_mode": "inline",
+        "safe_action_ids": [],
+        "availability": "coming-soon"
+      }
+    ]
+  }
+}

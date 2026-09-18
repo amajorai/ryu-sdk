@@ -1,0 +1,10 @@
+{
+  "extends": "@ryu/config/tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "allowImportingTsExtensions": true,
+    "types": ["bun", "node"],
+    "noEmit": true
+  },
+  "include": ["src/**/*"]
+}

@@ -1,0 +1,52 @@
+{
+  "tags": ["planning", "automation", "loop", "productivity"],
+  "author": { "name": "Ryu", "url": "https://ryuhq.com" },
+  "repository": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/plan-continue",
+  "homepage": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/plan-continue",
+  "privacyPolicyUrl": "https://ryuhq.com/privacy",
+  "termsOfServiceUrl": "https://ryuhq.com/terms",
+  "id": "@ryu/plan-continue",
+  "name": "Plan Continue",
+  "version": "0.1.14",
+  "stability": "experimental",
+  "description": "While plan mode is on and the plan has not been accepted, this injects a follow-up turn after each completed turn asking the agent to carry on planning — so a plan never stalls waiting for you to type \"continue\".",
+  "tagline": "Stop typing \"continue\" during plan mode",
+  "keywords": ["planning", "automation", "loop", "productivity"],
+  "category": "Productivity",
+  "icon": "task-01",
+  "iconDither": { "from": 198, "to": "transparent", "direction": "down" },
+  "surfaces": {
+    "gateway": { "support": "none" },
+    "core": { "support": "full" },
+    "desktop": { "support": "full" },
+    "island": { "support": "limited" },
+    "mobile": { "support": "limited" },
+    "extension": { "support": "limited" },
+    "web": { "support": "full" },
+    "cli": { "support": "full" }
+  },
+  "engines": { "ryu": ">=0.1.0" },
+  "runnables": [],
+  "permission_grants": ["storage:kv"],
+  "activation_events": ["*"],
+  "contributes": {
+    "slash_commands": [
+      {
+        "id": "plan-continue.toggle",
+        "command": "/plan-continue",
+        "description": "Turn the plan-mode auto-continue off or on for this chat ('/plan-continue off' | '/plan-continue on')."
+      }
+    ],
+    "turn_hooks": [
+      {
+        "id": "plan-continue.loop",
+        "on": "post_assistant_turn",
+        "match": {
+          "flag": "ryu.plan",
+          "commands": ["/plan-continue"]
+        },
+        "code_file": "hooks/loop.js"
+      }
+    ]
+  }
+}

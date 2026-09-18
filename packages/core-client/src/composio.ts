@@ -1,0 +1,237 @@
+// apps/desktop/src/lib/api/composio.ts
+//
+// Typed client for Core's Composio browse catalog (`/api/composio/*`). Core uses
+// Connect's tenant-scoped service in remote mode, with embedded compatibility
+// otherwise. These descriptors feed the agent editor's Tools/Triggers pickers.
+
+import { type ApiTarget, request } from "./client.ts";
+
+/** Whether a Composio key is configured + the active REST base. */
+export interface ComposioStatus {
+	baseUrl: string;
+	configured: boolean;
+	executionOwner?: "connect";
+}
+
+/** A Composio toolkit (an integration like GitHub, Gmail, Slack). */
+export interface ComposioToolkit {
+	description: string | null;
+	logo: string | null;
+	name: string;
+	slug: string;
+}
+
+/** A Composio action (a callable tool within a toolkit). */
+export interface ComposioAction {
+	description: string | null;
+	displayName: string;
+	name: string;
+	noAuth: boolean;
+	toolkit: string;
+}
+
+/** A Composio trigger type (an event a toolkit can fire). */
+export interface ComposioTrigger {
+	config?: Record<string, unknown> | null;
+	description: string | null;
+	displayName: string;
+	name: string;
+	toolkit: string;
+}
+
+interface ToolkitWire {
+	description?: string | null;
+	logo?: string | null;
+	name?: string;
+	slug?: string;
+}
+
+interface ActionWire {
+	description?: string | null;
+	display_name?: string;
+	name?: string;
+	no_auth?: boolean;
+	toolkit?: string;
+}
+
+interface TriggerWire {
+	config?: unknown;
+	description?: string | null;
+	display_name?: string;
+	name?: string;
+	toolkit?: string;
+}
+
+export async function fetchComposioStatus(
+	target: ApiTarget
+): Promise<ComposioStatus> {
+	const json = await request<{
+		configured?: boolean;
+		base_url?: string;
+		execution_owner?: string;
+	}>(target, "/api/composio/status");
+	return {
+		configured: json.configured ?? false,
+		baseUrl: json.base_url ?? "",
+		...(json.execution_owner === "connect"
+			? { executionOwner: "connect" as const }
+			: {}),
+	};
+}
+
+export async function fetchComposioToolkits(
+	target: ApiTarget
+): Promise<ComposioToolkit[]> {
+	const json = await request<{ data?: ToolkitWire[] }>(
+		target,
+		"/api/composio/toolkits"
+	);
+	return (json.data ?? []).map((t) => ({
+		slug: t.slug ?? "",
+		name: t.name ?? t.slug ?? "",
+		description: t.description ?? null,
+		logo: t.logo ?? null,
+	}));
+}
+
+export async function fetchComposioActions(
+	target: ApiTarget,
+	toolkit: string,
+	query = ""
+): Promise<ComposioAction[]> {
+	const params = new URLSearchParams({ toolkit });
+	if (query) {
+		params.set("q", query);
+	}
+	const json = await request<{ data?: ActionWire[] }>(
+		target,
+		`/api/composio/actions?${params.toString()}`
+	);
+	return (json.data ?? []).map((a) => ({
+		name: a.name ?? "",
+		displayName: a.display_name ?? a.name ?? "",
+		description: a.description ?? null,
+		toolkit: a.toolkit ?? toolkit,
+		noAuth: a.no_auth ?? false,
+	}));
+}
+
+export async function fetchComposioTriggers(
+	target: ApiTarget,
+	toolkit: string
+): Promise<ComposioTrigger[]> {
+	const json = await request<{ data?: TriggerWire[] }>(
+		target,
+		`/api/composio/triggers?toolkit=${encodeURIComponent(toolkit)}`
+	);
+	return (json.data ?? []).map((t) => ({
+		config:
+			t.config && typeof t.config === "object" && !Array.isArray(t.config)
+				? (t.config as Record<string, unknown>)
+				: null,
+		name: t.name ?? "",
+		displayName: t.display_name ?? t.name ?? "",
+		description: t.description ?? null,
+		toolkit: t.toolkit ?? toolkit,
+	}));
+}
+
+/** One of the user's Composio connected accounts. */
+export type ConnectionAccessLevel =
+	| "risk_based"
+	| "read_only"
+	| "write"
+	| "full";
+
+export interface ComposioConnection {
+	/** Ryu's per-connection action ceiling; unknown values use the safe default. */
+	accessLevel: ConnectionAccessLevel;
+	/** Whether the connection is active (ready for tool execution). */
+	active: boolean;
+	/** The connected-account id (poll this after the OAuth redirect). */
+	id: string;
+	/** Raw Composio status (e.g. ACTIVE, INITIATED, EXPIRED, FAILED). */
+	status: string;
+	/** Toolkit slug the connection is for. */
+	toolkit: string;
+}
+
+interface ConnectionWire {
+	access_level?: unknown;
+	active?: boolean;
+	id?: string;
+	status?: string;
+	toolkit?: string;
+}
+
+/** List the user's connections, optionally filtered to one toolkit. */
+export async function fetchComposioConnections(
+	target: ApiTarget,
+	toolkit = ""
+): Promise<ComposioConnection[]> {
+	const path = toolkit
+		? `/api/composio/connections?toolkit=${encodeURIComponent(toolkit)}`
+		: "/api/composio/connections";
+	const json = await request<{ data?: ConnectionWire[] }>(target, path);
+	return (json.data ?? []).map((c) => ({
+		accessLevel: normalizeAccessLevel(c.access_level),
+		id: c.id ?? "",
+		toolkit: c.toolkit ?? toolkit,
+		status: c.status ?? "",
+		active: c.active ?? false,
+	}));
+}
+
+function normalizeAccessLevel(value: unknown): ConnectionAccessLevel {
+	if (
+		value === "risk_based" ||
+		value === "read_only" ||
+		value === "write" ||
+		value === "full"
+	) {
+		return value;
+	}
+	return "risk_based";
+}
+
+/** Completion metadata only; refresh the connection list for its access policy. */
+export interface ComposioConnectionCompletion {
+	active: true;
+	id: string;
+	status: "ACTIVE";
+	toolkit: string;
+}
+
+export async function completeComposioConnection(
+	target: ApiTarget,
+	sessionUri: string,
+	send: typeof request = request
+): Promise<ComposioConnectionCompletion> {
+	if (!sessionUri || new TextEncoder().encode(sessionUri).byteLength > 4096) {
+		throw new Error("Invalid callback session URI");
+	}
+	const value = await send<Record<string, unknown>>(
+		target,
+		"/api/composio/connections/complete",
+		{
+			method: "POST",
+			body: { sessionUri },
+			signal: AbortSignal.timeout(45_000),
+		}
+	);
+	if (
+		typeof value.id !== "string" ||
+		!value.id ||
+		typeof value.toolkit !== "string" ||
+		value.status !== "ACTIVE" ||
+		value.active !== true
+	) {
+		throw new Error("Core did not confirm an active connection");
+	}
+	return {
+		id: value.id,
+		toolkit: value.toolkit,
+		status: "ACTIVE",
+		active: true,
+	};
+}
