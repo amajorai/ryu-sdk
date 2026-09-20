@@ -1,0 +1,132 @@
+{
+  "tags": ["learning", "skills", "memory", "improvement"],
+  "author": { "name": "Ryu", "url": "https://ryuhq.com" },
+  "repository": "https://github.com/amajorai/ryu-learning",
+  "homepage": "https://github.com/amajorai/ryu-learning",
+  "privacyPolicyUrl": "https://ryuhq.com/privacy",
+  "termsOfServiceUrl": "https://ryuhq.com/terms",
+  "id": "@ryu/learning",
+  "name": "Learning",
+  "version": "0.1.14",
+  "stability": "experimental",
+  "category": "Knowledge & Memory",
+  "description": "Learning loop: turn chats and runs into reusable skills, gated by the approval Inbox, with an experience log of what was learned.",
+  "tagline": "Turn your chats into reusable skills",
+  "keywords": ["learning", "skills", "memory", "improvement"],
+  "icon": "mortarboard-01",
+  "iconDither": { "from": 342, "to": "transparent", "direction": "down" },
+  "surfaces": {
+    "gateway": { "support": "none" },
+    "core": { "support": "none" },
+    "desktop": { "support": "full" },
+    "island": { "support": "limited" },
+    "mobile": { "support": "limited" },
+    "extension": { "support": "none" },
+    "web": { "support": "full" },
+    "cli": { "support": "list" }
+  },
+  "engines": {
+    "ryu": ">=0.1.0"
+  },
+  "runnables": [
+    {
+      "id": "learning-companion",
+      "name": "Learning",
+      "kind": "companion",
+      "config": {
+        "label": "Learning",
+        "ui_entry": "./dist/index.html",
+        "ui_format": "html"
+      }
+    }
+  ],
+  "requires": {
+    "apps": [
+      {
+        "id": "@ryu/skills",
+        "min_version": "0.1.14"
+      }
+    ]
+  },
+  "permission_grants": ["learning:crud"],
+  "permission_levels": [
+    {
+      "id": "learning.view",
+      "label": "Can view",
+      "description": "Read the experience log and the skills the learning loop has produced."
+    },
+    {
+      "id": "learning.capture",
+      "label": "Can teach",
+      "description": "Turn a chat or run into a proposed skill, which goes to the approval inbox before any agent can use it.",
+      "implies": ["learning.view"]
+    }
+  ],
+  "companion": {
+    "label": "Learning",
+    "icon": "mortarboard-01"
+  },
+  "contributes": {
+    "chat_widget_templates": [
+      {
+        "id": "learning.chat",
+        "title": "Learning widget",
+        "description": "Learning chat widget metadata is coming soon; no render tool is available yet.",
+        "triggers": ["learning widget"],
+        "examples": ["Show me a learning widget"],
+        "backing": {},
+        "display_mode": "inline",
+        "safe_action_ids": [],
+        "availability": "coming-soon"
+      }
+    ],
+    "message_actions": [
+      {
+        "id": "learning.feedback",
+        "label": "Rate response",
+        "icon": "tabler:thumb-up",
+        "target": "assistant",
+        "kind": "toggle-group",
+        "states": [
+          {
+            "value": "up",
+            "label": "Good response",
+            "icon": "tabler:thumb-up",
+            "active_icon": "tabler:thumb-up"
+          },
+          {
+            "value": "down",
+            "label": "Bad response",
+            "icon": "tabler:thumb-down",
+            "active_icon": "tabler:thumb-down"
+          }
+        ],
+        "capability": "learning.recordFeedback",
+        "order": 10
+      }
+    ],
+    "settings_tabs": [
+      {
+        "id": "learning.settings",
+        "title": "Learning",
+        "scope": "node",
+        "view": "learning"
+      }
+    ],
+    "context_menu_items": [
+      {
+        "id": "learning.make-skill",
+        "label": "Make a skill from this chat",
+        "icon": "mortarboard-01",
+        "anchor": "conversation",
+        "capability": "learning.synthesizeSkill",
+        "feedback": {
+          "loading": "Making a skill from this chat…",
+          "success": "Learned skill: ",
+          "error": "Couldn't create a skill from this chat"
+        },
+        "order": 100
+      }
+    ]
+  }
+}

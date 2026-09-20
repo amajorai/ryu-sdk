@@ -1,0 +1,46 @@
+{
+  "id": "@ryu/spaces",
+  "name": "Spaces",
+  "version": "1.0.0",
+  "category": "Core",
+  "mandatory": true,
+  "description": "Document Spaces: the shared store every note, doc, and RAG-indexed file lands in. The dependency target other apps declare when they own Space documents.",
+  "tagline": "Where every note, doc, and file lives",
+  "keywords": ["spaces", "documents", "storage", "rag"],
+  "engines": {
+    "ryu": ">=0.0.1"
+  },
+  "runnables": [],
+  "requires": {
+    "capabilities": [{ "capability": "rag" }]
+  },
+  "contributes": {
+    "settings_tabs": [
+      {
+        "id": "spaces.editor",
+        "title": "Spaces",
+        "scope": "node",
+        "view": "spaces",
+        "fields": []
+      }
+    ]
+  },
+  "permission_grants": [],
+  "permission_levels": [
+    {
+      "id": "space.read",
+      "label": "Can read",
+      "description": "Open a space and read its documents, including files other apps filed there."
+    },
+    {
+      "id": "space.write",
+      "label": "Can write",
+      "description": "Add and change documents in a space, which also changes what retrieval feeds back into chat."
+    },
+    {
+      "id": "space.delete",
+      "label": "Can delete",
+      "description": "Permanently remove documents and whole spaces, including anything other apps stored in them."
+    }
+  ]
+}
