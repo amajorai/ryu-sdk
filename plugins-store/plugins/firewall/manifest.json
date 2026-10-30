@@ -1,0 +1,54 @@
+{
+  "tags": ["security", "firewall", "gateway", "prompt-injection", "pii"],
+  "author": { "name": "Ryu", "url": "https://ryuhq.com" },
+  "repository": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/firewall",
+  "homepage": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/firewall",
+  "privacyPolicyUrl": "https://ryuhq.com/privacy",
+  "termsOfServiceUrl": "https://ryuhq.com/terms",
+  "id": "@ryu/firewall",
+  "name": "Gateway Firewall",
+  "version": "0.1.14",
+  "stability": "experimental",
+  "description": "An on/off switch over the Gateway's built-in firewall, which screens model traffic for prompt injection and PII. Enabling this plugin forces `firewall.enabled` on at the next Gateway restart; the pattern set and policy mode stay owned by the Gateway config (GET/PUT /v1/config), not by this plugin.",
+  "tagline": "Turn on the Gateway's prompt-injection and PII screen",
+  "keywords": ["security", "firewall", "gateway", "prompt-injection", "pii"],
+  "category": "Security",
+  "icon": "firewall",
+  "iconDither": { "from": 252, "to": "transparent", "direction": "down" },
+  "surfaces": {
+    "gateway": { "support": "none" },
+    "core": { "support": "full" },
+    "desktop": { "support": "full" },
+    "island": { "support": "full" },
+    "mobile": { "support": "full" },
+    "extension": { "support": "full" },
+    "web": { "support": "full" },
+    "cli": { "support": "full" }
+  },
+  "engines": {
+    "ryu": ">=0.1.0"
+  },
+  "runnables": [
+    {
+      "id": "policy-firewall",
+      "name": "Gateway firewall (prompt-injection / PII block)",
+      "kind": "policy",
+      "config": {
+        "policy_type": "firewall",
+        "definition": {
+          "service": "gateway",
+          "note": "On/off switch over the gateway firewall. The pattern set / policy mode stay owned by GET/PUT /v1/config; enabling this plugin forces firewall.enabled on at the next gateway restart."
+        }
+      }
+    }
+  ],
+  "contributes": {
+    "policies": [
+      {
+        "id": "policy-firewall",
+        "title": "Gateway Firewall"
+      }
+    ]
+  },
+  "permission_grants": []
+}

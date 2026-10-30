@@ -1,0 +1,123 @@
+{
+  "tags": ["web", "scraping"],
+  "author": { "name": "Ryu", "url": "https://ryuhq.com" },
+  "repository": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/spider",
+  "homepage": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/spider",
+  "privacyPolicyUrl": "https://ryuhq.com/privacy",
+  "termsOfServiceUrl": "https://ryuhq.com/terms",
+  "id": "@ryu/spider",
+  "name": "Spider",
+  "version": "0.1.14",
+  "stability": "experimental",
+  "description": "Web crawling and content extraction via the local Spider CLI (https://spider.cloud), declared as a command tool with no API key. Core runs the CLI behind a per-call loopback egress proxy that screens and IP-pins every connection the crawler opens, refusing private, loopback, link-local and cloud-metadata targets and ports other than 80 and 443.",
+  "iconUrl": "https://avatars.githubusercontent.com/u/112983871?v=4",
+  "iconPadding": "md",
+  "iconDither": { "from": 233, "to": "transparent", "direction": "down" },
+  "tagline": "Crawl and extract web pages for agents",
+  "keywords": ["web", "scraping"],
+  "category": "Search",
+  "surfaces": {
+    "gateway": { "support": "none" },
+    "core": { "support": "full" },
+    "desktop": { "support": "full" },
+    "island": { "support": "full" },
+    "mobile": { "support": "full" },
+    "extension": { "support": "full" },
+    "web": { "support": "full" },
+    "cli": { "support": "full" }
+  },
+  "engines": {
+    "ryu": ">=0.1.0"
+  },
+  "runnables": [
+    {
+      "id": "tool-spider-crawl",
+      "name": "Spider Crawl",
+      "kind": "tool",
+      "config": {
+        "slug": "spider.crawl",
+        "backend": "command",
+        "bin": "spider",
+        "command_args": [
+          "crawl",
+          "--depth",
+          "{depth}",
+          "--limit",
+          "{limit}",
+          "--output",
+          "json",
+          "--",
+          "{url}"
+        ],
+        "output": "json",
+        "timeout_secs": 120,
+        "egress_url_arg": "url",
+        "bin_version": {
+          "args": ["--version"],
+          "pattern": "spider_cli {version}",
+          "requirement": "=2.53.9",
+          "install_hint": "cargo install spider_cli --version 2.53.9 --locked"
+        },
+        "description": "Crawl command for the Spider CLI. Core screens the URL before the CLI starts and routes every connection the CLI makes through a screening egress proxy. The extract capability supplies depth=0 and limit=1; crawl forwards the caller's depth and limit values with the declared defaults.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "url": {
+              "type": "string",
+              "description": "The URL to crawl and extract content from."
+            },
+            "depth": {
+              "type": "integer",
+              "description": "Requested link depth for the command (declared default 1).",
+              "default": 1,
+              "minimum": 0,
+              "maximum": 10
+            },
+            "limit": {
+              "type": "integer",
+              "description": "Maximum number of pages to crawl (default 10).",
+              "default": 10,
+              "minimum": 1,
+              "maximum": 500
+            }
+          },
+          "required": ["url"]
+        }
+      }
+    }
+  ],
+  "provides": [
+    {
+      "capability": "web.extract",
+      "version": "1.0.0",
+      "title": "Extract",
+      "selectable": true,
+      "default": true,
+      "tools": {
+        "web.extract": {
+          "tool": "spider.crawl",
+          "args": {
+            "format": ""
+          },
+          "arg_defaults": {
+            "depth": 0,
+            "limit": 1
+          }
+        }
+      }
+    },
+    {
+      "capability": "web.crawl",
+      "version": "1.0.0",
+      "title": "Crawl",
+      "selectable": true,
+      "default": true,
+      "tools": {
+        "web.crawl": {
+          "tool": "spider.crawl"
+        }
+      }
+    }
+  ],
+  "permission_grants": ["tool:command:spider"]
+}

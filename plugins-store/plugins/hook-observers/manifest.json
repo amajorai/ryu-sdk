@@ -1,0 +1,61 @@
+{
+  "tags": ["developer", "hooks", "example", "reference"],
+  "author": { "name": "Ryu", "url": "https://ryuhq.com" },
+  "repository": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/hook-observers",
+  "homepage": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/hook-observers",
+  "privacyPolicyUrl": "https://ryuhq.com/privacy",
+  "termsOfServiceUrl": "https://ryuhq.com/terms",
+  "id": "@ryu/hook-observers",
+  "name": "Hook Observers",
+  "version": "0.1.14",
+  "stability": "experimental",
+  "description": "A worked reference for the turn-hook events Ryu can fire: five observer hooks watching subagent-stop, session-end, notification, workflow-run-failed, and a third-party app event (`com.ryu.meetings#meeting.ended`), each returning a harmless note. Nothing in Core knows this plugin exists — copy the directory as the starting point for your own event-driven plugin.",
+  "tagline": "Reference plugin: one observer per hook event",
+  "keywords": ["developer", "hooks", "example", "reference"],
+  "category": "Developer Tools",
+  "icon": "eye",
+  "iconDither": { "from": 267, "to": "transparent", "direction": "down" },
+  "surfaces": {
+    "gateway": { "support": "none" },
+    "core": { "support": "full" },
+    "desktop": { "support": "full" },
+    "island": { "support": "full" },
+    "mobile": { "support": "full" },
+    "extension": { "support": "full" },
+    "web": { "support": "full" },
+    "cli": { "support": "full" }
+  },
+  "engines": { "ryu": ">=0.1.0" },
+  "runnables": [],
+  "permission_grants": [],
+  "activation_events": ["*"],
+  "contributes": {
+    "turn_hooks": [
+      {
+        "id": "observers.subagent-stop",
+        "on": "subagent_stop",
+        "code_file": "hooks/subagent-stop.js"
+      },
+      {
+        "id": "observers.session-end",
+        "on": "session_end",
+        "code_file": "hooks/session-end.js"
+      },
+      {
+        "id": "observers.notification",
+        "on": "notification",
+        "code_file": "hooks/notification.js"
+      },
+      {
+        "id": "observers.workflow-run-failed",
+        "on": "workflow_run_failed",
+        "code_file": "hooks/workflow-run-failed.js"
+      },
+      {
+        "id": "observers.meeting-ended",
+        "on": "@ryu/meetings#meeting.ended",
+        "code_file": "hooks/app-event-meeting-ended.js"
+      }
+    ]
+  }
+}

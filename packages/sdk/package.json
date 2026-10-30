@@ -1,0 +1,172 @@
+{
+  "name": "@ryuhq/sdk",
+  "version": "0.5.0",
+  "type": "module",
+  "description": "Ryu developer SDK: typed builders and CLI for authoring manifest.json Plugin bundles",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/amajorai/ryu-sdk"
+  },
+  "main": "./dist/index.cjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./manifest": {
+      "types": "./dist/manifest.d.ts",
+      "import": "./dist/manifest.js",
+      "require": "./dist/manifest.cjs"
+    },
+    "./agent-plugin": {
+      "types": "./dist/agent-plugin.d.ts",
+      "import": "./dist/agent-plugin.js",
+      "require": "./dist/agent-plugin.cjs"
+    },
+    "./chatgpt": {
+      "types": "./dist/chatgpt.d.ts",
+      "import": "./dist/chatgpt.js",
+      "require": "./dist/chatgpt.cjs"
+    },
+    "./agent": {
+      "types": "./dist/agent.d.ts",
+      "import": "./dist/agent.js",
+      "require": "./dist/agent.cjs"
+    },
+    "./a2a": {
+      "types": "./dist/a2a.d.ts",
+      "import": "./dist/a2a.js",
+      "require": "./dist/a2a.cjs"
+    },
+    "./agui": {
+      "types": "./dist/agui.d.ts",
+      "import": "./dist/agui.js",
+      "require": "./dist/agui.cjs"
+    },
+    "./voice": {
+      "types": "./dist/voice.d.ts",
+      "import": "./dist/voice.js",
+      "require": "./dist/voice.cjs"
+    },
+    "./action": {
+      "types": "./dist/action.d.ts",
+      "import": "./dist/action.js",
+      "require": "./dist/action.cjs"
+    },
+    "./model": {
+      "types": "./dist/model.d.ts",
+      "import": "./dist/model.js",
+      "require": "./dist/model.cjs"
+    },
+    "./mcp": {
+      "types": "./dist/mcp.d.ts",
+      "import": "./dist/mcp.js",
+      "require": "./dist/mcp.cjs"
+    },
+    "./mcp/server": {
+      "types": "./dist/mcp/server.d.ts",
+      "import": "./dist/mcp/server.js",
+      "require": "./dist/mcp/server.cjs"
+    },
+    "./mcp/client": {
+      "types": "./dist/mcp/client.d.ts",
+      "import": "./dist/mcp/client.js",
+      "require": "./dist/mcp/client.cjs"
+    },
+    "./plugin": {
+      "types": "./dist/plugin.d.ts",
+      "import": "./dist/plugin.js",
+      "require": "./dist/plugin.cjs"
+    },
+    "./runnable": {
+      "types": "./dist/runnable.d.ts",
+      "import": "./dist/runnable.js",
+      "require": "./dist/runnable.cjs"
+    },
+    "./builder": {
+      "types": "./dist/builder.d.ts",
+      "import": "./dist/builder.js",
+      "require": "./dist/builder.cjs"
+    },
+    "./schema": {
+      "types": "./dist/schema.d.ts",
+      "import": "./dist/schema.js",
+      "require": "./dist/schema.cjs"
+    },
+    "./workflow": {
+      "types": "./dist/workflow.d.ts",
+      "import": "./dist/workflow.js",
+      "require": "./dist/workflow.cjs"
+    },
+    "./rag": {
+      "types": "./dist/rag.d.ts",
+      "import": "./dist/rag.js",
+      "require": "./dist/rag.cjs"
+    },
+    "./loaders": {
+      "types": "./dist/loaders.d.ts",
+      "import": "./dist/loaders.js",
+      "require": "./dist/loaders.cjs"
+    },
+    "./evals": {
+      "types": "./dist/evals.d.ts",
+      "import": "./dist/evals.js",
+      "require": "./dist/evals.cjs"
+    },
+    "./prompts": {
+      "types": "./dist/prompts.d.ts",
+      "import": "./dist/prompts.js",
+      "require": "./dist/prompts.cjs"
+    },
+    "./server": {
+      "types": "./dist/server.d.ts",
+      "import": "./dist/server.js",
+      "require": "./dist/server.cjs"
+    },
+    "./server/node": {
+      "types": "./dist/server/node.d.ts",
+      "import": "./dist/server/node.js",
+      "require": "./dist/server/node.cjs"
+    },
+    "./cli": {
+      "import": "./dist/cli.js"
+    }
+  },
+  "bin": {
+    "ryu": "./dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "src",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsup",
+    "check-types": "tsc --noEmit",
+    "generate:contracts": "bun run scripts/generate-contracts.ts",
+    "test": "bun test",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/ext-apps": "^1.7.5",
+    "@modelcontextprotocol/sdk": "^1.32.1",
+    "@openai/mcp-extensions": "^0.1.0",
+    "@ryuhq/client": "workspace:*",
+    "@ryuhq/sdk-native": "workspace:*",
+    "yaml": "^2.9.1",
+    "zod": "^4.1.13"
+  },
+  "devDependencies": {
+    "@types/bun": "catalog:",
+    "@types/json-schema": "^7.0.15",
+    "@types/node": "^22.20.1",
+    "json-schema-to-typescript": "^15.0.4",
+    "tsup": "^8.5.1",
+    "typescript": "^5"
+  }
+}

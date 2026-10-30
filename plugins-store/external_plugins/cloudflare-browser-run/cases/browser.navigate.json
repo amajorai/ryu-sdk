@@ -1,0 +1,133 @@
+{
+  "tool": "browser.navigate",
+  "kind": "adapter",
+  "code_file": "adapters/browser.navigate.js",
+  "adapter_tools": [],
+  "cases": [
+    {
+      "name": "uses the URL as the tab id and projects the JSON snapshot content",
+      "input": {
+        "url": " https://example.com/ "
+      },
+      "provider": {
+        "call": [
+          {
+            "content": [
+              {
+                "type": "text",
+                "text": "{\"title\":\"Example\",\"content\":\"Hi\"}"
+              }
+            ]
+          }
+        ]
+      },
+      "expect": {
+        "content": "Hi",
+        "tab_id": "https://example.com/",
+        "url": "https://example.com/",
+        "raw": {
+          "content": [
+            {
+              "type": "text",
+              "text": "{\"title\":\"Example\",\"content\":\"Hi\"}"
+            }
+          ]
+        }
+      },
+      "expectCalls": [
+        {
+          "path": "callTool",
+          "args": {
+            "url": "https://example.com/"
+          }
+        }
+      ]
+    },
+    {
+      "name": "non-JSON text becomes the content field",
+      "input": {
+        "url": "https://example.com/"
+      },
+      "provider": {
+        "call": [
+          {
+            "content": [
+              {
+                "type": "text",
+                "text": "plain page"
+              }
+            ]
+          }
+        ]
+      },
+      "expect": {
+        "content": "plain page",
+        "tab_id": "https://example.com/",
+        "url": "https://example.com/",
+        "raw": {
+          "content": [
+            {
+              "type": "text",
+              "text": "plain page"
+            }
+          ]
+        }
+      },
+      "expectCalls": [
+        {
+          "path": "callTool",
+          "args": {
+            "url": "https://example.com/"
+          }
+        }
+      ]
+    },
+    {
+      "name": "a missing url is refused without calling the provider",
+      "input": {},
+      "provider": {},
+      "expect": {
+        "error": "url is required"
+      },
+      "expectCalls": []
+    },
+    {
+      "name": "a provider error is surfaced raw",
+      "input": {
+        "url": "https://example.com/"
+      },
+      "provider": {
+        "call": [
+          {
+            "isError": true,
+            "content": [
+              {
+                "type": "text",
+                "text": "401"
+              }
+            ]
+          }
+        ]
+      },
+      "expect": {
+        "raw": {
+          "isError": true,
+          "content": [
+            {
+              "type": "text",
+              "text": "401"
+            }
+          ]
+        }
+      },
+      "expectCalls": [
+        {
+          "path": "callTool",
+          "args": {
+            "url": "https://example.com/"
+          }
+        }
+      ]
+    }
+  ]
+}

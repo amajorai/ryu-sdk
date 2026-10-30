@@ -1,0 +1,13 @@
+{
+  "id": "com.example.__APP_NAME__",
+  "name": "__APP_DISPLAY_NAME__",
+  "version": "0.1.0",
+  "runnables": [
+    {
+      "id": "agent-team",
+      "name": "Research Team",
+      "kind": "agent"
+    }
+  ],
+  "permission_grants": []
+}

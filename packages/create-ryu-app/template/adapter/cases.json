@@ -1,0 +1,102 @@
+{
+  "tool": "search",
+  "kind": "adapter",
+  "code_file": "adapters/search.js",
+  "adapter_tools": [],
+  "cases": [
+    {
+      "name": "maps a provider hit onto the canonical shape",
+      "input": {
+        "query": "lisbon"
+      },
+      "provider": {
+        "call": [
+          {
+            "results": [
+              {
+                "url": "https://example.com"
+              }
+            ]
+          }
+        ]
+      },
+      "expect": {
+        "results": [
+          {
+            "url": "https://example.com"
+          }
+        ]
+      },
+      "expectCalls": [
+        {
+          "path": "callTool",
+          "args": {
+            "query": "lisbon"
+          }
+        }
+      ]
+    },
+    {
+      "name": "an empty provider result stays empty, not null",
+      "input": {
+        "query": "nothing"
+      },
+      "provider": {
+        "call": [
+          {
+            "results": []
+          }
+        ]
+      },
+      "expect": {
+        "results": []
+      }
+    },
+    {
+      "name": "a provider error passes the {status, body} envelope through instead of faking a result",
+      "input": {
+        "query": "lisbon"
+      },
+      "provider": {
+        "call": [
+          {
+            "status": 500,
+            "body": {
+              "error": "upstream unavailable"
+            }
+          }
+        ]
+      },
+      "expect": {
+        "raw": {
+          "status": 500,
+          "body": {
+            "error": "upstream unavailable"
+          }
+        }
+      }
+    },
+    {
+      "name": "a rejected key passes the fail_open envelope through",
+      "input": {
+        "query": "lisbon"
+      },
+      "provider": {
+        "call": [
+          {
+            "available": false,
+            "reason": "endpoint returned HTTP 401",
+            "hint": "check the key"
+          }
+        ]
+      },
+      "expect": {
+        "raw": {
+          "available": false,
+          "reason": "endpoint returned HTTP 401",
+          "hint": "check the key"
+        }
+      }
+    }
+  ]
+}

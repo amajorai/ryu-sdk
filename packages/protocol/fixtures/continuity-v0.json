@@ -1,0 +1,44 @@
+{
+  "protocol": "ryu-node-continuity",
+  "version": 0,
+  "bundleId": "handoff-fixture-1",
+  "createdAt": 1800000000000,
+  "source": {
+    "conversationId": "conversation-fixture-1",
+    "updatedAt": 1799999999000,
+    "checkpointMessageId": "message-fixture-2",
+    "title": "Fixture conversation",
+    "agentHint": "ryu"
+  },
+  "selection": {
+    "transcript": { "mode": "recent", "maxMessages": 50 },
+    "omittedEarlierMessages": false
+  },
+  "messages": [
+    {
+      "sourceId": "message-fixture-1",
+      "role": "user",
+      "text": "Continue this elsewhere.",
+      "createdAt": 10
+    },
+    {
+      "sourceId": "message-fixture-2",
+      "role": "assistant",
+      "text": "The checkpoint is ready.",
+      "createdAt": 20
+    }
+  ],
+  "context": {
+    "version": 0,
+    "items": [
+      {
+        "id": "context-fixture-1",
+        "kind": "text",
+        "label": "Operator note",
+        "mediaType": "text/plain",
+        "text": "Do not deploy until approval.",
+        "source": { "kind": "manual" }
+      }
+    ]
+  }
+}

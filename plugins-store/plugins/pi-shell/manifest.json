@@ -1,0 +1,40 @@
+{
+  "tags": ["shell", "bash", "background", "developer"],
+  "author": { "name": "Ryu", "url": "https://ryuhq.com" },
+  "repository": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/pi-shell",
+  "homepage": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/pi-shell",
+  "privacyPolicyUrl": "https://ryuhq.com/privacy",
+  "termsOfServiceUrl": "https://ryuhq.com/terms",
+  "id": "@ryu/pi-shell",
+  "name": "Background Bash",
+  "version": "0.1.14",
+  "stability": "experimental",
+  "category": "Developer Tools",
+  "description": "Adds bash_background / bash_output / bash_kill to the managed Pi agent, so a long-running command does not hold the turn open.",
+  "tagline": "Run long commands without holding the turn open",
+  "keywords": ["shell", "bash", "background", "developer"],
+  "icon": "computer-terminal-02",
+  "iconDither": { "from": 196, "to": "transparent", "direction": "down" },
+  "surfaces": {
+    "gateway": { "support": "none" },
+    "core": { "support": "full" },
+    "desktop": { "support": "full" },
+    "island": { "support": "limited" },
+    "mobile": { "support": "limited" },
+    "extension": { "support": "limited" },
+    "web": { "support": "limited" },
+    "cli": { "support": "full" }
+  },
+  "engines": { "ryu": ">=0.1.0" },
+  "runnables": [],
+  "activation_events": ["*"],
+  "contributes": {
+    "pi_extensions": [
+      {
+        "id": "shell",
+        "file": "pi-extensions/ryu-shell.ts",
+        "description": "Background bash for the managed Pi agent."
+      }
+    ]
+  }
+}

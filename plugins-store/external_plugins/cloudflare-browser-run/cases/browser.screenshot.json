@@ -1,0 +1,105 @@
+{
+  "tool": "browser.screenshot",
+  "kind": "adapter",
+  "code_file": "adapters/browser.screenshot.js",
+  "adapter_tools": [],
+  "cases": [
+    {
+      "name": "returns the image part with its mime type",
+      "input": {
+        "tab_id": "https://example.com/"
+      },
+      "provider": {
+        "call": [
+          {
+            "content": [
+              {
+                "type": "text",
+                "text": "shot"
+              },
+              {
+                "type": "image",
+                "data": "iVBORw0KGgo=",
+                "mimeType": "image/png"
+              }
+            ]
+          }
+        ]
+      },
+      "expect": {
+        "tab_id": "https://example.com/",
+        "url": "https://example.com/",
+        "image": {
+          "data": "iVBORw0KGgo=",
+          "mimeType": "image/png"
+        },
+        "raw": {
+          "content": [
+            {
+              "type": "text",
+              "text": "shot"
+            },
+            {
+              "type": "image",
+              "data": "iVBORw0KGgo=",
+              "mimeType": "image/png"
+            }
+          ]
+        }
+      },
+      "expectCalls": [
+        {
+          "path": "callTool",
+          "args": {
+            "url": "https://example.com/"
+          }
+        }
+      ]
+    },
+    {
+      "name": "an answer without an image is surfaced raw",
+      "input": {
+        "tab_id": "https://example.com/"
+      },
+      "provider": {
+        "call": [
+          {
+            "content": [
+              {
+                "type": "text",
+                "text": "no image"
+              }
+            ]
+          }
+        ]
+      },
+      "expect": {
+        "raw": {
+          "content": [
+            {
+              "type": "text",
+              "text": "no image"
+            }
+          ]
+        }
+      },
+      "expectCalls": [
+        {
+          "path": "callTool",
+          "args": {
+            "url": "https://example.com/"
+          }
+        }
+      ]
+    },
+    {
+      "name": "a tab id is required",
+      "input": {},
+      "provider": {},
+      "expect": {
+        "error": "tab_id is required; Cloudflare Browser Run uses the URL as the tab id"
+      },
+      "expectCalls": []
+    }
+  ]
+}

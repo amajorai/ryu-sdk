@@ -1,0 +1,41 @@
+{
+  "tags": ["agents.md", "context", "instructions", "prompt", "acp"],
+  "author": { "name": "Ryu", "url": "https://ryuhq.com" },
+  "repository": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/agents-md-tail",
+  "homepage": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/agents-md-tail",
+  "privacyPolicyUrl": "https://ryuhq.com/privacy",
+  "termsOfServiceUrl": "https://ryuhq.com/terms",
+  "id": "@ryu/agents-md-tail",
+  "name": "AGENTS.md Tail",
+  "version": "0.1.14",
+  "stability": "experimental",
+  "description": "Experimental context hook that repeats the active AGENTS.md instructions at the end of the latest message on each model turn, without editing the system prompt or chat history.",
+  "tagline": "Keep project instructions fresh at the end of every turn",
+  "keywords": ["agents.md", "context", "instructions", "prompt", "acp"],
+  "category": "Developer Tools",
+  "icon": "tick-double-01",
+  "iconDither": { "from": 214, "to": "transparent", "direction": "down" },
+  "surfaces": {
+    "gateway": { "support": "none" },
+    "core": { "support": "full" },
+    "desktop": { "support": "full" },
+    "island": { "support": "limited" },
+    "mobile": { "support": "limited" },
+    "extension": { "support": "limited" },
+    "web": { "support": "full" },
+    "cli": { "support": "full" }
+  },
+  "engines": { "ryu": ">=0.1.0" },
+  "runnables": [],
+  "permission_grants": [],
+  "activation_events": ["*"],
+  "contributes": {
+    "turn_hooks": [
+      {
+        "id": "agents-md-tail.context",
+        "on": "context",
+        "code_file": "hooks/inject.js"
+      }
+    ]
+  }
+}

@@ -1,0 +1,49 @@
+{
+  "tags": ["example", "reference", "developer", "widget", "mcp"],
+  "author": { "name": "Ryu", "url": "https://ryuhq.com" },
+  "repository": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/sample-widget",
+  "homepage": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/sample-widget",
+  "privacyPolicyUrl": "https://ryuhq.com/privacy",
+  "termsOfServiceUrl": "https://ryuhq.com/terms",
+  "id": "@ryu/sample-widget",
+  "name": "Sample Widget",
+  "version": "0.1.14",
+  "stability": "experimental",
+  "hidden": true,
+  "category": "Developer Tools",
+  "description": "Reference third-party MCP widget plugin. A tiny local Node MCP server (server.mjs) exposes one render tool (sample_widget.render) that returns structured data AND serves a self-contained skybridge HTML resource (ui://widget/sample.html). The approved mcp:server grant lets a Community plugin register the server; contributes.widgets plus widget:render authorize promotion into an inline chat widget. Copy this directory as the starting point for your own widget plugin.",
+  "tagline": "Reference plugin: an inline chat widget",
+  "keywords": ["example", "reference", "developer", "widget", "mcp"],
+  "icon": "puzzle",
+  "iconDither": { "from": 282, "to": "transparent", "direction": "down" },
+  "surfaces": {
+    "gateway": { "support": "none" },
+    "core": { "support": "full" },
+    "desktop": { "support": "full" },
+    "island": { "support": "full" },
+    "mobile": { "support": "full" },
+    "extension": { "support": "limited" },
+    "web": { "support": "full" },
+    "cli": { "support": "list" }
+  },
+  "engines": { "ryu": ">=0.1.0" },
+  "runnables": [],
+  "permission_grants": ["mcp:server", "widget:render"],
+  "mcp_servers": {
+    "sample_widget": {
+      "command": "node",
+      "args": ["server.mjs"],
+      "description": "Sample widget MCP server: one render tool + the ui://widget/sample.html resource."
+    }
+  },
+  "contributes": {
+    "widgets": [
+      {
+        "tool_id": "sample_widget.render",
+        "uri": "ui://widget/sample.html",
+        "mime": "text/html+skybridge",
+        "default_display_mode": "inline"
+      }
+    ]
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "tags": ["writing", "style", "stylometry", "connections", "personalization"],
+  "author": { "name": "Ryu", "url": "https://ryuhq.com" },
+  "repository": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/writing-style",
+  "homepage": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/writing-style",
+  "privacyPolicyUrl": "https://ryuhq.com/privacy",
+  "termsOfServiceUrl": "https://ryuhq.com/terms",
+  "id": "@ryu/writing-style",
+  "name": "Writing Style",
+  "version": "0.1.0",
+  "stability": "experimental",
+  "category": "Productivity",
+  "description": "Extract a content-agnostic writing-style guide from a small, user-approved sample of the connected apps already available to the calling agent. It produces a reviewable Markdown Agent Skill that can be activated alongside an Output Style; it never guesses unavailable connections or copies private sample text into the guide.",
+  "tagline": "Turn your connected writing into a reusable voice guide",
+  "keywords": [
+    "writing",
+    "style",
+    "stylometry",
+    "connections",
+    "personalization"
+  ],
+  "icon": "text-align-left",
+  "iconDither": {
+    "from": 170,
+    "to": "transparent",
+    "direction": "down"
+  },
+  "surfaces": {
+    "gateway": { "support": "none" },
+    "core": { "support": "full" },
+    "desktop": { "support": "full" },
+    "island": { "support": "limited" },
+    "mobile": { "support": "limited" },
+    "extension": { "support": "limited" },
+    "web": { "support": "full" },
+    "cli": { "support": "full" }
+  },
+  "engines": { "ryu": ">=0.1.0" },
+  "runnables": [
+    {
+      "id": "skill-writing-style",
+      "name": "Writing Style Extractor",
+      "kind": "skill",
+      "config": {
+        "skill_id": "writing-style"
+      }
+    }
+  ],
+  "permission_grants": [],
+  "activation_events": ["*"]
+}

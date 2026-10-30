@@ -1,0 +1,6381 @@
+{
+  "generatedBy": "bindings/python/tests/fixtures/services_vectors.ts",
+  "constants": {
+    "envVars": [
+      {
+        "default": "https://api.ryuhq.com",
+        "name": "RYU_API_URL",
+        "role": "url",
+        "service": "managedAgents"
+      },
+      {
+        "default": null,
+        "name": "RYU_API_KEY",
+        "role": "key",
+        "service": "managedAgents"
+      },
+      {
+        "default": null,
+        "name": "RYU_ORGANIZATION_ID",
+        "role": "organization",
+        "service": "managedAgents"
+      },
+      {
+        "default": null,
+        "name": "RYU_MAIL_URL",
+        "role": "url",
+        "service": "mail"
+      },
+      {
+        "default": null,
+        "name": "RYU_MAIL_GATEWAY_KEY",
+        "role": "gateway-key",
+        "service": "mail"
+      },
+      {
+        "default": null,
+        "name": "RYU_MAIL_API_KEY",
+        "role": "key",
+        "service": "mail"
+      },
+      {
+        "default": "https://notify.ryuhq.com",
+        "name": "RYU_NOTIFY_URL",
+        "role": "url",
+        "service": "notify"
+      },
+      {
+        "default": null,
+        "name": "RYU_NOTIFY_API_KEY",
+        "role": "key",
+        "service": "notify"
+      },
+      {
+        "default": "https://box.ryuhq.com",
+        "name": "RYU_BOX_URL",
+        "role": "url",
+        "service": "box"
+      },
+      {
+        "default": null,
+        "name": "RYU_BOX_API_KEY",
+        "role": "key",
+        "service": "box"
+      },
+      {
+        "default": "http://127.0.0.1:7981",
+        "name": "RYU_GATEWAY_URL",
+        "role": "url",
+        "service": "gateway"
+      },
+      {
+        "default": null,
+        "name": "RYU_GATEWAY_TOKEN",
+        "role": "key",
+        "service": "gateway"
+      },
+      {
+        "default": null,
+        "name": "RYU_CONNECT_URL",
+        "role": "url",
+        "service": "connect"
+      },
+      {
+        "default": null,
+        "name": "RYU_CONNECT_API_KEY",
+        "role": "key",
+        "service": "connect"
+      },
+      {
+        "default": null,
+        "name": "RYU_CONNECT_MANAGEMENT_KEY",
+        "role": "management-key",
+        "service": "connect"
+      },
+      {
+        "default": null,
+        "name": "RYU_PASSPORT_URL",
+        "role": "url",
+        "service": "passport"
+      },
+      {
+        "default": null,
+        "name": "RYU_PASSPORT_API_KEY",
+        "role": "key",
+        "service": "passport"
+      },
+      {
+        "default": null,
+        "name": "RYU_PASSPORT_RUNTIME_KEY",
+        "role": "runtime-key",
+        "service": "passport"
+      },
+      {
+        "default": null,
+        "name": "RYU_SITES_URL",
+        "role": "url",
+        "service": "sites"
+      },
+      {
+        "default": null,
+        "name": "RYU_SITES_API_KEY",
+        "role": "key",
+        "service": "sites"
+      },
+      {
+        "default": "https://api.ryuhq.com",
+        "name": "RYU_API_URL",
+        "role": "url",
+        "service": "messaging"
+      },
+      {
+        "default": null,
+        "name": "RYU_API_KEY",
+        "role": "key",
+        "service": "messaging"
+      },
+      {
+        "default": null,
+        "name": "RYU_ORGANIZATION_ID",
+        "role": "organization",
+        "service": "messaging"
+      }
+    ],
+    "serviceRoutes": {
+      "box": {
+        "capabilityIdempotent": [],
+        "idempotent": [
+          {
+            "method": "POST",
+            "path": "/v1/boxes",
+            "required": true
+          },
+          {
+            "method": "POST",
+            "path": "/v1/boxes/{id}/fork",
+            "required": true
+          }
+        ],
+        "mount": "",
+        "nonReplaySafe": [],
+        "replayedBodyField": "type",
+        "replayedBodyValue": "box.existing"
+      },
+      "connect": {
+        "capabilityIdempotent": [],
+        "idempotent": [],
+        "mount": "",
+        "nonReplaySafe": [],
+        "replayedBodyField": null,
+        "replayedBodyValue": null
+      },
+      "gateway": {
+        "capabilityIdempotent": [],
+        "idempotent": [],
+        "mount": "",
+        "nonReplaySafe": [],
+        "replayedBodyField": null,
+        "replayedBodyValue": null
+      },
+      "mail": {
+        "capabilityIdempotent": [],
+        "idempotent": [
+          {
+            "method": "POST",
+            "path": "/inboxes/{id}/send",
+            "required": false
+          },
+          {
+            "method": "POST",
+            "path": "/inboxes/{id}/messages/{messageId}/reply",
+            "required": false
+          },
+          {
+            "method": "POST",
+            "path": "/inboxes/{id}/messages/{messageId}/reply-all",
+            "required": false
+          },
+          {
+            "method": "POST",
+            "path": "/inboxes/{id}/messages/{messageId}/forward",
+            "required": false
+          },
+          {
+            "method": "POST",
+            "path": "/inboxes/{id}/drafts/{draftId}/send",
+            "required": false
+          },
+          {
+            "method": "POST",
+            "path": "/drafts/{id}/approve",
+            "required": false
+          },
+          {
+            "method": "POST",
+            "path": "/agents/{agentId}/send",
+            "required": false
+          },
+          {
+            "method": "POST",
+            "path": "/agents/{agentId}/messages/{messageId}/reply",
+            "required": false
+          }
+        ],
+        "mount": "/api/mail",
+        "nonReplaySafe": [],
+        "replayedBodyField": null,
+        "replayedBodyValue": null
+      },
+      "managedAgents": {
+        "capabilityIdempotent": [],
+        "idempotent": [
+          {
+            "method": "POST",
+            "path": "/agents",
+            "required": false
+          },
+          {
+            "method": "PATCH",
+            "path": "/agents/{id}",
+            "required": false
+          },
+          {
+            "method": "POST",
+            "path": "/environments",
+            "required": false
+          },
+          {
+            "method": "PATCH",
+            "path": "/environments/{id}",
+            "required": false
+          },
+          {
+            "method": "POST",
+            "path": "/credentials",
+            "required": false
+          },
+          {
+            "method": "POST",
+            "path": "/sessions",
+            "required": false
+          },
+          {
+            "method": "POST",
+            "path": "/sessions/{id}/events",
+            "required": false
+          }
+        ],
+        "mount": "/api/v1/managed-agents",
+        "nonReplaySafe": [],
+        "replayedBodyField": null,
+        "replayedBodyValue": null
+      },
+      "messaging": {
+        "capabilityIdempotent": [],
+        "idempotent": [
+          {
+            "method": "POST",
+            "path": "/orgs/{orgId}/numbers",
+            "required": true
+          },
+          {
+            "method": "POST",
+            "path": "/orgs/{orgId}/sms",
+            "required": true
+          },
+          {
+            "method": "POST",
+            "path": "/orgs/{orgId}/mms",
+            "required": true
+          },
+          {
+            "method": "POST",
+            "path": "/orgs/{orgId}/voice",
+            "required": true
+          },
+          {
+            "method": "POST",
+            "path": "/orgs/{orgId}/whatsapp",
+            "required": true
+          }
+        ],
+        "mount": "/api/messaging",
+        "nonReplaySafe": [
+          {
+            "method": "PUT",
+            "path": "/orgs/{orgId}/settings",
+            "reason": "The reply that first sets a webhook URL carries the new webhook secret once; a replay after a lost reply answers without it."
+          }
+        ],
+        "replayedBodyField": null,
+        "replayedBodyValue": null
+      },
+      "notify": {
+        "capabilityIdempotent": [],
+        "idempotent": [
+          {
+            "method": "POST",
+            "path": "/v1/events",
+            "required": false
+          },
+          {
+            "method": "POST",
+            "path": "/v1/topics/{topic}",
+            "required": false
+          },
+          {
+            "method": "POST",
+            "path": "/v1/activities",
+            "required": true
+          }
+        ],
+        "mount": "",
+        "nonReplaySafe": [],
+        "replayedBodyField": "idempotent",
+        "replayedBodyValue": true
+      },
+      "passport": {
+        "capabilityIdempotent": [
+          {
+            "method": "POST",
+            "path": "/v1/connections",
+            "required": false,
+            "capability": "idempotency_keys"
+          }
+        ],
+        "idempotent": [],
+        "mount": "",
+        "nonReplaySafe": [],
+        "replayedBodyField": null,
+        "replayedBodyValue": null
+      },
+      "sites": {
+        "capabilityIdempotent": [],
+        "idempotent": [],
+        "mount": "/api/sites",
+        "nonReplaySafe": [
+          {
+            "method": "PUT",
+            "path": "/projects/{id}/settings",
+            "reason": "The write carries expectedRevision and moves it; a replay after a lost reply answers 409 conflict although the change applied."
+          },
+          {
+            "method": "DELETE",
+            "path": "/projects/{id}",
+            "reason": "The write carries expectedRevision and moves it before the Space database is removed; a replay answers 409 conflict, or can never succeed after a partial failure."
+          }
+        ],
+        "replayedBodyField": null,
+        "replayedBodyValue": null
+      }
+    },
+    "nonRetryableCodes": [
+      "address_change_cooldown",
+      "backend_disabled",
+      "driver_not_safe",
+      "feature_disabled",
+      "idempotency_key_resource_deleted",
+      "insufficient_credits",
+      "managed_agents_disabled",
+      "metering_unavailable",
+      "not_configured",
+      "outcome_unknown",
+      "provider_refused",
+      "quota_exceeded",
+      "secrets_unavailable",
+      "skills_unavailable",
+      "spend_limit_reached",
+      "stream_limit_reached",
+      "too_many_streams",
+      "upstream_invalid",
+      "upstream_unconfigured"
+    ],
+    "retryableStatuses": [
+      408,
+      425,
+      500,
+      502,
+      503,
+      504
+    ],
+    "statusCodes": {
+      "400": [
+        "bad_request",
+        "Bad Request"
+      ],
+      "401": [
+        "unauthenticated",
+        "Unauthorized"
+      ],
+      "403": [
+        "forbidden",
+        "Forbidden"
+      ],
+      "404": [
+        "not_found",
+        "Not Found"
+      ],
+      "405": [
+        "method_not_allowed",
+        "Method Not Allowed"
+      ],
+      "409": [
+        "conflict",
+        "Conflict"
+      ],
+      "410": [
+        "gone",
+        "Gone"
+      ],
+      "413": [
+        "payload_too_large",
+        "Content Too Large"
+      ],
+      "415": [
+        "unsupported_media_type",
+        "Unsupported Media Type"
+      ],
+      "422": [
+        "unprocessable_content",
+        "Unprocessable Content"
+      ],
+      "429": [
+        "rate_limited",
+        "Too Many Requests"
+      ],
+      "500": [
+        "internal_error",
+        "Internal Server Error"
+      ],
+      "502": [
+        "bad_gateway",
+        "Bad Gateway"
+      ],
+      "503": [
+        "service_unavailable",
+        "Service Unavailable"
+      ],
+      "504": [
+        "gateway_timeout",
+        "Gateway Timeout"
+      ]
+    },
+    "errorClasses": [
+      "RyuAbortError",
+      "RyuAuthenticationError",
+      "RyuConfigurationError",
+      "RyuConflictError",
+      "RyuConnectionError",
+      "RyuError",
+      "RyuInvalidRequestError",
+      "RyuNotFoundError",
+      "RyuPaymentRequiredError",
+      "RyuPermissionError",
+      "RyuQuotaExceededError",
+      "RyuRateLimitError",
+      "RyuRedirectError",
+      "RyuResponseValidationError",
+      "RyuServerError",
+      "RyuTimeoutError",
+      "RyuUnavailableError",
+      "RyuWebhookVerificationError"
+    ],
+    "availabilityCodes": [
+      "managed_agents_disabled",
+      "metering_unavailable",
+      "not_configured"
+    ],
+    "availability": {
+      "managedAgents": "Preview: off until your organization turns on the Managed Agents feature.",
+      "mail": "Available: hosted with a Ryu API key that has Mail scopes or a Ryu node gateway key, or self-hosted.",
+      "notify": "Early access: hosted at https://notify.ryuhq.com with keys provisioned by Ryu; the self-hosted service is not yet published.",
+      "box": "Early access: hosted at https://box.ryuhq.com and enabled per organization by Ryu; the self-hosted service is not yet published.",
+      "gateway": "Self-hosted: run Ryu Gateway with your own provider keys.",
+      "connect": "Early access: hosted keys are provisioned by Ryu; the self-hosted service is not yet published.",
+      "passport": "Early access: hosted keys are provisioned by Ryu; the self-hosted service is not yet published.",
+      "sites": "Early access: self-hosted process only, and standalone mode needs a ryu-sites release after 0.4.0, which is not published yet; there is no Ryu-hosted offer.",
+      "messaging": "Early access: hosted on the Ryu control plane; Ryu enables it per organization, and the organization must also turn on its Ryu Messaging feature (off by default); there is no self-hosted service."
+    },
+    "defaults": {
+      "box": "https://box.ryuhq.com",
+      "controlPlane": "https://api.ryuhq.com",
+      "gateway": "http://127.0.0.1:7981",
+      "notify": "https://notify.ryuhq.com"
+    },
+    "mailEventTypes": [
+      "message.received",
+      "message.received.spam",
+      "message.received.blocked",
+      "message.received.unauthenticated",
+      "message.sent",
+      "message.delivered",
+      "message.bounced",
+      "message.complained",
+      "message.rejected",
+      "message.opened",
+      "domain.verified"
+    ],
+    "boxErrorCodes": [
+      "unauthorized",
+      "invalid_json",
+      "invalid_request",
+      "body_too_large",
+      "quota_exceeded",
+      "insufficient_credits",
+      "not_found",
+      "conflict",
+      "idempotency_conflict",
+      "idempotency_key_resource_deleted",
+      "box_not_ready",
+      "box_busy",
+      "forbidden",
+      "not_supported",
+      "secrets_unavailable",
+      "driver_unavailable",
+      "driver_not_safe",
+      "driver_failed",
+      "upstream_not_configured",
+      "upstream_unavailable",
+      "upstream_timeout",
+      "upstream_account_conflict",
+      "upstream_account_unverified",
+      "request_failed",
+      "capacity_unavailable",
+      "billing_owner_mismatch",
+      "stream_direct_only",
+      "token_replayed"
+    ],
+    "messagingEventTypes": [
+      "message.received",
+      "message.delivered",
+      "message.failed",
+      "number.suspended",
+      "number.released"
+    ],
+    "mailMessageCodes": [
+      {
+        "code": "idempotency_in_progress",
+        "message": "a request with this Idempotency-Key is still in progress; retry shortly",
+        "status": 409
+      },
+      {
+        "code": "outcome_unknown",
+        "message": "the outcome of an earlier request with this Idempotency-Key is unknown and it may have been sent; check this inbox's sent messages before sending it again with a new Idempotency-Key",
+        "status": 409
+      },
+      {
+        "code": "idempotency_key_reused",
+        "message": "Idempotency-Key was already used with a different request",
+        "status": 409
+      },
+      {
+        "code": "outcome_unknown",
+        "message": "the mail provider did not confirm this send, so it may have been sent; check this inbox's sent messages before sending it again",
+        "status": 502
+      },
+      {
+        "code": "outcome_unknown",
+        "message": "this draft's last send ended without a definite answer from the mail provider, so it may have been sent; check this inbox's sent messages, then send or edit it with `confirmNotSent: true` only if it is not there",
+        "status": 409
+      },
+      {
+        "code": "idempotency_key_reused",
+        "message": "idempotency key was reused with a different inbox or request",
+        "status": 409
+      },
+      {
+        "code": "outcome_unknown",
+        "message": "mail send outcome is unresolved; reconcile this request before sending again",
+        "status": 409
+      },
+      {
+        "code": "outcome_unknown",
+        "message": "Mail transport acknowledged the message but its replay record could not be saved; reconcile this request before retrying",
+        "status": 500
+      }
+    ],
+    "connectErrorMessages": {
+      "connection_denied": "That Composio connection is not granted to this tenant.",
+      "insufficient_credits": "This organization has no Ryu credits left.",
+      "invalid_filters": "The tool search filters are not valid.",
+      "invalid_limit": "The limit is out of range.",
+      "invalid_skill_id": "The Skill id is not valid.",
+      "mcp_unconfigured": "MCP is not configured on this Connect server.",
+      "native_composio_unavailable": "Native Composio execution is not configured on this Connect server.",
+      "provider_unavailable": "The tool provider is unavailable right now.",
+      "skills_unavailable": "The Skill catalog is not available on this Connect server.",
+      "tool_denied": "That tool (or its account) is not granted to this tenant.",
+      "tool_unavailable": "That tool is not available on this Connect server.",
+      "toolkit_denied": "That toolkit is not granted to this tenant.",
+      "upstream_invalid": "The tool provider returned a response Connect could not read.",
+      "upstream_unconfigured": "The tool provider is not configured on this Connect server."
+    },
+    "managedAgentsPreviewDocs": "https://docs.ryuhq.com/docs/standalone/managed-agents",
+    "managedAgentsPreviewHints": {
+      "managed_agents_disabled": "This Ryu deployment does not offer the Managed Agents preview. See https://docs.ryuhq.com/docs/standalone/managed-agents",
+      "feature_disabled": "Managed Agents is a preview that is off until an organization owner or feature manager turns it on in Organization > Features (and for the member making the request). See https://docs.ryuhq.com/docs/standalone/managed-agents"
+    },
+    "messagingDocs": "https://docs.ryuhq.com/docs/standalone/messaging",
+    "messagingAvailabilityHints": [
+      {
+        "input": {
+          "status": 403,
+          "code": "feature_disabled",
+          "message": "off"
+        },
+        "hint": "The organization's Ryu Messaging feature is off; an organization owner or admin turns it on. See https://docs.ryuhq.com/docs/standalone/messaging"
+      },
+      {
+        "input": {
+          "status": 404,
+          "code": "not_found",
+          "message": "Ryu Messaging is not available for this organization"
+        },
+        "hint": "Ryu Messaging is in early access, and Ryu enables it for each organization. See https://docs.ryuhq.com/docs/standalone/messaging"
+      },
+      {
+        "input": {
+          "status": 404,
+          "code": "not_found",
+          "message": "no such number"
+        },
+        "hint": null
+      },
+      {
+        "input": {
+          "status": 500,
+          "code": "internal_error",
+          "message": "boom"
+        },
+        "hint": null
+      }
+    ]
+  },
+  "errors": [
+    {
+      "input": {
+        "service": "managedAgents",
+        "status": 403,
+        "body": "{\"error\":{\"code\":\"feature_disabled\",\"message\":\"off\",\"details\":{\"feature\":\"managed-agents\"},\"requestId\":\"req_body\"}}"
+      },
+      "expected": {
+        "name": "RyuPermissionError",
+        "code": "feature_disabled",
+        "envelope": "nested-error",
+        "message": "off",
+        "title": "Forbidden",
+        "type": null,
+        "requestId": "req_body",
+        "retryAfterSeconds": null,
+        "rateLimit": null,
+        "deprecation": null,
+        "details": {
+          "feature": "managed-agents"
+        },
+        "docs": null,
+        "hint": null,
+        "authChallenge": null,
+        "retryable": false,
+        "url": "https://svc.example.com/v1/x",
+        "method": "POST"
+      }
+    },
+    {
+      "input": {
+        "service": "managedAgents",
+        "status": 503,
+        "body": "{\"error\":{\"code\":\"managed_agents_disabled\",\"message\":\"not offered\"}}",
+        "headers": {
+          "x-request-id": "req_hdr"
+        }
+      },
+      "expected": {
+        "name": "RyuUnavailableError",
+        "code": "managed_agents_disabled",
+        "envelope": "nested-error",
+        "message": "not offered",
+        "title": "Service Unavailable",
+        "type": null,
+        "requestId": "req_hdr",
+        "retryAfterSeconds": null,
+        "rateLimit": null,
+        "deprecation": null,
+        "details": null,
+        "docs": null,
+        "hint": null,
+        "authChallenge": null,
+        "retryable": false,
+        "url": "https://svc.example.com/v1/x",
+        "method": "POST"
+      }
+    },
+    {
+      "input": {
+        "service": "notify",
+        "status": 400,
+        "body": "{\"ok\":false,\"type\":\"notify.error\",\"error\":{\"code\":\"invalid_request\",\"message\":\"bad\",\"fields\":{\"title\":\"required\"}}}"
+      },
+      "expected": {
+        "name": "RyuInvalidRequestError",
+        "code": "invalid_request",
+        "envelope": "ryu-service",
+        "message": "bad",
+        "title": "Bad Request",
+        "type": "notify.error",
+        "requestId": null,
+        "retryAfterSeconds": null,
+        "rateLimit": null,
+        "deprecation": null,
+        "details": {
+          "fields": {
+            "title": "required"
+          }
+        },
+        "docs": null,
+        "hint": null,
+        "authChallenge": null,
+        "retryable": false,
+        "url": "https://svc.example.com/v1/x",
+        "method": "POST"
+      }
+    },
+    {
+      "input": {
+        "service": "gateway",
+        "status": 429,
+        "body": "{\"error\":{\"message\":\"slow\",\"type\":\"rate_limit_error\",\"code\":\"rate_limited\",\"retry_after\":7}}",
+        "headers": {
+          "RateLimit": "\"burst\";r=0;t=12",
+          "RateLimit-Policy": "\"burst\";q=60;w=60"
+        }
+      },
+      "expected": {
+        "name": "RyuRateLimitError",
+        "code": "rate_limited",
+        "envelope": "openai",
+        "message": "slow",
+        "title": "Too Many Requests",
+        "type": null,
+        "requestId": null,
+        "retryAfterSeconds": 7,
+        "rateLimit": {
+          "limit": 60,
+          "policy": "burst",
+          "remaining": 0,
+          "resetSeconds": 12,
+          "windowSeconds": 60
+        },
+        "deprecation": null,
+        "details": null,
+        "docs": null,
+        "hint": null,
+        "authChallenge": null,
+        "retryable": true,
+        "url": "https://svc.example.com/v1/x",
+        "method": "POST"
+      }
+    },
+    {
+      "input": {
+        "service": "connect",
+        "status": 402,
+        "body": "{\"code\":\"insufficient_credits\",\"error\":\"insufficient_credits\",\"retryAfterSeconds\":3}"
+      },
+      "expected": {
+        "name": "RyuPaymentRequiredError",
+        "code": "insufficient_credits",
+        "envelope": "code-error",
+        "message": "insufficient_credits",
+        "title": "Client Error",
+        "type": null,
+        "requestId": null,
+        "retryAfterSeconds": 3,
+        "rateLimit": null,
+        "deprecation": null,
+        "details": null,
+        "docs": null,
+        "hint": null,
+        "authChallenge": null,
+        "retryable": false,
+        "url": "https://svc.example.com/v1/x",
+        "method": "POST"
+      }
+    },
+    {
+      "input": {
+        "service": "messaging",
+        "status": 409,
+        "body": "{\"error\":\"outcome_unknown\",\"message\":\"unclear\",\"messageRecord\":{\"id\":\"msg_1\",\"status\":\"unresolved\"}}"
+      },
+      "expected": {
+        "name": "RyuConflictError",
+        "code": "outcome_unknown",
+        "envelope": "messaging",
+        "message": "unclear",
+        "title": "Conflict",
+        "type": null,
+        "requestId": null,
+        "retryAfterSeconds": null,
+        "rateLimit": null,
+        "deprecation": null,
+        "details": {
+          "messageRecord": {
+            "id": "msg_1",
+            "status": "unresolved"
+          }
+        },
+        "docs": null,
+        "hint": null,
+        "authChallenge": null,
+        "retryable": false,
+        "url": "https://svc.example.com/v1/x",
+        "method": "POST"
+      }
+    },
+    {
+      "input": {
+        "service": "passport",
+        "status": 404,
+        "body": "{\"error\":\"connection not found\",\"message\":\"nope\"}"
+      },
+      "expected": {
+        "name": "RyuNotFoundError",
+        "code": "not_found",
+        "envelope": "error-string",
+        "message": "connection not found",
+        "title": "Not Found",
+        "type": null,
+        "requestId": null,
+        "retryAfterSeconds": null,
+        "rateLimit": null,
+        "deprecation": null,
+        "details": null,
+        "docs": null,
+        "hint": null,
+        "authChallenge": null,
+        "retryable": false,
+        "url": "https://svc.example.com/v1/x",
+        "method": "POST"
+      }
+    },
+    {
+      "input": {
+        "service": "box",
+        "status": 429,
+        "body": "{\"code\":\"quota_exceeded\",\"message\":\"quota\",\"retryable\":false}"
+      },
+      "expected": {
+        "name": "RyuQuotaExceededError",
+        "code": "quota_exceeded",
+        "envelope": "code-error",
+        "message": "quota",
+        "title": "Too Many Requests",
+        "type": null,
+        "requestId": null,
+        "retryAfterSeconds": null,
+        "rateLimit": null,
+        "deprecation": null,
+        "details": {
+          "retryable": false
+        },
+        "docs": null,
+        "hint": null,
+        "authChallenge": null,
+        "retryable": false,
+        "url": "https://svc.example.com/v1/x",
+        "method": "POST"
+      }
+    },
+    {
+      "input": {
+        "service": "mail",
+        "status": 401,
+        "body": "{\"message\":\"missing key\"}",
+        "headers": {
+          "WWW-Authenticate": "Bearer realm=\"mail\""
+        }
+      },
+      "expected": {
+        "name": "RyuAuthenticationError",
+        "code": "unauthenticated",
+        "envelope": "error-message",
+        "message": "missing key",
+        "title": "Unauthorized",
+        "type": null,
+        "requestId": null,
+        "retryAfterSeconds": null,
+        "rateLimit": null,
+        "deprecation": null,
+        "details": null,
+        "docs": null,
+        "hint": null,
+        "authChallenge": "Bearer realm=\"mail\"",
+        "retryable": false,
+        "url": "https://svc.example.com/v1/x",
+        "method": "POST"
+      }
+    },
+    {
+      "input": {
+        "service": "sites",
+        "status": 409,
+        "body": "{\"type\":\"https://docs.ryuhq.com/problems/conflict\",\"title\":\"Conflict\",\"status\":409,\"detail\":\"stale revision\",\"code\":\"conflict\",\"requestId\":\"req_p\"}",
+        "headers": {
+          "content-type": "application/problem+json"
+        }
+      },
+      "expected": {
+        "name": "RyuConflictError",
+        "code": "conflict",
+        "envelope": "problem+json",
+        "message": "stale revision",
+        "title": "Conflict",
+        "type": "https://docs.ryuhq.com/problems/conflict",
+        "requestId": "req_p",
+        "retryAfterSeconds": null,
+        "rateLimit": null,
+        "deprecation": null,
+        "details": null,
+        "docs": "https://docs.ryuhq.com/problems/conflict",
+        "hint": null,
+        "authChallenge": null,
+        "retryable": false,
+        "url": "https://svc.example.com/v1/x",
+        "method": "POST"
+      }
+    },
+    {
+      "input": {
+        "service": "notify",
+        "status": 502,
+        "body": "upstream exploded"
+      },
+      "expected": {
+        "name": "RyuServerError",
+        "code": "bad_gateway",
+        "envelope": "text",
+        "message": "upstream exploded",
+        "title": "Bad Gateway",
+        "type": null,
+        "requestId": null,
+        "retryAfterSeconds": null,
+        "rateLimit": null,
+        "deprecation": null,
+        "details": null,
+        "docs": null,
+        "hint": null,
+        "authChallenge": null,
+        "retryable": true,
+        "url": "https://svc.example.com/v1/x",
+        "method": "POST"
+      }
+    },
+    {
+      "input": {
+        "service": "box",
+        "status": 500,
+        "body": ""
+      },
+      "expected": {
+        "name": "RyuServerError",
+        "code": "internal_error",
+        "envelope": "empty",
+        "message": "Internal Server Error",
+        "title": "Internal Server Error",
+        "type": null,
+        "requestId": null,
+        "retryAfterSeconds": null,
+        "rateLimit": null,
+        "deprecation": null,
+        "details": null,
+        "docs": null,
+        "hint": null,
+        "authChallenge": null,
+        "retryable": true,
+        "url": "https://svc.example.com/v1/x",
+        "method": "POST"
+      }
+    },
+    {
+      "input": {
+        "service": "box",
+        "status": 418,
+        "body": ""
+      },
+      "expected": {
+        "name": "RyuError",
+        "code": "client_error",
+        "envelope": "empty",
+        "message": "Client Error",
+        "title": "Client Error",
+        "type": null,
+        "requestId": null,
+        "retryAfterSeconds": null,
+        "rateLimit": null,
+        "deprecation": null,
+        "details": null,
+        "docs": null,
+        "hint": null,
+        "authChallenge": null,
+        "retryable": false,
+        "url": "https://svc.example.com/v1/x",
+        "method": "POST"
+      }
+    },
+    {
+      "input": {
+        "service": "notify",
+        "status": 503,
+        "body": "{\"code\":\"not_configured\",\"message\":\"off\"}",
+        "headers": {
+          "Retry-After": "Wed, 22 Oct 2026 12:00:30 GMT"
+        }
+      },
+      "expected": {
+        "name": "RyuUnavailableError",
+        "code": "not_configured",
+        "envelope": "code-error",
+        "message": "off",
+        "title": "Service Unavailable",
+        "type": null,
+        "requestId": null,
+        "retryAfterSeconds": 30,
+        "rateLimit": null,
+        "deprecation": null,
+        "details": null,
+        "docs": null,
+        "hint": null,
+        "authChallenge": null,
+        "retryable": false,
+        "url": "https://svc.example.com/v1/x",
+        "method": "POST"
+      }
+    },
+    {
+      "input": {
+        "service": "managedAgents",
+        "status": 409,
+        "body": "{\"error\":{\"code\":\"idempotency_in_progress\",\"message\":\"still running\"}}",
+        "headers": {
+          "Deprecation": "@1790000000",
+          "Sunset": "Wed, 01 Apr 2027 00:00:00 GMT",
+          "Link": "<https://docs.ryuhq.com/policy>; rel=\"deprecation\", <https://api.ryuhq.com/v2>; rel=\"successor-version\""
+        }
+      },
+      "expected": {
+        "name": "RyuConflictError",
+        "code": "idempotency_in_progress",
+        "envelope": "nested-error",
+        "message": "still running",
+        "title": "Conflict",
+        "type": null,
+        "requestId": null,
+        "retryAfterSeconds": null,
+        "rateLimit": null,
+        "deprecation": {
+          "deprecatedAt": "2026-09-21T14:13:20.000Z",
+          "policyUrl": "https://docs.ryuhq.com/policy",
+          "successorUrl": "https://api.ryuhq.com/v2",
+          "sunsetAt": "2027-04-01T00:00:00.000Z"
+        },
+        "details": null,
+        "docs": null,
+        "hint": null,
+        "authChallenge": null,
+        "retryable": true,
+        "url": "https://svc.example.com/v1/x",
+        "method": "POST"
+      }
+    },
+    {
+      "input": {
+        "service": "notify",
+        "status": 401,
+        "body": "{\"type\":\"https://docs.ryuhq.com/docs/standalone/box-api#unauthorized\",\"title\":\"Unauthorized\",\"status\":401,\"detail\":\"missing bearer token\",\"code\":\"unauthorized\",\"hint\":\"Check RYU_BOX_API_KEY.\"}",
+        "headers": {
+          "content-type": "application/problem+json"
+        }
+      },
+      "expected": {
+        "name": "RyuAuthenticationError",
+        "code": "unauthorized",
+        "envelope": "problem+json",
+        "message": "missing bearer token. Hint: RYU_NOTIFY_URL points at Ryu Box, not Ryu Notify: the error came from the other service. Set RYU_NOTIFY_URL to the Ryu Notify server's URL.",
+        "title": "Unauthorized",
+        "type": "https://docs.ryuhq.com/docs/standalone/box-api#unauthorized",
+        "requestId": null,
+        "retryAfterSeconds": null,
+        "rateLimit": null,
+        "deprecation": null,
+        "details": null,
+        "docs": "https://docs.ryuhq.com/docs/standalone/sdk/errors#default-hints",
+        "hint": "RYU_NOTIFY_URL points at Ryu Box, not Ryu Notify: the error came from the other service. Set RYU_NOTIFY_URL to the Ryu Notify server's URL.",
+        "authChallenge": null,
+        "retryable": false,
+        "url": "https://svc.example.com/v1/x",
+        "method": "POST"
+      }
+    },
+    {
+      "input": {
+        "service": "box",
+        "status": 401,
+        "body": "{\"type\":\"about:blank\",\"title\":\"Error\",\"status\":401,\"detail\":\"bad key\",\"code\":\"unauthorized\",\"docs\":\"https://docs.ryuhq.com/docs/standalone/notify-api#unauthorized\"}",
+        "headers": {
+          "content-type": "application/problem+json"
+        }
+      },
+      "expected": {
+        "name": "RyuAuthenticationError",
+        "code": "unauthorized",
+        "envelope": "problem+json",
+        "message": "bad key. Hint: RYU_BOX_URL points at Ryu Notify, not Ryu Box: the error came from the other service. Set RYU_BOX_URL to the Ryu Box server's URL.",
+        "title": "Error",
+        "type": "about:blank",
+        "requestId": null,
+        "retryAfterSeconds": null,
+        "rateLimit": null,
+        "deprecation": null,
+        "details": null,
+        "docs": "https://docs.ryuhq.com/docs/standalone/sdk/errors#default-hints",
+        "hint": "RYU_BOX_URL points at Ryu Notify, not Ryu Box: the error came from the other service. Set RYU_BOX_URL to the Ryu Box server's URL.",
+        "authChallenge": null,
+        "retryable": false,
+        "url": "https://svc.example.com/v1/x",
+        "method": "POST"
+      }
+    },
+    {
+      "input": {
+        "service": "sites",
+        "status": 401,
+        "body": "{\"type\":\"about:blank\",\"title\":\"Error\",\"status\":401,\"detail\":\"bad key\",\"code\":\"unauthorized\",\"docs\":\"https://docs.ryuhq.com/docs/standalone/passport-mcp-api/tools\"}",
+        "headers": {
+          "content-type": "application/problem+json"
+        }
+      },
+      "expected": {
+        "name": "RyuAuthenticationError",
+        "code": "unauthorized",
+        "envelope": "problem+json",
+        "message": "bad key. Hint: RYU_SITES_URL points at Ryu Passport, not Ryu Sites: the error came from the other service. Set RYU_SITES_URL to the Ryu Sites server's URL.",
+        "title": "Error",
+        "type": "about:blank",
+        "requestId": null,
+        "retryAfterSeconds": null,
+        "rateLimit": null,
+        "deprecation": null,
+        "details": null,
+        "docs": "https://docs.ryuhq.com/docs/standalone/sdk/errors#default-hints",
+        "hint": "RYU_SITES_URL points at Ryu Passport, not Ryu Sites: the error came from the other service. Set RYU_SITES_URL to the Ryu Sites server's URL.",
+        "authChallenge": null,
+        "retryable": false,
+        "url": "https://svc.example.com/v1/x",
+        "method": "POST"
+      }
+    },
+    {
+      "input": {
+        "service": "messaging",
+        "status": 401,
+        "body": "{\"type\":\"about:blank\",\"title\":\"Error\",\"status\":401,\"detail\":\"bad key\",\"code\":\"unauthorized\",\"docs\":\"https://docs.ryuhq.com/docs/standalone/mail-api#unauthorized\"}",
+        "headers": {
+          "content-type": "application/problem+json"
+        }
+      },
+      "expected": {
+        "name": "RyuAuthenticationError",
+        "code": "unauthorized",
+        "envelope": "problem+json",
+        "message": "bad key",
+        "title": "Error",
+        "type": "about:blank",
+        "requestId": null,
+        "retryAfterSeconds": null,
+        "rateLimit": null,
+        "deprecation": null,
+        "details": null,
+        "docs": "https://docs.ryuhq.com/docs/standalone/mail-api#unauthorized",
+        "hint": null,
+        "authChallenge": null,
+        "retryable": false,
+        "url": "https://svc.example.com/v1/x",
+        "method": "POST"
+      }
+    },
+    {
+      "input": {
+        "service": "passport",
+        "status": 404,
+        "body": "{\"type\":\"about:blank\",\"title\":\"Error\",\"status\":404,\"detail\":\"no such tool\",\"code\":\"not_found\",\"docs\":\"https://docs.ryuhq.com/docs/standalone/passport-fetch-api#not-found\"}",
+        "headers": {
+          "content-type": "application/problem+json"
+        }
+      },
+      "expected": {
+        "name": "RyuNotFoundError",
+        "code": "not_found",
+        "envelope": "problem+json",
+        "message": "no such tool",
+        "title": "Error",
+        "type": "about:blank",
+        "requestId": null,
+        "retryAfterSeconds": null,
+        "rateLimit": null,
+        "deprecation": null,
+        "details": null,
+        "docs": "https://docs.ryuhq.com/docs/standalone/passport-fetch-api#not-found",
+        "hint": null,
+        "authChallenge": null,
+        "retryable": false,
+        "url": "https://svc.example.com/v1/x",
+        "method": "POST"
+      }
+    },
+    {
+      "input": {
+        "service": "connect",
+        "status": 503,
+        "body": "{\"code\":\"upstream_unconfigured\",\"error\":\"Connect upstream_unconfigured\"}"
+      },
+      "expected": {
+        "name": "RyuUnavailableError",
+        "code": "upstream_unconfigured",
+        "envelope": "code-error",
+        "message": "Connect upstream_unconfigured. Hint: This Connect has no tool lane (native: RYU_CONNECT_MCP_SERVERS or RYU_CONNECT_COMPOSIO_BINDINGS; single-tenant compatibility mode: RYU_CONNECT_CORE_URL for search, RYU_CONNECT_GATEWAY_URL for execution) configured. The operator sets it where Connect runs; a different key or URL, or a retry, will not help.",
+        "title": "Service Unavailable",
+        "type": null,
+        "requestId": null,
+        "retryAfterSeconds": null,
+        "rateLimit": null,
+        "deprecation": null,
+        "details": null,
+        "docs": "https://docs.ryuhq.com/docs/standalone/sdk/errors#default-hints",
+        "hint": "This Connect has no tool lane (native: RYU_CONNECT_MCP_SERVERS or RYU_CONNECT_COMPOSIO_BINDINGS; single-tenant compatibility mode: RYU_CONNECT_CORE_URL for search, RYU_CONNECT_GATEWAY_URL for execution) configured. The operator sets it where Connect runs; a different key or URL, or a retry, will not help.",
+        "authChallenge": null,
+        "retryable": false,
+        "url": "https://svc.example.com/v1/x",
+        "method": "POST"
+      }
+    },
+    {
+      "input": {
+        "service": "connect",
+        "status": 503,
+        "body": "{\"code\":\"upstream_invalid\",\"error\":\"Connect upstream_invalid\"}"
+      },
+      "expected": {
+        "name": "RyuUnavailableError",
+        "code": "upstream_invalid",
+        "envelope": "code-error",
+        "message": "Connect upstream_invalid. Hint: This Connect has no valid upstream URL (RYU_CONNECT_CORE_URL, RYU_CONNECT_GATEWAY_URL or RYU_CONNECT_MCP_UPSTREAM) configured. The operator sets it where Connect runs; a different key or URL, or a retry, will not help.",
+        "title": "Service Unavailable",
+        "type": null,
+        "requestId": null,
+        "retryAfterSeconds": null,
+        "rateLimit": null,
+        "deprecation": null,
+        "details": null,
+        "docs": "https://docs.ryuhq.com/docs/standalone/sdk/errors#default-hints",
+        "hint": "This Connect has no valid upstream URL (RYU_CONNECT_CORE_URL, RYU_CONNECT_GATEWAY_URL or RYU_CONNECT_MCP_UPSTREAM) configured. The operator sets it where Connect runs; a different key or URL, or a retry, will not help.",
+        "authChallenge": null,
+        "retryable": false,
+        "url": "https://svc.example.com/v1/x",
+        "method": "POST"
+      }
+    },
+    {
+      "input": {
+        "service": "connect",
+        "status": 503,
+        "body": "{\"code\":\"mcp_unconfigured\",\"error\":\"Connect mcp_unconfigured\"}"
+      },
+      "expected": {
+        "name": "RyuUnavailableError",
+        "code": "mcp_unconfigured",
+        "envelope": "code-error",
+        "message": "Connect mcp_unconfigured. Hint: This Connect has no MCP upstream (RYU_CONNECT_MCP_UPSTREAM) configured. The operator sets it where Connect runs; a different key or URL, or a retry, will not help.",
+        "title": "Service Unavailable",
+        "type": null,
+        "requestId": null,
+        "retryAfterSeconds": null,
+        "rateLimit": null,
+        "deprecation": null,
+        "details": null,
+        "docs": "https://docs.ryuhq.com/docs/standalone/sdk/errors#default-hints",
+        "hint": "This Connect has no MCP upstream (RYU_CONNECT_MCP_UPSTREAM) configured. The operator sets it where Connect runs; a different key or URL, or a retry, will not help.",
+        "authChallenge": null,
+        "retryable": true,
+        "url": "https://svc.example.com/v1/x",
+        "method": "POST"
+      }
+    },
+    {
+      "input": {
+        "service": "connect",
+        "status": 503,
+        "body": "{\"code\":\"native_composio_unavailable\",\"error\":\"Connect native_composio_unavailable\"}"
+      },
+      "expected": {
+        "name": "RyuUnavailableError",
+        "code": "native_composio_unavailable",
+        "envelope": "code-error",
+        "message": "Connect native_composio_unavailable. Hint: This Connect has no Composio lane (RYU_CONNECT_COMPOSIO_BINDINGS, or RYU_CONNECT_GATEWAY_URL in proxy mode) configured. The operator sets it where Connect runs; a different key or URL, or a retry, will not help.",
+        "title": "Service Unavailable",
+        "type": null,
+        "requestId": null,
+        "retryAfterSeconds": null,
+        "rateLimit": null,
+        "deprecation": null,
+        "details": null,
+        "docs": "https://docs.ryuhq.com/docs/standalone/sdk/errors#default-hints",
+        "hint": "This Connect has no Composio lane (RYU_CONNECT_COMPOSIO_BINDINGS, or RYU_CONNECT_GATEWAY_URL in proxy mode) configured. The operator sets it where Connect runs; a different key or URL, or a retry, will not help.",
+        "authChallenge": null,
+        "retryable": true,
+        "url": "https://svc.example.com/v1/x",
+        "method": "POST"
+      }
+    },
+    {
+      "input": {
+        "service": "connect",
+        "status": 503,
+        "body": "{\"code\":\"skills_unavailable\",\"error\":\"Connect skills_unavailable\"}"
+      },
+      "expected": {
+        "name": "RyuUnavailableError",
+        "code": "skills_unavailable",
+        "envelope": "code-error",
+        "message": "Connect skills_unavailable. Hint: This Connect has no skill catalog (RYU_CONNECT_SKILLS_DIR) configured. The operator sets it where Connect runs; a different key or URL, or a retry, will not help.",
+        "title": "Service Unavailable",
+        "type": null,
+        "requestId": null,
+        "retryAfterSeconds": null,
+        "rateLimit": null,
+        "deprecation": null,
+        "details": null,
+        "docs": "https://docs.ryuhq.com/docs/standalone/sdk/errors#default-hints",
+        "hint": "This Connect has no skill catalog (RYU_CONNECT_SKILLS_DIR) configured. The operator sets it where Connect runs; a different key or URL, or a retry, will not help.",
+        "authChallenge": null,
+        "retryable": false,
+        "url": "https://svc.example.com/v1/x",
+        "method": "POST"
+      }
+    },
+    {
+      "input": {
+        "service": "connect",
+        "status": 503,
+        "body": "{\"code\":\"upstream_unavailable\",\"error\":\"down\"}"
+      },
+      "expected": {
+        "name": "RyuUnavailableError",
+        "code": "upstream_unavailable",
+        "envelope": "code-error",
+        "message": "down",
+        "title": "Service Unavailable",
+        "type": null,
+        "requestId": null,
+        "retryAfterSeconds": null,
+        "rateLimit": null,
+        "deprecation": null,
+        "details": null,
+        "docs": null,
+        "hint": null,
+        "authChallenge": null,
+        "retryable": true,
+        "url": "https://svc.example.com/v1/x",
+        "method": "POST"
+      }
+    },
+    {
+      "input": {
+        "service": "connect",
+        "status": 403,
+        "body": "{\"code\":\"tool_denied\",\"error\":\"Connect tool_denied\",\"ok\":false}"
+      },
+      "expected": {
+        "name": "RyuPermissionError",
+        "code": "tool_denied",
+        "envelope": "code-error",
+        "message": "Connect tool_denied. Hint: This Connect has not granted that tool (or its account) to your tenant; Connect's tool search lists what it grants. The operator sets grants where Connect runs (allowedTools in RYU_CONNECT_MCP_SERVERS, or RYU_CONNECT_COMPOSIO_BINDINGS); a different key will not help.",
+        "title": "Forbidden",
+        "type": null,
+        "requestId": null,
+        "retryAfterSeconds": null,
+        "rateLimit": null,
+        "deprecation": null,
+        "details": null,
+        "docs": "https://docs.ryuhq.com/docs/standalone/sdk/errors#default-hints",
+        "hint": "This Connect has not granted that tool (or its account) to your tenant; Connect's tool search lists what it grants. The operator sets grants where Connect runs (allowedTools in RYU_CONNECT_MCP_SERVERS, or RYU_CONNECT_COMPOSIO_BINDINGS); a different key will not help.",
+        "authChallenge": null,
+        "retryable": false,
+        "url": "https://svc.example.com/v1/x",
+        "method": "POST"
+      }
+    },
+    {
+      "input": {
+        "service": "connect",
+        "status": 403,
+        "body": "{\"code\":\"toolkit_denied\",\"error\":\"Connect toolkit_denied\",\"ok\":false}"
+      },
+      "expected": {
+        "name": "RyuPermissionError",
+        "code": "toolkit_denied",
+        "envelope": "code-error",
+        "message": "Connect toolkit_denied. Hint: This Connect has not granted that toolkit to your tenant; Connect's tool search lists what it grants. The operator sets grants where Connect runs (allowedTools in RYU_CONNECT_MCP_SERVERS, or RYU_CONNECT_COMPOSIO_BINDINGS); a different key will not help.",
+        "title": "Forbidden",
+        "type": null,
+        "requestId": null,
+        "retryAfterSeconds": null,
+        "rateLimit": null,
+        "deprecation": null,
+        "details": null,
+        "docs": "https://docs.ryuhq.com/docs/standalone/sdk/errors#default-hints",
+        "hint": "This Connect has not granted that toolkit to your tenant; Connect's tool search lists what it grants. The operator sets grants where Connect runs (allowedTools in RYU_CONNECT_MCP_SERVERS, or RYU_CONNECT_COMPOSIO_BINDINGS); a different key will not help.",
+        "authChallenge": null,
+        "retryable": false,
+        "url": "https://svc.example.com/v1/x",
+        "method": "POST"
+      }
+    },
+    {
+      "input": {
+        "service": "connect",
+        "status": 403,
+        "body": "{\"code\":\"connection_denied\",\"error\":\"Connect connection_denied\",\"ok\":false}"
+      },
+      "expected": {
+        "name": "RyuPermissionError",
+        "code": "connection_denied",
+        "envelope": "code-error",
+        "message": "Connect connection_denied. Hint: This Connect has not granted that Composio connection to your tenant; Connect's tool search lists what it grants. The operator sets grants where Connect runs (allowedTools in RYU_CONNECT_MCP_SERVERS, or RYU_CONNECT_COMPOSIO_BINDINGS); a different key will not help.",
+        "title": "Forbidden",
+        "type": null,
+        "requestId": null,
+        "retryAfterSeconds": null,
+        "rateLimit": null,
+        "deprecation": null,
+        "details": null,
+        "docs": "https://docs.ryuhq.com/docs/standalone/sdk/errors#default-hints",
+        "hint": "This Connect has not granted that Composio connection to your tenant; Connect's tool search lists what it grants. The operator sets grants where Connect runs (allowedTools in RYU_CONNECT_MCP_SERVERS, or RYU_CONNECT_COMPOSIO_BINDINGS); a different key will not help.",
+        "authChallenge": null,
+        "retryable": false,
+        "url": "https://svc.example.com/v1/x",
+        "method": "POST"
+      }
+    },
+    {
+      "input": {
+        "service": "connect",
+        "status": 403,
+        "body": "{\"code\":\"forbidden\",\"error\":\"Connect forbidden\",\"ok\":false}"
+      },
+      "expected": {
+        "name": "RyuPermissionError",
+        "code": "forbidden",
+        "envelope": "code-error",
+        "message": "Connect forbidden",
+        "title": "Forbidden",
+        "type": null,
+        "requestId": null,
+        "retryAfterSeconds": null,
+        "rateLimit": null,
+        "deprecation": null,
+        "details": null,
+        "docs": null,
+        "hint": null,
+        "authChallenge": null,
+        "retryable": false,
+        "url": "https://svc.example.com/v1/x",
+        "method": "POST"
+      }
+    }
+  ],
+  "managedAgentsErrors": [
+    {
+      "input": {
+        "status": 403,
+        "body": "{\"error\":{\"code\":\"feature_disabled\",\"message\":\"off\",\"details\":{\"feature\":\"managed-agents\"},\"requestId\":\"req_body\"}}",
+        "headers": {
+          "x-request-id": "req_hdr",
+          "content-type": "application/json"
+        }
+      },
+      "expected": {
+        "name": "RyuPermissionError",
+        "code": "feature_disabled",
+        "envelope": "managed-agents",
+        "message": "off. Hint: Managed Agents is a preview that is off until an organization owner or feature manager turns it on in Organization > Features (and for the member making the request). See https://docs.ryuhq.com/docs/standalone/managed-agents",
+        "title": "Forbidden",
+        "requestId": "req_body",
+        "retryAfterSeconds": null,
+        "rateLimit": null,
+        "deprecated": false,
+        "details": {
+          "feature": "managed-agents"
+        },
+        "docs": "https://docs.ryuhq.com/docs/standalone/managed-agents",
+        "hint": "Managed Agents is a preview that is off until an organization owner or feature manager turns it on in Organization > Features (and for the member making the request). See https://docs.ryuhq.com/docs/standalone/managed-agents",
+        "authChallenge": null,
+        "retryable": false,
+        "url": "https://api.ryuhq.com/api/v1/managed-agents/agents/magt_1",
+        "method": "GET"
+      }
+    },
+    {
+      "input": {
+        "status": 503,
+        "body": "{\"error\":{\"code\":\"managed_agents_disabled\",\"message\":\"not offered\"}}",
+        "headers": {
+          "x-request-id": "req_hdr",
+          "content-type": "application/json"
+        }
+      },
+      "expected": {
+        "name": "RyuUnavailableError",
+        "code": "service_unavailable",
+        "envelope": "managed-agents",
+        "message": "Ryu Managed Agents: GET /agents/magt_1 failed (503): {\"error\":{\"code\":\"managed_agents_disabled\",\"message\":\"not offered\"}}",
+        "title": "Service Unavailable",
+        "requestId": "req_hdr",
+        "retryAfterSeconds": null,
+        "rateLimit": null,
+        "deprecated": false,
+        "details": null,
+        "docs": null,
+        "hint": null,
+        "authChallenge": null,
+        "retryable": true,
+        "url": "https://api.ryuhq.com/api/v1/managed-agents/agents/magt_1",
+        "method": "GET"
+      }
+    },
+    {
+      "input": {
+        "status": 400,
+        "body": "{\"type\":\"about:blank\",\"title\":\"Bad\",\"code\":\"invalid_body\",\"detail\":\"agentId is required\"}",
+        "headers": {
+          "content-type": "application/problem+json"
+        }
+      },
+      "expected": {
+        "name": "RyuInvalidRequestError",
+        "code": "bad_request",
+        "envelope": "managed-agents",
+        "message": "Ryu Managed Agents: GET /agents/magt_1 failed (400): {\"type\":\"about:blank\",\"title\":\"Bad\",\"code\":\"invalid_body\",\"detail\":\"agentId is required\"}",
+        "title": "Bad Request",
+        "requestId": null,
+        "retryAfterSeconds": null,
+        "rateLimit": null,
+        "deprecated": false,
+        "details": null,
+        "docs": null,
+        "hint": null,
+        "authChallenge": null,
+        "retryable": false,
+        "url": "https://api.ryuhq.com/api/v1/managed-agents/agents/magt_1",
+        "method": "GET"
+      }
+    },
+    {
+      "input": {
+        "status": 429,
+        "body": "{\"retryAfterSeconds\":9,\"code\":\"rate_limited\"}",
+        "headers": {
+          "content-type": "application/json",
+          "Retry-After": "120"
+        }
+      },
+      "expected": {
+        "name": "RyuRateLimitError",
+        "code": "rate_limited",
+        "envelope": "managed-agents",
+        "message": "Ryu Managed Agents: GET /agents/magt_1 failed (429): {\"retryAfterSeconds\":9,\"code\":\"rate_limited\"}",
+        "title": "Too Many Requests",
+        "requestId": null,
+        "retryAfterSeconds": 120,
+        "rateLimit": null,
+        "deprecated": false,
+        "details": null,
+        "docs": null,
+        "hint": null,
+        "authChallenge": null,
+        "retryable": true,
+        "url": "https://api.ryuhq.com/api/v1/managed-agents/agents/magt_1",
+        "method": "GET"
+      }
+    },
+    {
+      "input": {
+        "status": 502,
+        "body": "upstream exploded"
+      },
+      "expected": {
+        "name": "RyuServerError",
+        "code": "bad_gateway",
+        "envelope": "managed-agents",
+        "message": "Ryu Managed Agents: GET /agents/magt_1 failed (502): upstream exploded",
+        "title": "Bad Gateway",
+        "requestId": null,
+        "retryAfterSeconds": null,
+        "rateLimit": null,
+        "deprecated": false,
+        "details": null,
+        "docs": null,
+        "hint": null,
+        "authChallenge": null,
+        "retryable": true,
+        "url": "https://api.ryuhq.com/api/v1/managed-agents/agents/magt_1",
+        "method": "GET"
+      }
+    },
+    {
+      "input": {
+        "status": 409,
+        "body": "{\"error\":{\"code\":\"idempotency_in_progress\",\"message\":\"still running\",\"requestId\":\"req_409\"}}",
+        "headers": {
+          "content-type": "application/json",
+          "Deprecation": "@1790000000",
+          "Link": "<https://docs.ryuhq.com/policy>; rel=\"deprecation\""
+        }
+      },
+      "expected": {
+        "name": "RyuConflictError",
+        "code": "idempotency_in_progress",
+        "envelope": "managed-agents",
+        "message": "still running",
+        "title": "Conflict",
+        "requestId": "req_409",
+        "retryAfterSeconds": null,
+        "rateLimit": null,
+        "deprecated": true,
+        "details": null,
+        "docs": null,
+        "hint": null,
+        "authChallenge": null,
+        "retryable": true,
+        "url": "https://api.ryuhq.com/api/v1/managed-agents/agents/magt_1",
+        "method": "GET"
+      }
+    },
+    {
+      "input": {
+        "status": 401,
+        "body": "{\"error\":{\"code\":\"unauthenticated\",\"message\":\"bad key\",\"requestId\":\"r1\"}}",
+        "headers": {
+          "content-type": "application/json",
+          "www-authenticate": "Bearer"
+        }
+      },
+      "expected": {
+        "name": "RyuAuthenticationError",
+        "code": "unauthenticated",
+        "envelope": "managed-agents",
+        "message": "bad key. Hint: Ryu Managed Agents did not accept the credentials. Check RYU_API_KEY and RYU_ORGANIZATION_ID (or apiKey and organizationId).",
+        "title": "Unauthorized",
+        "requestId": "r1",
+        "retryAfterSeconds": null,
+        "rateLimit": null,
+        "deprecated": false,
+        "details": null,
+        "docs": null,
+        "hint": "Ryu Managed Agents did not accept the credentials. Check RYU_API_KEY and RYU_ORGANIZATION_ID (or apiKey and organizationId).",
+        "authChallenge": "Bearer",
+        "retryable": false,
+        "url": "https://api.ryuhq.com/api/v1/managed-agents/agents/magt_1",
+        "method": "GET"
+      }
+    }
+  ],
+  "retry": [
+    {
+      "input": {
+        "status": 503,
+        "code": "service_unavailable",
+        "replaySafe": true,
+        "bodyRetryAfterSeconds": null,
+        "rateLimitRemaining": null,
+        "rateLimitResetSeconds": null,
+        "retryAfterSeconds": null
+      },
+      "expected": {
+        "retry": true,
+        "delays": [
+          {
+            "ms": 375,
+            "source": "backoff"
+          },
+          {
+            "ms": 750,
+            "source": "backoff"
+          },
+          {
+            "ms": 1500,
+            "source": "backoff"
+          },
+          {
+            "ms": 6000,
+            "source": "backoff"
+          }
+        ]
+      }
+    },
+    {
+      "input": {
+        "status": 503,
+        "code": "service_unavailable",
+        "replaySafe": false,
+        "bodyRetryAfterSeconds": null,
+        "rateLimitRemaining": null,
+        "rateLimitResetSeconds": null,
+        "retryAfterSeconds": null
+      },
+      "expected": {
+        "retry": false,
+        "delays": [
+          {
+            "ms": 375,
+            "source": "backoff"
+          },
+          {
+            "ms": 750,
+            "source": "backoff"
+          },
+          {
+            "ms": 1500,
+            "source": "backoff"
+          },
+          {
+            "ms": 6000,
+            "source": "backoff"
+          }
+        ]
+      }
+    },
+    {
+      "input": {
+        "status": 0,
+        "code": "connection_error",
+        "replaySafe": true,
+        "bodyRetryAfterSeconds": null,
+        "rateLimitRemaining": null,
+        "rateLimitResetSeconds": null,
+        "retryAfterSeconds": null
+      },
+      "expected": {
+        "retry": true,
+        "delays": [
+          {
+            "ms": 375,
+            "source": "backoff"
+          },
+          {
+            "ms": 750,
+            "source": "backoff"
+          },
+          {
+            "ms": 1500,
+            "source": "backoff"
+          },
+          {
+            "ms": 6000,
+            "source": "backoff"
+          }
+        ]
+      }
+    },
+    {
+      "input": {
+        "status": 429,
+        "code": "rate_limited",
+        "replaySafe": false,
+        "bodyRetryAfterSeconds": null,
+        "rateLimitRemaining": null,
+        "rateLimitResetSeconds": null,
+        "retryAfterSeconds": null
+      },
+      "expected": {
+        "retry": false,
+        "delays": [
+          {
+            "ms": 375,
+            "source": "backoff"
+          },
+          {
+            "ms": 750,
+            "source": "backoff"
+          },
+          {
+            "ms": 1500,
+            "source": "backoff"
+          },
+          {
+            "ms": 6000,
+            "source": "backoff"
+          }
+        ]
+      }
+    },
+    {
+      "input": {
+        "status": 429,
+        "code": "rate_limited",
+        "replaySafe": false,
+        "retryAfterSeconds": 2,
+        "bodyRetryAfterSeconds": null,
+        "rateLimitRemaining": null,
+        "rateLimitResetSeconds": null
+      },
+      "expected": {
+        "retry": true,
+        "delays": [
+          {
+            "ms": 2000,
+            "source": "retry-after"
+          },
+          {
+            "ms": 2000,
+            "source": "retry-after"
+          },
+          {
+            "ms": 2000,
+            "source": "retry-after"
+          },
+          {
+            "ms": 2000,
+            "source": "retry-after"
+          }
+        ]
+      }
+    },
+    {
+      "input": {
+        "status": 429,
+        "code": "rate_limited",
+        "replaySafe": false,
+        "rateLimitRemaining": 0,
+        "rateLimitResetSeconds": 4,
+        "bodyRetryAfterSeconds": null,
+        "retryAfterSeconds": null
+      },
+      "expected": {
+        "retry": true,
+        "delays": [
+          {
+            "ms": 4000,
+            "source": "ratelimit"
+          },
+          {
+            "ms": 4000,
+            "source": "ratelimit"
+          },
+          {
+            "ms": 4000,
+            "source": "ratelimit"
+          },
+          {
+            "ms": 4000,
+            "source": "ratelimit"
+          }
+        ]
+      }
+    },
+    {
+      "input": {
+        "status": 429,
+        "code": "rate_limited",
+        "replaySafe": false,
+        "rateLimitRemaining": 3,
+        "rateLimitResetSeconds": 4,
+        "bodyRetryAfterSeconds": null,
+        "retryAfterSeconds": null
+      },
+      "expected": {
+        "retry": false,
+        "delays": [
+          {
+            "ms": 375,
+            "source": "backoff"
+          },
+          {
+            "ms": 750,
+            "source": "backoff"
+          },
+          {
+            "ms": 1500,
+            "source": "backoff"
+          },
+          {
+            "ms": 6000,
+            "source": "backoff"
+          }
+        ]
+      }
+    },
+    {
+      "input": {
+        "status": 429,
+        "code": "rate_limited",
+        "replaySafe": true,
+        "bodyRetryAfterSeconds": 5,
+        "rateLimitRemaining": null,
+        "rateLimitResetSeconds": null,
+        "retryAfterSeconds": null
+      },
+      "expected": {
+        "retry": true,
+        "delays": [
+          {
+            "ms": 5000,
+            "source": "body"
+          },
+          {
+            "ms": 5000,
+            "source": "body"
+          },
+          {
+            "ms": 5000,
+            "source": "body"
+          },
+          {
+            "ms": 5000,
+            "source": "body"
+          }
+        ]
+      }
+    },
+    {
+      "input": {
+        "status": 429,
+        "code": "quota_exceeded",
+        "replaySafe": true,
+        "retryAfterSeconds": 2,
+        "bodyRetryAfterSeconds": null,
+        "rateLimitRemaining": null,
+        "rateLimitResetSeconds": null
+      },
+      "expected": {
+        "retry": false,
+        "delays": [
+          {
+            "ms": 2000,
+            "source": "retry-after"
+          },
+          {
+            "ms": 2000,
+            "source": "retry-after"
+          },
+          {
+            "ms": 2000,
+            "source": "retry-after"
+          },
+          {
+            "ms": 2000,
+            "source": "retry-after"
+          }
+        ]
+      }
+    },
+    {
+      "input": {
+        "status": 409,
+        "code": "idempotency_in_progress",
+        "replaySafe": true,
+        "bodyRetryAfterSeconds": null,
+        "rateLimitRemaining": null,
+        "rateLimitResetSeconds": null,
+        "retryAfterSeconds": null
+      },
+      "expected": {
+        "retry": true,
+        "delays": [
+          {
+            "ms": 375,
+            "source": "backoff"
+          },
+          {
+            "ms": 750,
+            "source": "backoff"
+          },
+          {
+            "ms": 1500,
+            "source": "backoff"
+          },
+          {
+            "ms": 6000,
+            "source": "backoff"
+          }
+        ]
+      }
+    },
+    {
+      "input": {
+        "status": 409,
+        "code": "conflict",
+        "replaySafe": true,
+        "bodyRetryAfterSeconds": null,
+        "rateLimitRemaining": null,
+        "rateLimitResetSeconds": null,
+        "retryAfterSeconds": null
+      },
+      "expected": {
+        "retry": false,
+        "delays": [
+          {
+            "ms": 375,
+            "source": "backoff"
+          },
+          {
+            "ms": 750,
+            "source": "backoff"
+          },
+          {
+            "ms": 1500,
+            "source": "backoff"
+          },
+          {
+            "ms": 6000,
+            "source": "backoff"
+          }
+        ]
+      }
+    },
+    {
+      "input": {
+        "status": 402,
+        "code": "payment_required",
+        "replaySafe": true,
+        "bodyRetryAfterSeconds": null,
+        "rateLimitRemaining": null,
+        "rateLimitResetSeconds": null,
+        "retryAfterSeconds": null
+      },
+      "expected": {
+        "retry": false,
+        "delays": [
+          {
+            "ms": 375,
+            "source": "backoff"
+          },
+          {
+            "ms": 750,
+            "source": "backoff"
+          },
+          {
+            "ms": 1500,
+            "source": "backoff"
+          },
+          {
+            "ms": 6000,
+            "source": "backoff"
+          }
+        ]
+      }
+    },
+    {
+      "input": {
+        "status": 502,
+        "code": "outcome_unknown",
+        "replaySafe": true,
+        "bodyRetryAfterSeconds": null,
+        "rateLimitRemaining": null,
+        "rateLimitResetSeconds": null,
+        "retryAfterSeconds": null
+      },
+      "expected": {
+        "retry": false,
+        "delays": [
+          {
+            "ms": 375,
+            "source": "backoff"
+          },
+          {
+            "ms": 750,
+            "source": "backoff"
+          },
+          {
+            "ms": 1500,
+            "source": "backoff"
+          },
+          {
+            "ms": 6000,
+            "source": "backoff"
+          }
+        ]
+      }
+    },
+    {
+      "input": {
+        "status": 500,
+        "code": "internal_error",
+        "replaySafe": true,
+        "bodyRetryAfterSeconds": null,
+        "rateLimitRemaining": null,
+        "rateLimitResetSeconds": null,
+        "retryAfterSeconds": null
+      },
+      "expected": {
+        "retry": true,
+        "delays": [
+          {
+            "ms": 375,
+            "source": "backoff"
+          },
+          {
+            "ms": 750,
+            "source": "backoff"
+          },
+          {
+            "ms": 1500,
+            "source": "backoff"
+          },
+          {
+            "ms": 6000,
+            "source": "backoff"
+          }
+        ]
+      }
+    },
+    {
+      "input": {
+        "status": 425,
+        "code": "client_error",
+        "replaySafe": true,
+        "bodyRetryAfterSeconds": null,
+        "rateLimitRemaining": null,
+        "rateLimitResetSeconds": null,
+        "retryAfterSeconds": null
+      },
+      "expected": {
+        "retry": true,
+        "delays": [
+          {
+            "ms": 375,
+            "source": "backoff"
+          },
+          {
+            "ms": 750,
+            "source": "backoff"
+          },
+          {
+            "ms": 1500,
+            "source": "backoff"
+          },
+          {
+            "ms": 6000,
+            "source": "backoff"
+          }
+        ]
+      }
+    },
+    {
+      "input": {
+        "status": 404,
+        "code": "not_found",
+        "replaySafe": true,
+        "bodyRetryAfterSeconds": null,
+        "rateLimitRemaining": null,
+        "rateLimitResetSeconds": null,
+        "retryAfterSeconds": null
+      },
+      "expected": {
+        "retry": false,
+        "delays": [
+          {
+            "ms": 375,
+            "source": "backoff"
+          },
+          {
+            "ms": 750,
+            "source": "backoff"
+          },
+          {
+            "ms": 1500,
+            "source": "backoff"
+          },
+          {
+            "ms": 6000,
+            "source": "backoff"
+          }
+        ]
+      }
+    }
+  ],
+  "headers": {
+    "retryAfter": [
+      {
+        "input": "0",
+        "expected": 0
+      },
+      {
+        "input": "12",
+        "expected": 12
+      },
+      {
+        "input": " 7 ",
+        "expected": 7
+      },
+      {
+        "input": "",
+        "expected": null
+      },
+      {
+        "input": "soon",
+        "expected": null
+      },
+      {
+        "input": "-3",
+        "expected": null
+      },
+      {
+        "input": "Wed, 22 Oct 2026 12:00:30 GMT",
+        "expected": 30
+      },
+      {
+        "input": "Wed, 22 Oct 2026 11:00:00 GMT",
+        "expected": 0
+      },
+      {
+        "input": "1790000000",
+        "expected": 1790000000
+      }
+    ],
+    "rateLimit": [
+      {
+        "input": [
+          "\"burst\";r=0;t=12",
+          "\"burst\";q=60;w=60"
+        ],
+        "expected": {
+          "limit": 60,
+          "policy": "burst",
+          "remaining": 0,
+          "resetSeconds": 12,
+          "windowSeconds": 60
+        }
+      },
+      {
+        "input": [
+          "default;r=5;t=30",
+          null
+        ],
+        "expected": {
+          "limit": null,
+          "policy": "default",
+          "remaining": 5,
+          "resetSeconds": 30,
+          "windowSeconds": null
+        }
+      },
+      {
+        "input": [
+          null,
+          "\"daily\";q=1000;w=86400"
+        ],
+        "expected": {
+          "limit": 1000,
+          "policy": "daily",
+          "remaining": null,
+          "resetSeconds": null,
+          "windowSeconds": 86400
+        }
+      },
+      {
+        "input": [
+          "\"a\";r=1;t=2, \"b\";r=3;t=4",
+          "\"b\";q=9;w=9, \"a\";q=5;w=10"
+        ],
+        "expected": {
+          "limit": 5,
+          "policy": "a",
+          "remaining": 1,
+          "resetSeconds": 2,
+          "windowSeconds": 10
+        }
+      },
+      {
+        "input": [
+          "\"x\";r=abc",
+          null
+        ],
+        "expected": {
+          "limit": null,
+          "policy": "x",
+          "remaining": null,
+          "resetSeconds": null,
+          "windowSeconds": null
+        }
+      },
+      {
+        "input": [
+          null,
+          null
+        ],
+        "expected": null
+      }
+    ],
+    "deprecation": [
+      {
+        "input": {
+          "Deprecation": "@1790000000"
+        },
+        "expected": {
+          "deprecatedAt": "2026-09-21T14:13:20.000Z",
+          "policyUrl": null,
+          "successorUrl": null,
+          "sunsetAt": null
+        }
+      },
+      {
+        "input": {
+          "Deprecation": "Sat, 01 Jan 2028 00:00:00 GMT",
+          "Link": "<https://docs.ryuhq.com/p>; rel=\"deprecation\""
+        },
+        "expected": {
+          "deprecatedAt": "2028-01-01T00:00:00.000Z",
+          "policyUrl": "https://docs.ryuhq.com/p",
+          "successorUrl": null,
+          "sunsetAt": null
+        }
+      },
+      {
+        "input": {
+          "Sunset": "Wed, 01 Apr 2027 00:00:00 GMT",
+          "Link": "<https://a.example.com/x,y>; rel=\"successor-version\""
+        },
+        "expected": {
+          "deprecatedAt": null,
+          "policyUrl": null,
+          "successorUrl": "https://a.example.com/x,y",
+          "sunsetAt": "2027-04-01T00:00:00.000Z"
+        }
+      },
+      {
+        "input": {
+          "Link": "<https://docs.ryuhq.com/p>; rel=\"deprecation\""
+        },
+        "expected": null
+      }
+    ]
+  },
+  "config": [
+    {
+      "input": {
+        "service": "managedAgents",
+        "env": {}
+      },
+      "error": {
+        "code": "configuration_error",
+        "details": {
+          "missing": [
+            "RYU_API_KEY"
+          ]
+        },
+        "hint": "Set RYU_API_KEY (or pass apiKey to new Ryu()). See https://docs.ryuhq.com/docs/standalone/sdk/managed-agents.",
+        "message": "Ryu Managed Agents needs a ryu_ key: set RYU_API_KEY or pass apiKey. Hint: Set RYU_API_KEY (or pass apiKey to new Ryu()). See https://docs.ryuhq.com/docs/standalone/sdk/managed-agents.",
+        "name": "RyuConfigurationError"
+      }
+    },
+    {
+      "input": {
+        "service": "managedAgents",
+        "env": {
+          "RYU_API_KEY": "ryu_k",
+          "RYU_ORGANIZATION_ID": "org_1"
+        }
+      },
+      "expected": {
+        "apiKey": "ryu_k",
+        "auth": "x-api-key",
+        "baseUrl": "https://api.ryuhq.com",
+        "mailMode": null,
+        "managementKey": null,
+        "organizationId": "org_1",
+        "runtimeKey": null
+      }
+    },
+    {
+      "input": {
+        "service": "managedAgents",
+        "env": {
+          "RYU_API_KEY": "ryu_k",
+          "RYU_API_URL": "https://api.example.com"
+        },
+        "options": {
+          "managedAgents": {
+            "organizationId": "org_scoped"
+          }
+        }
+      },
+      "expected": {
+        "apiKey": "ryu_k",
+        "auth": "x-api-key",
+        "baseUrl": "https://api.example.com",
+        "mailMode": null,
+        "managementKey": null,
+        "organizationId": "org_scoped",
+        "runtimeKey": null
+      }
+    },
+    {
+      "input": {
+        "service": "managedAgents",
+        "env": {
+          "RYU_API_KEY": "ryu_k",
+          "RYU_API_URL": "not a url"
+        }
+      },
+      "error": {
+        "code": "invalid_url",
+        "details": {
+          "invalid": [
+            "RYU_API_URL"
+          ]
+        },
+        "hint": null,
+        "message": "Ryu Managed Agents: RYU_API_URL is not an absolute URL (invalid value, 9 chars).",
+        "name": "RyuConfigurationError"
+      }
+    },
+    {
+      "input": {
+        "service": "messaging",
+        "env": {
+          "RYU_API_KEY": "ryu_k"
+        }
+      },
+      "error": {
+        "code": "configuration_error",
+        "details": {
+          "missing": [
+            "RYU_ORGANIZATION_ID"
+          ]
+        },
+        "hint": "Set RYU_ORGANIZATION_ID (or pass organizationId to new Ryu()). See https://docs.ryuhq.com/docs/standalone/sdk/messaging.",
+        "message": "Ryu Messaging needs a ryu_ key and the organization it acts for: set RYU_ORGANIZATION_ID. Hint: Set RYU_ORGANIZATION_ID (or pass organizationId to new Ryu()). See https://docs.ryuhq.com/docs/standalone/sdk/messaging.",
+        "name": "RyuConfigurationError"
+      }
+    },
+    {
+      "input": {
+        "service": "messaging",
+        "env": {},
+        "resolution": {
+          "credentials": "optional"
+        }
+      },
+      "expected": {
+        "apiKey": null,
+        "auth": "x-api-key",
+        "baseUrl": "https://api.ryuhq.com",
+        "mailMode": null,
+        "managementKey": null,
+        "organizationId": null,
+        "runtimeKey": null
+      }
+    },
+    {
+      "input": {
+        "service": "messaging",
+        "env": {
+          "RYU_API_KEY": "ryu_k"
+        },
+        "resolution": {
+          "credentials": "optional"
+        }
+      },
+      "expected": {
+        "apiKey": null,
+        "auth": "x-api-key",
+        "baseUrl": "https://api.ryuhq.com",
+        "mailMode": null,
+        "managementKey": null,
+        "organizationId": null,
+        "runtimeKey": null
+      }
+    },
+    {
+      "input": {
+        "service": "messaging",
+        "env": {
+          "RYU_API_KEY": "ryu_k",
+          "RYU_ORGANIZATION_ID": "org_1"
+        },
+        "resolution": {
+          "credentials": "optional"
+        }
+      },
+      "expected": {
+        "apiKey": "ryu_k",
+        "auth": "x-api-key",
+        "baseUrl": "https://api.ryuhq.com",
+        "mailMode": null,
+        "managementKey": null,
+        "organizationId": "org_1",
+        "runtimeKey": null
+      }
+    },
+    {
+      "input": {
+        "service": "messaging",
+        "env": {
+          "RYU_API_URL": "not a url"
+        },
+        "resolution": {
+          "credentials": "optional"
+        }
+      },
+      "error": {
+        "code": "invalid_url",
+        "details": {
+          "invalid": [
+            "RYU_API_URL"
+          ]
+        },
+        "hint": null,
+        "message": "Ryu Messaging: RYU_API_URL is not an absolute URL (invalid value, 9 chars).",
+        "name": "RyuConfigurationError"
+      }
+    },
+    {
+      "input": {
+        "service": "sites",
+        "env": {
+          "RYU_SITES_API_KEY": "s_k",
+          "RYU_SITES_URL": "127.0.0.1:48721"
+        }
+      },
+      "error": {
+        "code": "invalid_url",
+        "details": {
+          "invalid": [
+            "RYU_SITES_URL"
+          ]
+        },
+        "hint": "Add the scheme, for example http://127.0.0.1:8021 or https://api.example.com.",
+        "message": "Ryu Sites: RYU_SITES_URL is not an absolute URL (invalid value, 15 chars). Hint: Add the scheme, for example http://127.0.0.1:8021 or https://api.example.com.",
+        "name": "RyuConfigurationError"
+      }
+    },
+    {
+      "input": {
+        "service": "notify",
+        "env": {
+          "RYU_NOTIFY_API_KEY": "n_k",
+          "RYU_NOTIFY_URL": "localhost:8021"
+        }
+      },
+      "error": {
+        "code": "invalid_url",
+        "details": {
+          "invalid": [
+            "RYU_NOTIFY_URL"
+          ]
+        },
+        "hint": "Add the scheme, for example http://127.0.0.1:8021 or https://api.example.com.",
+        "message": "Ryu Notify: RYU_NOTIFY_URL is not an absolute URL (invalid localhost: value, 14 chars). Hint: Add the scheme, for example http://127.0.0.1:8021 or https://api.example.com.",
+        "name": "RyuConfigurationError"
+      }
+    },
+    {
+      "input": {
+        "service": "box",
+        "env": {
+          "RYU_BOX_API_KEY": "b_k",
+          "RYU_BOX_URL": "box.example.com/v1"
+        }
+      },
+      "error": {
+        "code": "invalid_url",
+        "details": {
+          "invalid": [
+            "RYU_BOX_URL"
+          ]
+        },
+        "hint": "Add the scheme, for example http://127.0.0.1:8021 or https://api.example.com.",
+        "message": "Ryu Box: RYU_BOX_URL is not an absolute URL (invalid value, 18 chars). Hint: Add the scheme, for example http://127.0.0.1:8021 or https://api.example.com.",
+        "name": "RyuConfigurationError"
+      }
+    },
+    {
+      "input": {
+        "service": "box",
+        "env": {
+          "RYU_BOX_API_KEY": "b_k",
+          "RYU_BOX_URL": "ftp://box.example.com"
+        }
+      },
+      "error": {
+        "code": "invalid_url",
+        "details": {
+          "invalid": [
+            "RYU_BOX_URL"
+          ]
+        },
+        "hint": null,
+        "message": "Ryu Box: RYU_BOX_URL is not an absolute URL (invalid ftp: value, 21 chars).",
+        "name": "RyuConfigurationError"
+      }
+    },
+    {
+      "input": {
+        "service": "sites",
+        "env": {
+          "RYU_SITES_API_KEY": "s_k",
+          "RYU_SITES_URL": "http:127.0.0.1:8021"
+        }
+      },
+      "error": {
+        "code": "invalid_url",
+        "details": {
+          "invalid": [
+            "RYU_SITES_URL"
+          ]
+        },
+        "hint": null,
+        "message": "Ryu Sites: RYU_SITES_URL is not an absolute URL (invalid http: value, 19 chars).",
+        "name": "RyuConfigurationError"
+      }
+    },
+    {
+      "input": {
+        "service": "sites",
+        "env": {
+          "RYU_SITES_API_KEY": "s_k",
+          "RYU_SITES_URL": "http:/127.0.0.1:8021"
+        }
+      },
+      "error": {
+        "code": "invalid_url",
+        "details": {
+          "invalid": [
+            "RYU_SITES_URL"
+          ]
+        },
+        "hint": null,
+        "message": "Ryu Sites: RYU_SITES_URL is not an absolute URL (invalid http: value, 20 chars).",
+        "name": "RyuConfigurationError"
+      }
+    },
+    {
+      "input": {
+        "service": "notify",
+        "env": {
+          "RYU_NOTIFY_API_KEY": "n_k",
+          "RYU_NOTIFY_URL": "mailto:x"
+        }
+      },
+      "error": {
+        "code": "invalid_url",
+        "details": {
+          "invalid": [
+            "RYU_NOTIFY_URL"
+          ]
+        },
+        "hint": null,
+        "message": "Ryu Notify: RYU_NOTIFY_URL is not an absolute URL (invalid mailto: value, 8 chars).",
+        "name": "RyuConfigurationError"
+      }
+    },
+    {
+      "input": {
+        "service": "box",
+        "env": {
+          "RYU_BOX_API_KEY": "b_k",
+          "RYU_BOX_URL": "[::1]:8021"
+        }
+      },
+      "error": {
+        "code": "invalid_url",
+        "details": {
+          "invalid": [
+            "RYU_BOX_URL"
+          ]
+        },
+        "hint": "Add the scheme, for example http://127.0.0.1:8021 or https://api.example.com.",
+        "message": "Ryu Box: RYU_BOX_URL is not an absolute URL (invalid value, 10 chars). Hint: Add the scheme, for example http://127.0.0.1:8021 or https://api.example.com.",
+        "name": "RyuConfigurationError"
+      }
+    },
+    {
+      "input": {
+        "service": "box",
+        "env": {
+          "RYU_BOX_API_KEY": "b_k",
+          "RYU_BOX_URL": "nope"
+        }
+      },
+      "error": {
+        "code": "invalid_url",
+        "details": {
+          "invalid": [
+            "RYU_BOX_URL"
+          ]
+        },
+        "hint": null,
+        "message": "Ryu Box: RYU_BOX_URL is not an absolute URL (invalid value, 4 chars).",
+        "name": "RyuConfigurationError"
+      }
+    },
+    {
+      "input": {
+        "service": "notify",
+        "env": {},
+        "resolution": {
+          "credentials": "optional"
+        }
+      },
+      "error": {
+        "code": "configuration_error",
+        "details": {
+          "missing": [
+            "RYU_NOTIFY_API_KEY"
+          ]
+        },
+        "hint": "Set RYU_NOTIFY_API_KEY (or pass notify.apiKey to new Ryu()). See https://docs.ryuhq.com/docs/standalone/sdk/notify.",
+        "message": "Ryu Notify is not configured: set RYU_NOTIFY_API_KEY. Hint: Set RYU_NOTIFY_API_KEY (or pass notify.apiKey to new Ryu()). See https://docs.ryuhq.com/docs/standalone/sdk/notify.",
+        "name": "RyuConfigurationError"
+      }
+    },
+    {
+      "input": {
+        "service": "messaging",
+        "env": {
+          "RYU_API_KEY": "ryu_k",
+          "RYU_ORGANIZATION_ID": "org_1"
+        }
+      },
+      "expected": {
+        "apiKey": "ryu_k",
+        "auth": "x-api-key",
+        "baseUrl": "https://api.ryuhq.com",
+        "mailMode": null,
+        "managementKey": null,
+        "organizationId": "org_1",
+        "runtimeKey": null
+      }
+    },
+    {
+      "input": {
+        "service": "mail",
+        "env": {}
+      },
+      "error": {
+        "code": "configuration_error",
+        "details": {
+          "missing": [
+            "RYU_API_KEY",
+            "RYU_MAIL_GATEWAY_KEY",
+            "RYU_MAIL_API_KEY"
+          ]
+        },
+        "hint": "Set RYU_API_KEY (or pass apiKey) to a ryu_ key with Mail scopes for hosted Mail, or RYU_MAIL_GATEWAY_KEY (or mail.gatewayKey) for a node gateway key, or RYU_MAIL_URL and RYU_MAIL_API_KEY (or mail.baseUrl and mail.apiKey) for a self-hosted server. See https://docs.ryuhq.com/docs/standalone/sdk/mail.",
+        "message": "Ryu Mail needs a key: RYU_API_KEY (a ryu_ key with Mail scopes) or RYU_MAIL_GATEWAY_KEY (a node gateway key) for hosted Mail, or RYU_MAIL_URL and RYU_MAIL_API_KEY for a self-hosted server. Hint: Set RYU_API_KEY (or pass apiKey) to a ryu_ key with Mail scopes for hosted Mail, or RYU_MAIL_GATEWAY_KEY (or mail.gatewayKey) for a node gateway key, or RYU_MAIL_URL and RYU_MAIL_API_KEY (or mail.baseUrl and mail.apiKey) for a self-hosted server. See https://docs.ryuhq.com/docs/standalone/sdk/mail.",
+        "name": "RyuConfigurationError"
+      }
+    },
+    {
+      "input": {
+        "service": "mail",
+        "env": {
+          "RYU_API_KEY": "ryu_k",
+          "RYU_ORGANIZATION_ID": "org_1"
+        }
+      },
+      "expected": {
+        "apiKey": "ryu_k",
+        "auth": "x-api-key",
+        "baseUrl": "https://api.ryuhq.com",
+        "mailMode": "hosted",
+        "managementKey": null,
+        "organizationId": "org_1",
+        "runtimeKey": null
+      }
+    },
+    {
+      "input": {
+        "service": "mail",
+        "env": {
+          "RYU_API_KEY": "ryu_k",
+          "RYU_MAIL_GATEWAY_KEY": "gw_k"
+        }
+      },
+      "expected": {
+        "apiKey": "gw_k",
+        "auth": "x-gateway-key",
+        "baseUrl": "https://api.ryuhq.com",
+        "mailMode": "hosted",
+        "managementKey": null,
+        "organizationId": null,
+        "runtimeKey": null
+      }
+    },
+    {
+      "input": {
+        "service": "mail",
+        "env": {
+          "RYU_API_KEY": "ryu_k",
+          "RYU_MAIL_URL": "https://mail.example.com"
+        }
+      },
+      "error": {
+        "code": "configuration_error",
+        "details": {
+          "missing": [
+            "RYU_MAIL_API_KEY"
+          ]
+        },
+        "hint": "Set RYU_MAIL_API_KEY (or pass mail.apiKey to new Ryu()). See https://docs.ryuhq.com/docs/standalone/sdk/mail.",
+        "message": "Self-hosted Ryu Mail needs its bearer token: set RYU_MAIL_API_KEY (or mail.apiKey). The ryu_ key is sent only to hosted Mail on the control-plane origin. Hint: Set RYU_MAIL_API_KEY (or pass mail.apiKey to new Ryu()). See https://docs.ryuhq.com/docs/standalone/sdk/mail.",
+        "name": "RyuConfigurationError"
+      }
+    },
+    {
+      "input": {
+        "service": "mail",
+        "env": {
+          "RYU_MAIL_API_KEY": "self_k",
+          "RYU_MAIL_URL": "https://mail.example.com",
+          "RYU_MAIL_GATEWAY_KEY": "gw_k"
+        }
+      },
+      "expected": {
+        "apiKey": "self_k",
+        "auth": "bearer",
+        "baseUrl": "https://mail.example.com",
+        "mailMode": "self-hosted",
+        "managementKey": null,
+        "organizationId": null,
+        "runtimeKey": null
+      }
+    },
+    {
+      "input": {
+        "service": "mail",
+        "env": {
+          "RYU_MAIL_API_KEY": "self_k"
+        }
+      },
+      "error": {
+        "code": "configuration_error",
+        "details": {
+          "missing": [
+            "RYU_MAIL_URL"
+          ]
+        },
+        "hint": "Set RYU_MAIL_URL (or pass mail.baseUrl to new Ryu()). See https://docs.ryuhq.com/docs/standalone/sdk/mail.",
+        "message": "Self-hosted Ryu Mail has no default URL: set RYU_MAIL_URL (or mail.baseUrl) to your Mail server. Hint: Set RYU_MAIL_URL (or pass mail.baseUrl to new Ryu()). See https://docs.ryuhq.com/docs/standalone/sdk/mail.",
+        "name": "RyuConfigurationError"
+      }
+    },
+    {
+      "input": {
+        "service": "mail",
+        "env": {
+          "RYU_MAIL_GATEWAY_KEY": "gw_env"
+        },
+        "options": {
+          "apiKey": "ryu_opt"
+        }
+      },
+      "expected": {
+        "apiKey": "ryu_opt",
+        "auth": "x-api-key",
+        "baseUrl": "https://api.ryuhq.com",
+        "mailMode": "hosted",
+        "managementKey": null,
+        "organizationId": null,
+        "runtimeKey": null
+      }
+    },
+    {
+      "input": {
+        "service": "mail",
+        "env": {
+          "RYU_API_KEY": "ryu_k",
+          "RYU_MAIL_URL": "https://api.ryuhq.com"
+        }
+      },
+      "expected": {
+        "apiKey": "ryu_k",
+        "auth": "x-api-key",
+        "baseUrl": "https://api.ryuhq.com",
+        "mailMode": "hosted",
+        "managementKey": null,
+        "organizationId": null,
+        "runtimeKey": null
+      }
+    },
+    {
+      "input": {
+        "service": "notify",
+        "env": {}
+      },
+      "error": {
+        "code": "configuration_error",
+        "details": {
+          "missing": [
+            "RYU_NOTIFY_API_KEY"
+          ]
+        },
+        "hint": "Set RYU_NOTIFY_API_KEY (or pass notify.apiKey to new Ryu()). See https://docs.ryuhq.com/docs/standalone/sdk/notify.",
+        "message": "Ryu Notify is not configured: set RYU_NOTIFY_API_KEY. Hint: Set RYU_NOTIFY_API_KEY (or pass notify.apiKey to new Ryu()). See https://docs.ryuhq.com/docs/standalone/sdk/notify.",
+        "name": "RyuConfigurationError"
+      }
+    },
+    {
+      "input": {
+        "service": "notify",
+        "env": {
+          "RYU_NOTIFY_API_KEY": "  "
+        }
+      },
+      "error": {
+        "code": "configuration_error",
+        "details": {
+          "missing": [
+            "RYU_NOTIFY_API_KEY"
+          ]
+        },
+        "hint": "Set RYU_NOTIFY_API_KEY (or pass notify.apiKey to new Ryu()). See https://docs.ryuhq.com/docs/standalone/sdk/notify.",
+        "message": "Ryu Notify is not configured: set RYU_NOTIFY_API_KEY. Hint: Set RYU_NOTIFY_API_KEY (or pass notify.apiKey to new Ryu()). See https://docs.ryuhq.com/docs/standalone/sdk/notify.",
+        "name": "RyuConfigurationError"
+      }
+    },
+    {
+      "input": {
+        "service": "notify",
+        "env": {
+          "RYU_NOTIFY_API_KEY": "n_k"
+        }
+      },
+      "expected": {
+        "apiKey": "n_k",
+        "auth": "bearer",
+        "baseUrl": "https://notify.ryuhq.com",
+        "mailMode": null,
+        "managementKey": null,
+        "organizationId": null,
+        "runtimeKey": null
+      }
+    },
+    {
+      "input": {
+        "service": "box",
+        "env": {
+          "RYU_BOX_API_KEY": "b_k",
+          "RYU_BOX_URL": "https://box.example.com"
+        }
+      },
+      "expected": {
+        "apiKey": "b_k",
+        "auth": "bearer",
+        "baseUrl": "https://box.example.com",
+        "mailMode": null,
+        "managementKey": null,
+        "organizationId": null,
+        "runtimeKey": null
+      }
+    },
+    {
+      "input": {
+        "service": "gateway",
+        "env": {}
+      },
+      "expected": {
+        "apiKey": null,
+        "auth": "bearer",
+        "baseUrl": "http://127.0.0.1:7981",
+        "mailMode": null,
+        "managementKey": null,
+        "organizationId": null,
+        "runtimeKey": null
+      }
+    },
+    {
+      "input": {
+        "service": "gateway",
+        "env": {
+          "RYU_GATEWAY_TOKEN": "g_k"
+        }
+      },
+      "expected": {
+        "apiKey": "g_k",
+        "auth": "bearer",
+        "baseUrl": "http://127.0.0.1:7981",
+        "mailMode": null,
+        "managementKey": null,
+        "organizationId": null,
+        "runtimeKey": null
+      }
+    },
+    {
+      "input": {
+        "service": "connect",
+        "env": {
+          "RYU_CONNECT_API_KEY": "c_k"
+        }
+      },
+      "error": {
+        "code": "configuration_error",
+        "details": {
+          "missing": [
+            "RYU_CONNECT_URL"
+          ]
+        },
+        "hint": "Set RYU_CONNECT_URL (or pass connect.baseUrl to new Ryu()). See https://docs.ryuhq.com/docs/standalone/sdk/connect.",
+        "message": "Ryu Connect is not configured: set RYU_CONNECT_URL. It has no default URL. Hint: Set RYU_CONNECT_URL (or pass connect.baseUrl to new Ryu()). See https://docs.ryuhq.com/docs/standalone/sdk/connect.",
+        "name": "RyuConfigurationError"
+      }
+    },
+    {
+      "input": {
+        "service": "connect",
+        "env": {
+          "RYU_CONNECT_API_KEY": "c_k",
+          "RYU_CONNECT_URL": "https://connect.example.com",
+          "RYU_CONNECT_MANAGEMENT_KEY": "m_k"
+        }
+      },
+      "expected": {
+        "apiKey": "c_k",
+        "auth": "bearer",
+        "baseUrl": "https://connect.example.com",
+        "mailMode": null,
+        "managementKey": "m_k",
+        "organizationId": null,
+        "runtimeKey": null
+      }
+    },
+    {
+      "input": {
+        "service": "passport",
+        "env": {
+          "RYU_PASSPORT_URL": "https://passport.example.com",
+          "RYU_PASSPORT_RUNTIME_KEY": "rt_k"
+        }
+      },
+      "expected": {
+        "apiKey": null,
+        "auth": "bearer",
+        "baseUrl": "https://passport.example.com",
+        "mailMode": null,
+        "managementKey": null,
+        "organizationId": null,
+        "runtimeKey": "rt_k"
+      }
+    },
+    {
+      "input": {
+        "service": "passport",
+        "env": {
+          "RYU_PASSPORT_URL": "https://passport.example.com"
+        }
+      },
+      "error": {
+        "code": "configuration_error",
+        "details": {
+          "missing": [
+            "RYU_PASSPORT_API_KEY"
+          ]
+        },
+        "hint": "Set RYU_PASSPORT_API_KEY (or pass passport.apiKey to new Ryu()). See https://docs.ryuhq.com/docs/standalone/sdk/passport.",
+        "message": "Ryu Passport is not configured: set RYU_PASSPORT_API_KEY. Hint: Set RYU_PASSPORT_API_KEY (or pass passport.apiKey to new Ryu()). See https://docs.ryuhq.com/docs/standalone/sdk/passport.",
+        "name": "RyuConfigurationError"
+      }
+    },
+    {
+      "input": {
+        "service": "sites",
+        "env": {}
+      },
+      "error": {
+        "code": "configuration_error",
+        "details": {
+          "missing": [
+            "RYU_SITES_URL",
+            "RYU_SITES_API_KEY"
+          ]
+        },
+        "hint": "Set RYU_SITES_URL and RYU_SITES_API_KEY (or pass sites.baseUrl and sites.apiKey to new Ryu()). See https://docs.ryuhq.com/docs/standalone/sdk/sites.",
+        "message": "Ryu Sites is not configured: set RYU_SITES_URL and RYU_SITES_API_KEY. It has no default URL. Hint: Set RYU_SITES_URL and RYU_SITES_API_KEY (or pass sites.baseUrl and sites.apiKey to new Ryu()). See https://docs.ryuhq.com/docs/standalone/sdk/sites.",
+        "name": "RyuConfigurationError"
+      }
+    },
+    {
+      "input": {
+        "service": "sites",
+        "env": {
+          "RYU_SITES_URL": "http://localhost:8090",
+          "RYU_SITES_API_KEY": "s_k"
+        },
+        "options": {
+          "sites": {
+            "apiKey": "s_opt"
+          }
+        }
+      },
+      "expected": {
+        "apiKey": "s_opt",
+        "auth": "bearer",
+        "baseUrl": "http://localhost:8090",
+        "mailMode": null,
+        "managementKey": null,
+        "organizationId": null,
+        "runtimeKey": null
+      }
+    }
+  ],
+  "routes": [
+    {
+      "input": {
+        "service": "mail",
+        "baseUrl": "https://api.ryuhq.com",
+        "method": "POST",
+        "url": "https://api.ryuhq.com/api/mail/inboxes/ibx_1/send"
+      },
+      "expected": "/inboxes/{id}/send"
+    },
+    {
+      "input": {
+        "service": "mail",
+        "baseUrl": "https://api.ryuhq.com",
+        "method": "POST",
+        "url": "https://api.ryuhq.com/api/mail/inboxes/ibx_1/messages/m_1/reply-all"
+      },
+      "expected": "/inboxes/{id}/messages/{messageId}/reply-all"
+    },
+    {
+      "input": {
+        "service": "mail",
+        "baseUrl": "https://api.ryuhq.com",
+        "method": "GET",
+        "url": "https://api.ryuhq.com/api/mail/inboxes/ibx_1/send"
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "service": "mail",
+        "baseUrl": "https://mail.example.com/base",
+        "method": "POST",
+        "url": "https://mail.example.com/base/api/mail/inboxes/i/drafts/d/send"
+      },
+      "expected": "/inboxes/{id}/drafts/{draftId}/send"
+    },
+    {
+      "input": {
+        "service": "mail",
+        "baseUrl": "https://api.ryuhq.com",
+        "method": "POST",
+        "url": "https://other.example.com/api/mail/inboxes/ibx_1/send"
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "service": "notify",
+        "baseUrl": "https://notify.ryuhq.com",
+        "method": "POST",
+        "url": "https://notify.ryuhq.com/v1/topics/deploys"
+      },
+      "expected": "/v1/topics/{topic}"
+    },
+    {
+      "input": {
+        "service": "notify",
+        "baseUrl": "https://notify.ryuhq.com",
+        "method": "POST",
+        "url": "https://notify.ryuhq.com/v1/events/evt_1/ack"
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "service": "box",
+        "baseUrl": "https://box.ryuhq.com",
+        "method": "POST",
+        "url": "https://box.ryuhq.com/v1/boxes/box_1/fork"
+      },
+      "expected": "/v1/boxes/{id}/fork"
+    },
+    {
+      "input": {
+        "service": "box",
+        "baseUrl": "https://box.ryuhq.com",
+        "method": "POST",
+        "url": "https://box.ryuhq.com/v1/boxes/"
+      },
+      "expected": "/v1/boxes"
+    },
+    {
+      "input": {
+        "service": "managedAgents",
+        "baseUrl": "https://api.ryuhq.com",
+        "method": "PATCH",
+        "url": "https://api.ryuhq.com/api/v1/managed-agents/agents/magt_1"
+      },
+      "expected": "/agents/{id}"
+    },
+    {
+      "input": {
+        "service": "managedAgents",
+        "baseUrl": "https://api.ryuhq.com",
+        "method": "POST",
+        "url": "https://api.ryuhq.com/api/v1/managed-agents/sessions/s_1/cancel"
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "service": "messaging",
+        "baseUrl": "https://api.ryuhq.com",
+        "method": "POST",
+        "url": "https://api.ryuhq.com/api/messaging/orgs/org_1/sms"
+      },
+      "expected": "/orgs/{orgId}/sms"
+    },
+    {
+      "input": {
+        "service": "gateway",
+        "baseUrl": "http://127.0.0.1:7981",
+        "method": "POST",
+        "url": "http://127.0.0.1:7981/v1/chat/completions"
+      },
+      "expected": null
+    },
+    {
+      "input": {
+        "service": "passport",
+        "baseUrl": "https://passport.example.com",
+        "method": "POST",
+        "url": "https://passport.example.com/v1/connections"
+      },
+      "expected": null,
+      "expectedCapability": "idempotency_keys",
+      "expectedNonReplaySafe": null
+    },
+    {
+      "input": {
+        "service": "passport",
+        "baseUrl": "https://passport.example.com/base",
+        "method": "POST",
+        "url": "https://passport.example.com/base/v1/connections/"
+      },
+      "expected": null,
+      "expectedCapability": "idempotency_keys",
+      "expectedNonReplaySafe": null
+    },
+    {
+      "input": {
+        "service": "passport",
+        "baseUrl": "https://passport.example.com",
+        "method": "GET",
+        "url": "https://passport.example.com/v1/connections"
+      },
+      "expected": null,
+      "expectedCapability": null,
+      "expectedNonReplaySafe": null
+    },
+    {
+      "input": {
+        "service": "passport",
+        "baseUrl": "https://passport.example.com",
+        "method": "POST",
+        "url": "https://passport.example.com/v1/connections/conn_1/login"
+      },
+      "expected": null,
+      "expectedCapability": null,
+      "expectedNonReplaySafe": null
+    },
+    {
+      "input": {
+        "service": "passport",
+        "baseUrl": "https://passport.example.com",
+        "method": "POST",
+        "url": "https://other.example.com/v1/connections"
+      },
+      "expected": null,
+      "expectedCapability": null,
+      "expectedNonReplaySafe": null
+    },
+    {
+      "input": {
+        "service": "messaging",
+        "baseUrl": "https://api.ryuhq.com",
+        "method": "PUT",
+        "url": "https://api.ryuhq.com/api/messaging/orgs/org_1/settings"
+      },
+      "expected": null,
+      "expectedCapability": null,
+      "expectedNonReplaySafe": "/orgs/{orgId}/settings"
+    },
+    {
+      "input": {
+        "service": "messaging",
+        "baseUrl": "https://api.ryuhq.com",
+        "method": "GET",
+        "url": "https://api.ryuhq.com/api/messaging/orgs/org_1/settings"
+      },
+      "expected": null,
+      "expectedCapability": null,
+      "expectedNonReplaySafe": null
+    },
+    {
+      "input": {
+        "service": "messaging",
+        "baseUrl": "https://api.ryuhq.com",
+        "method": "POST",
+        "url": "https://api.ryuhq.com/api/messaging/orgs/org_1/settings/webhook-secret/rotate"
+      },
+      "expected": null,
+      "expectedCapability": null,
+      "expectedNonReplaySafe": null
+    },
+    {
+      "input": {
+        "service": "messaging",
+        "baseUrl": "https://api.ryuhq.com",
+        "method": "DELETE",
+        "url": "https://api.ryuhq.com/api/messaging/orgs/org_1/opt-outs/x"
+      },
+      "expected": null,
+      "expectedCapability": null,
+      "expectedNonReplaySafe": null
+    }
+  ],
+  "gatewayUpstream": [
+    {
+      "body": {
+        "error": {
+          "code": "provider_error",
+          "upstream_status": 400
+        }
+      },
+      "expected": {
+        "details": {
+          "provider": "openai",
+          "upstreamStatus": 400
+        },
+        "retryable": false,
+        "upstreamStatus": 400
+      }
+    },
+    {
+      "body": {
+        "error": {
+          "code": "provider_error",
+          "upstream_status": 404
+        }
+      },
+      "expected": {
+        "details": {
+          "provider": "openai",
+          "upstreamStatus": 404
+        },
+        "retryable": false,
+        "upstreamStatus": 404
+      }
+    },
+    {
+      "body": {
+        "error": {
+          "code": "provider_error",
+          "upstream_status": 408
+        }
+      },
+      "expected": {
+        "details": {
+          "provider": "openai",
+          "upstreamStatus": 408
+        },
+        "retryable": true,
+        "upstreamStatus": 408
+      }
+    },
+    {
+      "body": {
+        "error": {
+          "code": "provider_error",
+          "upstream_status": 425
+        }
+      },
+      "expected": {
+        "details": {
+          "provider": "openai",
+          "upstreamStatus": 425
+        },
+        "retryable": true,
+        "upstreamStatus": 425
+      }
+    },
+    {
+      "body": {
+        "error": {
+          "code": "provider_error",
+          "upstream_status": 429
+        }
+      },
+      "expected": {
+        "details": {
+          "provider": "openai",
+          "upstreamStatus": 429
+        },
+        "retryable": true,
+        "upstreamStatus": 429
+      }
+    },
+    {
+      "body": {
+        "error": {
+          "code": "provider_error",
+          "upstream_status": 451
+        }
+      },
+      "expected": {
+        "details": {
+          "provider": "openai",
+          "upstreamStatus": 451
+        },
+        "retryable": false,
+        "upstreamStatus": 451
+      }
+    },
+    {
+      "body": {
+        "error": {
+          "code": "provider_error",
+          "upstream_status": 500
+        }
+      },
+      "expected": {
+        "details": {
+          "provider": "openai",
+          "upstreamStatus": 500
+        },
+        "retryable": true,
+        "upstreamStatus": 500
+      }
+    },
+    {
+      "body": {
+        "error": {
+          "code": "provider_error",
+          "upstream_status": 599
+        }
+      },
+      "expected": {
+        "details": {
+          "provider": "openai",
+          "upstreamStatus": 599
+        },
+        "retryable": true,
+        "upstreamStatus": 599
+      }
+    },
+    {
+      "body": {
+        "error": {
+          "code": "provider_error",
+          "upstream_status": 600
+        }
+      },
+      "expected": {
+        "details": {
+          "provider": "openai"
+        },
+        "retryable": true,
+        "upstreamStatus": null
+      }
+    },
+    {
+      "body": {
+        "error": {
+          "code": "provider_error",
+          "upstream_status": 399
+        }
+      },
+      "expected": {
+        "details": {
+          "provider": "openai"
+        },
+        "retryable": true,
+        "upstreamStatus": null
+      }
+    },
+    {
+      "body": {
+        "error": {
+          "code": "provider_error",
+          "upstream_status": 404.5
+        }
+      },
+      "expected": {
+        "details": {
+          "provider": "openai"
+        },
+        "retryable": true,
+        "upstreamStatus": null
+      }
+    },
+    {
+      "body": {
+        "error": {
+          "code": "provider_error",
+          "upstream_status": "404"
+        }
+      },
+      "expected": {
+        "details": {
+          "provider": "openai"
+        },
+        "retryable": true,
+        "upstreamStatus": null
+      }
+    },
+    {
+      "body": {
+        "error": {
+          "code": "provider_error",
+          "upstream_status": true
+        }
+      },
+      "expected": {
+        "details": {
+          "provider": "openai"
+        },
+        "retryable": true,
+        "upstreamStatus": null
+      }
+    },
+    {
+      "body": {
+        "error": {
+          "code": "provider_error"
+        }
+      },
+      "expected": {
+        "details": {
+          "provider": "openai"
+        },
+        "retryable": true,
+        "upstreamStatus": null
+      }
+    },
+    {
+      "body": {
+        "error": "provider_error"
+      },
+      "expected": {
+        "details": {
+          "provider": "openai"
+        },
+        "retryable": true,
+        "upstreamStatus": null
+      }
+    },
+    {
+      "body": [],
+      "expected": {
+        "details": {
+          "provider": "openai"
+        },
+        "retryable": true,
+        "upstreamStatus": null
+      }
+    },
+    {
+      "body": null,
+      "expected": {
+        "details": {
+          "provider": "openai"
+        },
+        "retryable": true,
+        "upstreamStatus": null
+      }
+    }
+  ],
+  "errorClassFor": [
+    {
+      "code": "aborted",
+      "created": "RyuAbortError",
+      "copied": "RyuAbortError",
+      "status": 0
+    },
+    {
+      "code": "configuration_error",
+      "created": "RyuConfigurationError",
+      "copied": "RyuConfigurationError",
+      "status": 0
+    },
+    {
+      "code": "connection_error",
+      "created": "RyuConnectionError",
+      "copied": "RyuConnectionError",
+      "status": 0
+    },
+    {
+      "code": "invalid_id",
+      "created": "RyuInvalidRequestError",
+      "copied": "RyuInvalidRequestError",
+      "status": 0
+    },
+    {
+      "code": "invalid_response",
+      "created": "RyuResponseValidationError",
+      "copied": "RyuResponseValidationError",
+      "status": 0
+    },
+    {
+      "code": "timeout",
+      "created": "RyuTimeoutError",
+      "copied": "RyuTimeoutError",
+      "status": 0
+    },
+    {
+      "code": "unknown_code",
+      "created": "RyuError",
+      "copied": "RyuError",
+      "status": 0
+    },
+    {
+      "code": "redirect",
+      "created": "RyuRedirectError",
+      "copied": "RyuRedirectError",
+      "status": 302
+    },
+    {
+      "code": "redirect_refused",
+      "created": "RyuRedirectError",
+      "copied": "RyuRedirectError",
+      "status": 400
+    },
+    {
+      "code": "invalid_request",
+      "created": "RyuInvalidRequestError",
+      "copied": "RyuInvalidRequestError",
+      "status": 400
+    },
+    {
+      "code": "unauthorized",
+      "created": "RyuAuthenticationError",
+      "copied": "RyuAuthenticationError",
+      "status": 401
+    },
+    {
+      "code": "quota_exceeded",
+      "created": "RyuQuotaExceededError",
+      "copied": "RyuQuotaExceededError",
+      "status": 402
+    },
+    {
+      "code": "not_found",
+      "created": "RyuNotFoundError",
+      "copied": "RyuNotFoundError",
+      "status": 404
+    },
+    {
+      "code": "idempotency_conflict",
+      "created": "RyuConflictError",
+      "copied": "RyuConflictError",
+      "status": 409
+    },
+    {
+      "code": "validation_error",
+      "created": "RyuInvalidRequestError",
+      "copied": "RyuInvalidRequestError",
+      "status": 422
+    },
+    {
+      "code": "rate_limited",
+      "created": "RyuRateLimitError",
+      "copied": "RyuRateLimitError",
+      "status": 429
+    },
+    {
+      "code": "internal_error",
+      "created": "RyuServerError",
+      "copied": "RyuServerError",
+      "status": 500
+    },
+    {
+      "code": "unavailable",
+      "created": "RyuUnavailableError",
+      "copied": "RyuUnavailableError",
+      "status": 503
+    }
+  ],
+  "webhooks": [
+    {
+      "input": {
+        "name": "mail standard ok",
+        "verifier": "mail",
+        "payload": "{\"type\":\"event\",\"event_type\":\"message.bounced\",\"event_id\":\"evt_mail_1\",\"data\":{\"reason\":\"mailbox full\"}}",
+        "secret": "whsec_cnl1LXZlY3RvcnMtc2lnbmluZy1rZXktMDEyMzQ1Njc4OQ==",
+        "headers": {
+          "webhook-id": "evt_mail_1",
+          "webhook-timestamp": "1792670400",
+          "webhook-signature": "v1,hfZ0e4mAc06NOZY5YxHyIfXlAC2lSVy/XDmlUHBnKu8="
+        },
+        "now": 1792670400
+      },
+      "expected": {
+        "type": "event",
+        "event_type": "message.bounced",
+        "event_id": "evt_mail_1",
+        "data": {
+          "reason": "mailbox full"
+        }
+      }
+    },
+    {
+      "input": {
+        "name": "mail rotation list ok",
+        "verifier": "mail",
+        "payload": "{\"type\":\"event\",\"event_type\":\"message.bounced\",\"event_id\":\"evt_mail_1\",\"data\":{\"reason\":\"mailbox full\"}}",
+        "secret": "whsec_cnl1LXZlY3RvcnMtc2lnbmluZy1rZXktMDEyMzQ1Njc4OQ==",
+        "headers": {
+          "webhook-id": "evt_mail_1",
+          "webhook-timestamp": "1792670400",
+          "webhook-signature": "v1,AAAA v2,zzz v1,hfZ0e4mAc06NOZY5YxHyIfXlAC2lSVy/XDmlUHBnKu8="
+        },
+        "now": 1792670400
+      },
+      "expected": {
+        "type": "event",
+        "event_type": "message.bounced",
+        "event_id": "evt_mail_1",
+        "data": {
+          "reason": "mailbox full"
+        }
+      }
+    },
+    {
+      "input": {
+        "name": "mail svix aliases ok",
+        "verifier": "mail",
+        "payload": "{\"type\":\"event\",\"event_type\":\"message.bounced\",\"event_id\":\"evt_mail_1\",\"data\":{\"reason\":\"mailbox full\"}}",
+        "secret": "whsec_cnl1LXZlY3RvcnMtc2lnbmluZy1rZXktMDEyMzQ1Njc4OQ==",
+        "headers": {
+          "svix-id": "evt_mail_1",
+          "svix-timestamp": "1792670400",
+          "svix-signature": "v1,hfZ0e4mAc06NOZY5YxHyIfXlAC2lSVy/XDmlUHBnKu8="
+        },
+        "now": 1792670400
+      },
+      "expected": {
+        "type": "event",
+        "event_type": "message.bounced",
+        "event_id": "evt_mail_1",
+        "data": {
+          "reason": "mailbox full"
+        }
+      }
+    },
+    {
+      "input": {
+        "name": "mail legacy raw svix ok",
+        "verifier": "mail",
+        "scheme": "legacy",
+        "payload": "{\"type\":\"event\",\"event_type\":\"message.bounced\",\"event_id\":\"evt_mail_1\",\"data\":{\"reason\":\"mailbox full\"}}",
+        "secret": "whsec_cnl1LXZlY3RvcnMtc2lnbmluZy1rZXktMDEyMzQ1Njc4OQ==",
+        "headers": {
+          "svix-id": "evt_mail_1",
+          "svix-timestamp": "1792670400",
+          "svix-signature": "v1,5A9hoOZdPEIcUUQcChi7zaoGdHNuMHzqWsafES7+vso="
+        },
+        "now": 1792670400
+      },
+      "expected": {
+        "type": "event",
+        "event_type": "message.bounced",
+        "event_id": "evt_mail_1",
+        "data": {
+          "reason": "mailbox full"
+        }
+      }
+    },
+    {
+      "input": {
+        "name": "mail tampered body",
+        "verifier": "mail",
+        "payload": "{\"type\":\"event\",\"event_type\":\"message.bounced\",\"event_id\":\"evt_mail_1\",\"data\":{\"reason\":\"mailbox fine\"}}",
+        "secret": "whsec_cnl1LXZlY3RvcnMtc2lnbmluZy1rZXktMDEyMzQ1Njc4OQ==",
+        "headers": {
+          "webhook-id": "evt_mail_1",
+          "webhook-timestamp": "1792670400",
+          "webhook-signature": "v1,hfZ0e4mAc06NOZY5YxHyIfXlAC2lSVy/XDmlUHBnKu8="
+        },
+        "now": 1792670400
+      },
+      "error": "webhook_invalid_signature"
+    },
+    {
+      "input": {
+        "name": "mail old timestamp",
+        "verifier": "mail",
+        "payload": "{\"type\":\"event\",\"event_type\":\"message.bounced\",\"event_id\":\"evt_mail_1\",\"data\":{\"reason\":\"mailbox full\"}}",
+        "secret": "whsec_cnl1LXZlY3RvcnMtc2lnbmluZy1rZXktMDEyMzQ1Njc4OQ==",
+        "headers": {
+          "webhook-id": "evt_mail_1",
+          "webhook-timestamp": "1792669400",
+          "webhook-signature": "v1,52wPWdFx7HiLx8wyEMWs+rBshdaJbaB8VPq2B596smk="
+        },
+        "now": 1792670400
+      },
+      "error": "webhook_timestamp_out_of_range"
+    },
+    {
+      "input": {
+        "name": "mail old timestamp within custom tolerance",
+        "verifier": "mail",
+        "toleranceSeconds": 2000,
+        "payload": "{\"type\":\"event\",\"event_type\":\"message.bounced\",\"event_id\":\"evt_mail_1\",\"data\":{\"reason\":\"mailbox full\"}}",
+        "secret": "whsec_cnl1LXZlY3RvcnMtc2lnbmluZy1rZXktMDEyMzQ1Njc4OQ==",
+        "headers": {
+          "webhook-id": "evt_mail_1",
+          "webhook-timestamp": "1792669400",
+          "webhook-signature": "v1,52wPWdFx7HiLx8wyEMWs+rBshdaJbaB8VPq2B596smk="
+        },
+        "now": 1792670400
+      },
+      "expected": {
+        "type": "event",
+        "event_type": "message.bounced",
+        "event_id": "evt_mail_1",
+        "data": {
+          "reason": "mailbox full"
+        }
+      }
+    },
+    {
+      "input": {
+        "name": "mail missing headers",
+        "verifier": "mail",
+        "payload": "{\"type\":\"event\",\"event_type\":\"message.bounced\",\"event_id\":\"evt_mail_1\",\"data\":{\"reason\":\"mailbox full\"}}",
+        "secret": "whsec_cnl1LXZlY3RvcnMtc2lnbmluZy1rZXktMDEyMzQ1Njc4OQ==",
+        "headers": {
+          "webhook-id": "evt_mail_1"
+        },
+        "now": 1792670400
+      },
+      "error": "webhook_missing_headers"
+    },
+    {
+      "input": {
+        "name": "mail bad secret",
+        "verifier": "mail",
+        "payload": "{\"type\":\"event\",\"event_type\":\"message.bounced\",\"event_id\":\"evt_mail_1\",\"data\":{\"reason\":\"mailbox full\"}}",
+        "secret": "whsec_not base64!",
+        "headers": {
+          "webhook-id": "evt_mail_1",
+          "webhook-timestamp": "1792670400",
+          "webhook-signature": "v1,AAAA"
+        },
+        "now": 1792670400
+      },
+      "error": "webhook_invalid_secret"
+    },
+    {
+      "input": {
+        "name": "standard non json",
+        "verifier": "standard",
+        "payload": "not json",
+        "secret": "whsec_cnl1LXZlY3RvcnMtc2lnbmluZy1rZXktMDEyMzQ1Njc4OQ==",
+        "headers": {
+          "webhook-id": "x",
+          "webhook-timestamp": "1792670400",
+          "webhook-signature": "v1,VTuWLybY2y3sdR19vfhPnCO/sqIbq9y/4jOx1DT49BI="
+        },
+        "now": 1792670400
+      },
+      "error": "webhook_payload_invalid"
+    },
+    {
+      "input": {
+        "name": "mail wrong envelope",
+        "verifier": "mail",
+        "payload": "{\"hello\":\"world\"}",
+        "secret": "whsec_cnl1LXZlY3RvcnMtc2lnbmluZy1rZXktMDEyMzQ1Njc4OQ==",
+        "headers": {
+          "webhook-id": "x",
+          "webhook-timestamp": "1792670400",
+          "webhook-signature": "v1,HRH90jbqIConjH/aM8k+NJhJ4KLTupfh3N0LDkshHtM="
+        },
+        "now": 1792670400
+      },
+      "error": "webhook_payload_invalid"
+    },
+    {
+      "input": {
+        "name": "messaging ok",
+        "verifier": "messaging",
+        "payload": "{\"type\":\"event\",\"event_type\":\"message.failed\",\"event_id\":\"evt_msg_1\",\"data\":{\"message\":{\"id\":\"msg_1\",\"error\":\"unreachable\"}}}",
+        "secret": "whsec_cnl1LXZlY3RvcnMtc2lnbmluZy1rZXktMDEyMzQ1Njc4OQ==",
+        "headers": {
+          "webhook-id": "evt_msg_1",
+          "webhook-timestamp": "1792670400",
+          "webhook-signature": "v1,k1ixNljXjL7rRmfSlQzfdGLXMPVEvgR4UeenYJEmFCA="
+        },
+        "now": 1792670400
+      },
+      "expected": {
+        "type": "event",
+        "event_type": "message.failed",
+        "event_id": "evt_msg_1",
+        "data": {
+          "message": {
+            "id": "msg_1",
+            "error": "unreachable"
+          }
+        }
+      }
+    },
+    {
+      "input": {
+        "name": "messaging missing resource",
+        "verifier": "messaging",
+        "payload": "{\"type\":\"event\",\"event_type\":\"message.failed\",\"event_id\":\"e\",\"data\":{}}",
+        "secret": "whsec_cnl1LXZlY3RvcnMtc2lnbmluZy1rZXktMDEyMzQ1Njc4OQ==",
+        "headers": {
+          "webhook-id": "e",
+          "webhook-timestamp": "1792670400",
+          "webhook-signature": "v1,T+svrWkn6e7HSXW7D92Yc/BD0D7xpHESyEJBFxFOWt4="
+        },
+        "now": 1792670400
+      },
+      "error": "webhook_payload_invalid"
+    },
+    {
+      "input": {
+        "name": "notify destination standard ok",
+        "verifier": "notify",
+        "kind": "destination",
+        "payload": "{\"deliveryId\":\"dlv_1\",\"event\":{\"id\":\"evt_n_1\",\"title\":\"Deployed\"},\"type\":\"notification\"}",
+        "secret": "notify-destination-secret",
+        "headers": {
+          "webhook-id": "dlv_1",
+          "webhook-timestamp": "1792670400",
+          "webhook-signature": "v1,w2twWXpjxhAu5I7hLrCTuOngdEuQR4hZAj13e7OmwQw=",
+          "x-ryu-notify-event": "evt_n_1"
+        },
+        "now": 1792670400
+      },
+      "expected": {
+        "kind": "destination",
+        "deliveryId": "dlv_1",
+        "eventId": "evt_n_1",
+        "body": {
+          "deliveryId": "dlv_1",
+          "event": {
+            "id": "evt_n_1",
+            "title": "Deployed"
+          },
+          "type": "notification"
+        },
+        "replayProtected": true
+      }
+    },
+    {
+      "input": {
+        "name": "notify destination id mismatch",
+        "verifier": "notify",
+        "kind": "destination",
+        "payload": "{\"deliveryId\":\"dlv_1\",\"event\":{\"id\":\"evt_n_1\",\"title\":\"Deployed\"},\"type\":\"notification\"}",
+        "secret": "notify-destination-secret",
+        "headers": {
+          "webhook-id": "dlv_2",
+          "webhook-timestamp": "1792670400",
+          "webhook-signature": "v1,oqx+pywpMFZpNJZ042uUowGlPzs1mBTu07GjqH7FxLg="
+        },
+        "now": 1792670400
+      },
+      "error": "webhook_invalid_signature"
+    },
+    {
+      "input": {
+        "name": "notify destination partial headers",
+        "verifier": "notify",
+        "kind": "destination",
+        "payload": "{\"deliveryId\":\"dlv_1\",\"event\":{\"id\":\"evt_n_1\",\"title\":\"Deployed\"},\"type\":\"notification\"}",
+        "secret": "notify-destination-secret",
+        "headers": {
+          "webhook-id": "dlv_1",
+          "x-ryu-notify-signature": "sha256=7101b3524d8beef9c14c18b2963a4fffc874b4413c6e4f6b5e7278e242444ff2"
+        },
+        "now": 1792670400
+      },
+      "error": "webhook_missing_headers"
+    },
+    {
+      "input": {
+        "name": "notify destination legacy body-only refused by default",
+        "verifier": "notify",
+        "kind": "destination",
+        "payload": "{\"deliveryId\":\"dlv_1\",\"event\":{\"id\":\"evt_n_1\",\"title\":\"Deployed\"},\"type\":\"notification\"}",
+        "secret": "notify-destination-secret",
+        "headers": {
+          "x-ryu-notify-signature": "sha256=7101b3524d8beef9c14c18b2963a4fffc874b4413c6e4f6b5e7278e242444ff2"
+        },
+        "now": 1792670400
+      },
+      "error": "webhook_missing_headers"
+    },
+    {
+      "input": {
+        "name": "notify destination legacy body-only ok when requireTimestamp is false",
+        "verifier": "notify",
+        "kind": "destination",
+        "requireTimestamp": false,
+        "payload": "{\"deliveryId\":\"dlv_1\",\"event\":{\"id\":\"evt_n_1\",\"title\":\"Deployed\"},\"type\":\"notification\"}",
+        "secret": "notify-destination-secret",
+        "headers": {
+          "x-ryu-notify-signature": "sha256=7101b3524d8beef9c14c18b2963a4fffc874b4413c6e4f6b5e7278e242444ff2"
+        },
+        "now": 1792670400
+      },
+      "expected": {
+        "kind": "destination",
+        "deliveryId": "dlv_1",
+        "eventId": "evt_n_1",
+        "body": {
+          "deliveryId": "dlv_1",
+          "event": {
+            "id": "evt_n_1",
+            "title": "Deployed"
+          },
+          "type": "notification"
+        },
+        "replayProtected": false
+      }
+    },
+    {
+      "input": {
+        "name": "notify destination legacy body-only ok",
+        "verifier": "notify",
+        "kind": "destination",
+        "allowBodyOnlySignature": true,
+        "payload": "{\"deliveryId\":\"dlv_1\",\"event\":{\"id\":\"evt_n_1\",\"title\":\"Deployed\"},\"type\":\"notification\"}",
+        "secret": "notify-destination-secret",
+        "headers": {
+          "x-ryu-notify-signature": "SHA256=7101B3524D8BEEF9C14C18B2963A4FFFC874B4413C6E4F6B5E7278E242444FF2"
+        },
+        "now": 1792670400
+      },
+      "expected": {
+        "kind": "destination",
+        "deliveryId": "dlv_1",
+        "eventId": "evt_n_1",
+        "body": {
+          "deliveryId": "dlv_1",
+          "event": {
+            "id": "evt_n_1",
+            "title": "Deployed"
+          },
+          "type": "notification"
+        },
+        "replayProtected": false
+      }
+    },
+    {
+      "input": {
+        "name": "notify destination legacy refused by requireTimestamp",
+        "verifier": "notify",
+        "kind": "destination",
+        "allowBodyOnlySignature": true,
+        "requireTimestamp": true,
+        "payload": "{\"deliveryId\":\"dlv_1\",\"event\":{\"id\":\"evt_n_1\",\"title\":\"Deployed\"},\"type\":\"notification\"}",
+        "secret": "notify-destination-secret",
+        "headers": {
+          "x-ryu-notify-signature": "sha256=7101b3524d8beef9c14c18b2963a4fffc874b4413c6e4f6b5e7278e242444ff2"
+        },
+        "now": 1792670400
+      },
+      "error": "webhook_missing_headers"
+    },
+    {
+      "input": {
+        "name": "notify destination plain text ok",
+        "verifier": "notify",
+        "kind": "destination",
+        "allowBodyOnlySignature": true,
+        "payload": "Deployed",
+        "secret": "notify-destination-secret",
+        "headers": {
+          "x-ryu-notify-signature": "sha256=69ab8c9e5a12bf100ee0e13301eb4e6c8e0b0c8af178e664645a15aa4b953da9"
+        },
+        "now": 1792670400
+      },
+      "expected": {
+        "kind": "destination",
+        "deliveryId": null,
+        "eventId": null,
+        "body": "Deployed",
+        "replayProtected": false
+      }
+    },
+    {
+      "input": {
+        "name": "notify destination tampered header",
+        "verifier": "notify",
+        "kind": "destination",
+        "allowBodyOnlySignature": true,
+        "payload": "{\"deliveryId\":\"dlv_1\",\"event\":{\"id\":\"evt_n_1\",\"title\":\"Deployed\"},\"type\":\"notification\"}",
+        "secret": "notify-destination-secret",
+        "headers": {
+          "x-ryu-notify-signature": "sha256=7101b3524d8beef9c14c18b2963a4fffc874b4413c6e4f6b5e7278e242444ff2",
+          "x-ryu-notify-delivery": "dlv_other"
+        },
+        "now": 1792670400
+      },
+      "error": "webhook_invalid_signature"
+    },
+    {
+      "input": {
+        "name": "notify callback ok",
+        "verifier": "notify",
+        "kind": "callback",
+        "payload": "{\"type\":\"notification.response\",\"eventId\":\"evt_n_2\",\"response\":{\"status\":\"approved\"}}",
+        "secret": "notify-destination-secret",
+        "headers": {
+          "x-ryu-notify-timestamp": "1792670400",
+          "x-ryu-notify-signature": "sha256=85c0cfc9b46cfdeba562127c37b5c9a82e90f647f7f41cc57993008739ad3d07"
+        },
+        "now": 1792670400
+      },
+      "expected": {
+        "kind": "callback",
+        "deliveryId": null,
+        "eventId": "evt_n_2",
+        "body": {
+          "type": "notification.response",
+          "eventId": "evt_n_2",
+          "response": {
+            "status": "approved"
+          }
+        },
+        "replayProtected": true
+      }
+    },
+    {
+      "input": {
+        "name": "notify callback missing timestamp",
+        "verifier": "notify",
+        "kind": "callback",
+        "payload": "{\"type\":\"notification.response\",\"eventId\":\"evt_n_2\",\"response\":{\"status\":\"approved\"}}",
+        "secret": "notify-destination-secret",
+        "headers": {
+          "x-ryu-notify-signature": "sha256=ead0c2784debef30914bf53979107abb3effbed1d59d3260126864a2c8956dd5"
+        },
+        "now": 1792670400
+      },
+      "error": "webhook_missing_headers"
+    },
+    {
+      "input": {
+        "name": "notify callback old",
+        "verifier": "notify",
+        "kind": "callback",
+        "payload": "{\"type\":\"notification.response\",\"eventId\":\"evt_n_2\",\"response\":{\"status\":\"approved\"}}",
+        "secret": "notify-destination-secret",
+        "headers": {
+          "x-ryu-notify-timestamp": "1792669400",
+          "x-ryu-notify-signature": "sha256=8fcc459f1e5b709ccd96a58548a32d956a4c6cb4d50be5f1b22e00cdc8c7d355"
+        },
+        "now": 1792670400
+      },
+      "error": "webhook_timestamp_out_of_range"
+    },
+    {
+      "input": {
+        "name": "notify empty secret",
+        "verifier": "notify",
+        "kind": "destination",
+        "payload": "{\"deliveryId\":\"dlv_1\",\"event\":{\"id\":\"evt_n_1\",\"title\":\"Deployed\"},\"type\":\"notification\"}",
+        "secret": "",
+        "headers": {
+          "x-ryu-notify-signature": "sha256=00"
+        },
+        "now": 1792670400
+      },
+      "error": "webhook_invalid_secret"
+    },
+    {
+      "input": {
+        "name": "mail unset secret",
+        "verifier": "mail",
+        "payload": "{\"type\":\"event\",\"event_type\":\"message.bounced\",\"event_id\":\"evt_mail_1\",\"data\":{\"reason\":\"mailbox full\"}}",
+        "secret": null,
+        "headers": {
+          "webhook-id": "evt_mail_1",
+          "webhook-timestamp": "1792670400",
+          "webhook-signature": "v1,hfZ0e4mAc06NOZY5YxHyIfXlAC2lSVy/XDmlUHBnKu8="
+        },
+        "now": 1792670400
+      },
+      "error": "webhook_invalid_secret"
+    },
+    {
+      "input": {
+        "name": "mail unset secret reported before missing headers",
+        "verifier": "mail",
+        "payload": "{\"type\":\"event\",\"event_type\":\"message.bounced\",\"event_id\":\"evt_mail_1\",\"data\":{\"reason\":\"mailbox full\"}}",
+        "secret": null,
+        "headers": {},
+        "now": 1792670400
+      },
+      "error": "webhook_invalid_secret"
+    },
+    {
+      "input": {
+        "name": "messaging unset secret",
+        "verifier": "messaging",
+        "payload": "{\"type\":\"event\",\"event_type\":\"message.failed\",\"event_id\":\"evt_msg_1\",\"data\":{\"message\":{\"id\":\"msg_1\",\"error\":\"unreachable\"}}}",
+        "secret": null,
+        "headers": {
+          "webhook-id": "evt_msg_1",
+          "webhook-timestamp": "1792670400",
+          "webhook-signature": "v1,k1ixNljXjL7rRmfSlQzfdGLXMPVEvgR4UeenYJEmFCA="
+        },
+        "now": 1792670400
+      },
+      "error": "webhook_invalid_secret"
+    },
+    {
+      "input": {
+        "name": "notify destination unset secret reported before missing headers",
+        "verifier": "notify",
+        "kind": "destination",
+        "payload": "{\"deliveryId\":\"dlv_1\",\"event\":{\"id\":\"evt_n_1\",\"title\":\"Deployed\"},\"type\":\"notification\"}",
+        "secret": null,
+        "headers": {},
+        "now": 1792670400
+      },
+      "error": "webhook_invalid_secret"
+    },
+    {
+      "input": {
+        "name": "notify callback unset secret reported before missing headers",
+        "verifier": "notify",
+        "kind": "callback",
+        "payload": "{\"type\":\"notification.response\",\"eventId\":\"evt_n_2\",\"response\":{\"status\":\"approved\"}}",
+        "secret": null,
+        "headers": {},
+        "now": 1792670400
+      },
+      "error": "webhook_invalid_secret"
+    }
+  ],
+  "surface": [
+    "box.absoluteUrl",
+    "box.accessToken",
+    "box.body",
+    "box.box",
+    "box.create",
+    "box.delete",
+    "box.enableSsh",
+    "box.events.follow",
+    "box.events.list",
+    "box.exec",
+    "box.execStream",
+    "box.files.delete",
+    "box.files.downloadArchive",
+    "box.files.list",
+    "box.files.mkdir",
+    "box.files.read",
+    "box.files.readText",
+    "box.files.uploadArchive",
+    "box.files.write",
+    "box.fork",
+    "box.get",
+    "box.json",
+    "box.limits",
+    "box.list",
+    "box.openTerminal",
+    "box.openTunnel",
+    "box.previews.create",
+    "box.previews.delete",
+    "box.previews.list",
+    "box.proc",
+    "box.processes.followLogs",
+    "box.processes.get",
+    "box.processes.interrupt",
+    "box.processes.kill",
+    "box.processes.list",
+    "box.processes.logs",
+    "box.processes.spawn",
+    "box.processes.writeStdin",
+    "box.prompts.cancel",
+    "box.prompts.create",
+    "box.prompts.get",
+    "box.prompts.list",
+    "box.request",
+    "box.resume",
+    "box.run",
+    "box.secrets.delete",
+    "box.secrets.list",
+    "box.secrets.set",
+    "box.snapshots.create",
+    "box.snapshots.delete",
+    "box.snapshots.get",
+    "box.snapshots.list",
+    "box.socket",
+    "box.socketUrl",
+    "box.stop",
+    "box.streamEvents",
+    "box.usage",
+    "box.waitUntilReady",
+    "box.withAbsoluteUrl",
+    "connect.composio.execute",
+    "connect.mcp",
+    "connect.skills.get",
+    "connect.skills.list",
+    "connect.tools.describe",
+    "connect.tools.exec",
+    "connect.tools.search",
+    "connect.usage",
+    "connect.usage.iterate",
+    "gateway.auth.status",
+    "gateway.chat.completions.create",
+    "gateway.chat.completions.stream",
+    "gateway.embeddings.create",
+    "gateway.health",
+    "gateway.models.list",
+    "gateway.openAICompatible",
+    "mail.adoptMailbox",
+    "mail.approveAlias",
+    "mail.approveDraft",
+    "mail.assignAlias",
+    "mail.checkAgentAlias",
+    "mail.checkAlias",
+    "mail.checkMailboxHandle",
+    "mail.claimAgentAlias",
+    "mail.claimMailbox",
+    "mail.connectRealtime",
+    "mail.connectRealtimeWithTicket",
+    "mail.createRealtimeTicket",
+    "mail.deleteAliasSendPolicy",
+    "mail.domains.create",
+    "mail.domains.delete",
+    "mail.domains.get",
+    "mail.domains.list",
+    "mail.domains.update",
+    "mail.domains.verify",
+    "mail.drafts.create",
+    "mail.drafts.delete",
+    "mail.drafts.get",
+    "mail.drafts.list",
+    "mail.drafts.send",
+    "mail.drafts.update",
+    "mail.events.list",
+    "mail.getAgentAlias",
+    "mail.getAgentMessage",
+    "mail.getAgentThread",
+    "mail.getMailbox",
+    "mail.getSendPolicy",
+    "mail.inboxes.changeAddress",
+    "mail.inboxes.checkAddress",
+    "mail.inboxes.create",
+    "mail.inboxes.delete",
+    "mail.inboxes.ensureForAgent",
+    "mail.inboxes.get",
+    "mail.inboxes.getForAgent",
+    "mail.inboxes.list",
+    "mail.inboxes.rotateSecret",
+    "mail.inboxes.update",
+    "mail.listAgentMessages",
+    "mail.listAliases",
+    "mail.listApprovals",
+    "mail.lists.add",
+    "mail.lists.entries",
+    "mail.lists.remove",
+    "mail.messages.delete",
+    "mail.messages.downloadAttachment",
+    "mail.messages.downloadRaw",
+    "mail.messages.forward",
+    "mail.messages.get",
+    "mail.messages.iterate",
+    "mail.messages.list",
+    "mail.messages.reply",
+    "mail.messages.replyAll",
+    "mail.messages.search",
+    "mail.messages.send",
+    "mail.messages.update",
+    "mail.mintWsTicket",
+    "mail.pods.create",
+    "mail.pods.delete",
+    "mail.pods.get",
+    "mail.pods.list",
+    "mail.reinstateAlias",
+    "mail.rejectAlias",
+    "mail.rejectDraft",
+    "mail.replyAsAgent",
+    "mail.revokeAlias",
+    "mail.send",
+    "mail.sendAsAgent",
+    "mail.setMailboxAliasHost",
+    "mail.setSendPolicy",
+    "mail.status",
+    "mail.threads.delete",
+    "mail.threads.get",
+    "mail.threads.list",
+    "mail.threads.update",
+    "mail.transferAlias",
+    "mail.updateMailbox",
+    "mail.webhooks.create",
+    "mail.webhooks.delete",
+    "mail.webhooks.deliveries.list",
+    "mail.webhooks.get",
+    "mail.webhooks.headers.list",
+    "mail.webhooks.headers.update",
+    "mail.webhooks.list",
+    "mail.webhooks.rotateSecret",
+    "mail.webhooks.update",
+    "managedAgents.agents.archive",
+    "managedAgents.agents.create",
+    "managedAgents.agents.get",
+    "managedAgents.agents.getVersion",
+    "managedAgents.agents.iterate",
+    "managedAgents.agents.list",
+    "managedAgents.agents.listVersions",
+    "managedAgents.agents.update",
+    "managedAgents.credentials.get",
+    "managedAgents.credentials.list",
+    "managedAgents.environments.archive",
+    "managedAgents.environments.create",
+    "managedAgents.environments.get",
+    "managedAgents.environments.iterate",
+    "managedAgents.environments.list",
+    "managedAgents.environments.update",
+    "managedAgents.sessions.approveTool",
+    "managedAgents.sessions.cancel",
+    "managedAgents.sessions.complete",
+    "managedAgents.sessions.create",
+    "managedAgents.sessions.delete",
+    "managedAgents.sessions.denyTool",
+    "managedAgents.sessions.events",
+    "managedAgents.sessions.follow",
+    "managedAgents.sessions.get",
+    "managedAgents.sessions.iterate",
+    "managedAgents.sessions.list",
+    "managedAgents.sessions.respondToApproval",
+    "managedAgents.sessions.run",
+    "managedAgents.sessions.send",
+    "managedAgents.sessions.stream",
+    "managedAgents.sessions.streamConnection",
+    "managedAgents.sessions.update",
+    "messaging.messages.get",
+    "messaging.messages.iterate",
+    "messaging.messages.list",
+    "messaging.mms.send",
+    "messaging.numbers.buy",
+    "messaging.numbers.list",
+    "messaging.numbers.quote",
+    "messaging.numbers.release",
+    "messaging.numbers.update",
+    "messaging.optOuts.add",
+    "messaging.optOuts.iterate",
+    "messaging.optOuts.list",
+    "messaging.optOuts.remove",
+    "messaging.quote",
+    "messaging.settings.get",
+    "messaging.settings.rotateWebhookSecret",
+    "messaging.settings.update",
+    "messaging.sms.send",
+    "messaging.status",
+    "messaging.voice.send",
+    "messaging.whatsapp.send",
+    "messaging.whatsapp.senders",
+    "messaging.whatsapp.templates.create",
+    "messaging.whatsapp.templates.list",
+    "notify.activities.create",
+    "notify.activities.end",
+    "notify.activities.get",
+    "notify.activities.list",
+    "notify.activities.update",
+    "notify.analytics",
+    "notify.deliveries.list",
+    "notify.deliveries.retry",
+    "notify.destinations.create",
+    "notify.destinations.delete",
+    "notify.destinations.list",
+    "notify.destinations.test",
+    "notify.destinations.update",
+    "notify.events.acknowledge",
+    "notify.events.archive",
+    "notify.events.cancelResponse",
+    "notify.events.get",
+    "notify.events.iterate",
+    "notify.events.list",
+    "notify.events.respond",
+    "notify.events.stream",
+    "notify.events.unarchive",
+    "notify.fetch",
+    "notify.groups.list",
+    "notify.preferences.get",
+    "notify.preferences.update",
+    "notify.publish",
+    "notify.requestApproval",
+    "notify.requestOptions",
+    "notify.silences.create",
+    "notify.silences.delete",
+    "notify.silences.list",
+    "notify.topics.list",
+    "notify.topics.publish",
+    "notify.usage",
+    "passport.capabilities",
+    "passport.connections.create",
+    "passport.connections.delete",
+    "passport.connections.fetch",
+    "passport.connections.get",
+    "passport.connections.importState",
+    "passport.connections.list",
+    "passport.connections.login",
+    "passport.profiles.list",
+    "passport.runtime.connections.fetch",
+    "passport.runtime.connections.hasRuntimeGrant",
+    "passport.runtime.connections.isConfigured",
+    "passport.runtime.connections.list",
+    "passport.usage",
+    "sites.deploy",
+    "sites.projects.create",
+    "sites.projects.delete",
+    "sites.projects.get",
+    "sites.projects.list",
+    "sites.projects.makePublic",
+    "sites.projects.updateSettings",
+    "sites.status",
+    "sites.unpublish",
+    "sites.versions.create"
+  ],
+  "toolApprovals": {
+    "eventTypes": [
+      "agent.tool_use",
+      "agent.tool_approval_request",
+      "user.tool_approval",
+      "user.interrupt",
+      "session.status"
+    ],
+    "keys": [
+      {
+        "toolUseId": "toolu_0123456789",
+        "decision": "allow",
+        "message": null,
+        "expected": "tool-approval-allow-toolu_0123456789"
+      },
+      {
+        "toolUseId": "toolu_0123456789",
+        "decision": "deny",
+        "message": "Not now",
+        "expected": "tool-approval-deny-toolu_0123456789-m2c3d6fce"
+      },
+      {
+        "toolUseId": "toolu_0123456789",
+        "decision": "allow",
+        "message": "",
+        "expected": "tool-approval-allow-toolu_0123456789-m811c9dc5"
+      },
+      {
+        "toolUseId": "toolu_0123456789",
+        "decision": "deny",
+        "message": "Nicht jetzt — später 🙂",
+        "expected": "tool-approval-deny-toolu_0123456789-me1c4dc45"
+      },
+      {
+        "toolUseId": "x",
+        "decision": "deny",
+        "message": null,
+        "expected": "tool-approval-deny-x"
+      },
+      {
+        "toolUseId": "bad id/with slash",
+        "decision": "allow",
+        "message": null,
+        "expected": null
+      },
+      {
+        "toolUseId": "tttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt",
+        "decision": "allow",
+        "message": "too long once hashed",
+        "expected": null
+      }
+    ],
+    "pending": [
+      {
+        "events": [
+          {
+            "seq": 3,
+            "type": "agent.tool_approval_request",
+            "toolUseId": "toolu_1"
+          },
+          {
+            "seq": 4,
+            "type": "agent.tool_approval_request",
+            "toolUseId": "toolu_2"
+          }
+        ],
+        "expected": [
+          "toolu_1",
+          "toolu_2"
+        ]
+      },
+      {
+        "events": [
+          {
+            "seq": 3,
+            "type": "agent.tool_approval_request",
+            "toolUseId": "toolu_1"
+          },
+          {
+            "seq": 4,
+            "type": "agent.tool_approval_request",
+            "toolUseId": "toolu_2"
+          },
+          {
+            "seq": 5,
+            "type": "user.tool_approval",
+            "toolUseId": "toolu_1"
+          }
+        ],
+        "expected": [
+          "toolu_2"
+        ]
+      },
+      {
+        "events": [
+          {
+            "seq": 3,
+            "type": "agent.tool_approval_request",
+            "toolUseId": "toolu_1"
+          },
+          {
+            "seq": 4,
+            "type": "user.interrupt"
+          }
+        ],
+        "expected": [
+          "toolu_1"
+        ]
+      },
+      {
+        "events": [
+          {
+            "seq": 3,
+            "type": "agent.tool_approval_request",
+            "toolUseId": "toolu_1"
+          },
+          {
+            "seq": 4,
+            "type": "user.interrupt"
+          },
+          {
+            "seq": 5,
+            "type": "session.status",
+            "status": "idle",
+            "stopReason": "interrupted",
+            "inputSeq": 4,
+            "pendingToolUseIds": []
+          }
+        ],
+        "expected": []
+      },
+      {
+        "events": [
+          {
+            "seq": 3,
+            "type": "agent.tool_approval_request",
+            "toolUseId": "toolu_1"
+          },
+          {
+            "seq": 4,
+            "type": "user.interrupt"
+          },
+          {
+            "seq": 5,
+            "type": "session.status",
+            "status": "idle",
+            "stopReason": "interrupted",
+            "inputSeq": 2,
+            "pendingToolUseIds": []
+          }
+        ],
+        "expected": [
+          "toolu_1"
+        ]
+      },
+      {
+        "events": [
+          {
+            "seq": 3,
+            "type": "agent.tool_approval_request",
+            "toolUseId": "toolu_1"
+          },
+          {
+            "seq": 4,
+            "type": "session.status",
+            "status": "idle",
+            "stopReason": "interrupted",
+            "inputSeq": null,
+            "pendingToolUseIds": []
+          }
+        ],
+        "expected": [
+          "toolu_1"
+        ]
+      },
+      {
+        "events": [
+          {
+            "seq": 3,
+            "type": "agent.tool_approval_request",
+            "toolUseId": "toolu_1"
+          },
+          {
+            "seq": 4,
+            "type": "user.interrupt"
+          },
+          {
+            "seq": 5,
+            "type": "session.status",
+            "status": "idle",
+            "stopReason": "interrupted",
+            "inputSeq": null,
+            "pendingToolUseIds": []
+          }
+        ],
+        "expected": []
+      },
+      {
+        "events": [
+          {
+            "seq": 9,
+            "type": "agent.tool_approval_request",
+            "toolUseId": "toolu_9"
+          },
+          {
+            "seq": 3,
+            "type": "agent.tool_approval_request",
+            "toolUseId": "toolu_3"
+          }
+        ],
+        "expected": [
+          "toolu_3",
+          "toolu_9"
+        ]
+      }
+    ]
+  },
+  "mailRealtimeTickets": [
+    {
+      "env": {
+        "RYU_API_KEY": "ryu_vectors",
+        "RYU_ORGANIZATION_ID": "org_1"
+      },
+      "reply": {
+        "ticket": "mrt_2r7Yf0kQ6bWm9pXcJ3hT1sLeAa8uVnZg4oDiRyKqE5w",
+        "expiresAt": "2026-10-23T12:00:30.000Z",
+        "expiresIn": 30,
+        "path": "/api/mail/realtime",
+        "protocols": [
+          "ryu-mail.v1",
+          "ryu-ticket.mrt_2r7Yf0kQ6bWm9pXcJ3hT1sLeAa8uVnZg4oDiRyKqE5w"
+        ]
+      },
+      "expected": {
+        "expiresAt": "2026-10-23T12:00:30.000Z",
+        "expiresIn": 30,
+        "path": "/api/mail/realtime",
+        "protocols": [
+          "ryu-mail.v1",
+          "ryu-ticket.mrt_2r7Yf0kQ6bWm9pXcJ3hT1sLeAa8uVnZg4oDiRyKqE5w"
+        ],
+        "ticket": "mrt_2r7Yf0kQ6bWm9pXcJ3hT1sLeAa8uVnZg4oDiRyKqE5w",
+        "url": "wss://api.ryuhq.com/api/mail/realtime"
+      }
+    },
+    {
+      "env": {
+        "RYU_MAIL_GATEWAY_KEY": "rgw_vectors"
+      },
+      "reply": {
+        "ticket": "mrt_2r7Yf0kQ6bWm9pXcJ3hT1sLeAa8uVnZg4oDiRyKqE5w",
+        "expires_at": "2026-10-23T12:00:30.000Z",
+        "expires_in": 30,
+        "protocols": [
+          "ryu-mail.v1",
+          "ryu-ticket.mrt_2r7Yf0kQ6bWm9pXcJ3hT1sLeAa8uVnZg4oDiRyKqE5w"
+        ],
+        "extra": "dropped"
+      },
+      "expected": {
+        "expiresAt": "2026-10-23T12:00:30.000Z",
+        "expiresIn": 30,
+        "path": "/api/mail/realtime",
+        "protocols": [
+          "ryu-mail.v1",
+          "ryu-ticket.mrt_2r7Yf0kQ6bWm9pXcJ3hT1sLeAa8uVnZg4oDiRyKqE5w"
+        ],
+        "ticket": "mrt_2r7Yf0kQ6bWm9pXcJ3hT1sLeAa8uVnZg4oDiRyKqE5w",
+        "url": "wss://api.ryuhq.com/api/mail/realtime"
+      }
+    }
+  ],
+  "mailListLimits": [
+    {
+      "call": "drafts.list",
+      "id": "inbox_1",
+      "eventType": null,
+      "limit": null,
+      "path": "/api/mail/inboxes/inbox_1/drafts",
+      "error": null
+    },
+    {
+      "call": "drafts.list",
+      "id": "inbox_1",
+      "eventType": null,
+      "limit": 25,
+      "path": "/api/mail/inboxes/inbox_1/drafts?limit=25",
+      "error": null
+    },
+    {
+      "call": "events.list",
+      "id": null,
+      "eventType": null,
+      "limit": null,
+      "path": "/api/mail/events",
+      "error": null
+    },
+    {
+      "call": "events.list",
+      "id": null,
+      "eventType": null,
+      "limit": 5,
+      "path": "/api/mail/events?limit=5",
+      "error": null
+    },
+    {
+      "call": "events.list",
+      "id": null,
+      "eventType": "message.received",
+      "limit": 10,
+      "path": "/api/mail/events?eventType=message.received&limit=10",
+      "error": null
+    },
+    {
+      "call": "events.list",
+      "id": "inbox_1",
+      "eventType": null,
+      "limit": 500,
+      "path": "/api/mail/inboxes/inbox_1/events?limit=500",
+      "error": null
+    },
+    {
+      "call": "events.list",
+      "id": "inbox_1",
+      "eventType": "message.received",
+      "limit": 3,
+      "path": "/api/mail/inboxes/inbox_1/events?limit=3",
+      "error": null
+    },
+    {
+      "call": "webhooks.deliveries.list",
+      "id": "wh_1",
+      "eventType": null,
+      "limit": null,
+      "path": "/api/mail/webhooks/wh_1/deliveries",
+      "error": null
+    },
+    {
+      "call": "webhooks.deliveries.list",
+      "id": "wh_1",
+      "eventType": null,
+      "limit": 1000,
+      "path": "/api/mail/webhooks/wh_1/deliveries?limit=1000",
+      "error": null
+    },
+    {
+      "call": "drafts.list",
+      "id": "inbox_1",
+      "eventType": null,
+      "limit": 0,
+      "path": null,
+      "error": "invalid_limit"
+    },
+    {
+      "call": "drafts.list",
+      "id": "inbox_1",
+      "eventType": null,
+      "limit": -1,
+      "path": null,
+      "error": "invalid_limit"
+    },
+    {
+      "call": "drafts.list",
+      "id": "inbox_1",
+      "eventType": null,
+      "limit": 2.5,
+      "path": null,
+      "error": "invalid_limit"
+    },
+    {
+      "call": "drafts.list",
+      "id": "inbox_1",
+      "eventType": null,
+      "limit": "NaN",
+      "path": null,
+      "error": "invalid_limit"
+    },
+    {
+      "call": "drafts.list",
+      "id": "inbox_1",
+      "eventType": null,
+      "limit": true,
+      "path": null,
+      "error": "invalid_limit"
+    },
+    {
+      "call": "events.list",
+      "id": null,
+      "eventType": null,
+      "limit": 0,
+      "path": null,
+      "error": "invalid_limit"
+    },
+    {
+      "call": "events.list",
+      "id": "inbox_1",
+      "eventType": null,
+      "limit": -1,
+      "path": null,
+      "error": "invalid_limit"
+    },
+    {
+      "call": "webhooks.deliveries.list",
+      "id": "wh_1",
+      "eventType": null,
+      "limit": 2.5,
+      "path": null,
+      "error": "invalid_limit"
+    },
+    {
+      "call": "webhooks.deliveries.list",
+      "id": "wh_1",
+      "eventType": null,
+      "limit": "NaN",
+      "path": null,
+      "error": "invalid_limit"
+    },
+    {
+      "call": "events.list",
+      "id": "",
+      "eventType": null,
+      "limit": 3,
+      "path": null,
+      "error": "invalid_id"
+    },
+    {
+      "call": "events.list",
+      "id": "",
+      "eventType": null,
+      "limit": null,
+      "path": null,
+      "error": "invalid_id"
+    },
+    {
+      "call": "drafts.list",
+      "id": "",
+      "eventType": null,
+      "limit": 3,
+      "path": null,
+      "error": "invalid_id"
+    },
+    {
+      "call": "events.list",
+      "id": "",
+      "eventType": null,
+      "limit": 0,
+      "path": null,
+      "error": "invalid_id"
+    }
+  ],
+  "notifyHeaderText": [
+    {
+      "title": "Deploy finished",
+      "header": "Deploy finished"
+    },
+    {
+      "title": "Déploiement",
+      "header": "Déploiement"
+    },
+    {
+      "title": "部署完成 ✅",
+      "header": "=?UTF-8?B?6YOo572y5a6M5oiQIOKchQ==?="
+    },
+    {
+      "title": "=?UTF-8?B?aGk=?=",
+      "header": "=?UTF-8?B?PT9VVEYtOD9CP2FHaz0/PQ==?="
+    },
+    {
+      "title": "=?ISO-8859-1?Q?caf=E9?=",
+      "header": "=?UTF-8?B?PT9JU08tODg1OS0xP1E/Y2FmPUU5Pz0=?="
+    },
+    {
+      "title": "Price =?x?Q?y?=",
+      "header": "=?UTF-8?B?UHJpY2UgPT94P1E/eT89?="
+    },
+    {
+      "title": "部署 =?UTF-8?B?aGk=?=",
+      "header": "=?UTF-8?B?6YOo572yID0/VVRGLTg/Qj9hR2s9Pz0=?="
+    },
+    {
+      "title": "a=?b",
+      "header": "=?UTF-8?B?YT0/Yg==?="
+    },
+    {
+      "title": "a\nb",
+      "header": null
+    },
+    {
+      "title": "部署\n完成",
+      "header": null
+    },
+    {
+      "title": "a\u0000b",
+      "header": null
+    },
+    {
+      "title": "a\ud800b",
+      "header": null
+    }
+  ],
+  "messagingOrgIds": [
+    {
+      "organizationId": "org_1",
+      "path": "/api/messaging/orgs/org_1/numbers",
+      "error": null
+    },
+    {
+      "organizationId": ".",
+      "path": null,
+      "error": {
+        "code": "invalid_id",
+        "errorClass": "RyuInvalidRequestError"
+      }
+    },
+    {
+      "organizationId": "..",
+      "path": null,
+      "error": {
+        "code": "invalid_id",
+        "errorClass": "RyuInvalidRequestError"
+      }
+    },
+    {
+      "organizationId": "a..b",
+      "path": "/api/messaging/orgs/a..b/numbers",
+      "error": null
+    },
+    {
+      "organizationId": "a b",
+      "path": "/api/messaging/orgs/a%20b/numbers",
+      "error": null
+    },
+    {
+      "organizationId": "../x",
+      "path": "/api/messaging/orgs/..%2Fx/numbers",
+      "error": null
+    }
+  ],
+  "messageHints": [
+    {
+      "input": {
+        "message": "Ryu Notify is not configured: set RYU_NOTIFY_API_KEY.",
+        "hint": "Set RYU_NOTIFY_API_KEY."
+      },
+      "expected": {
+        "message": "Ryu Notify is not configured: set RYU_NOTIFY_API_KEY. Hint: Set RYU_NOTIFY_API_KEY.",
+        "errorMessage": "Ryu Notify is not configured: set RYU_NOTIFY_API_KEY. Hint: Set RYU_NOTIFY_API_KEY.",
+        "withoutHint": "Ryu Notify is not configured: set RYU_NOTIFY_API_KEY.",
+        "foreignWithoutHint": "Ryu Notify is not configured: set RYU_NOTIFY_API_KEY.",
+        "rehinted": "Ryu Notify is not configured: set RYU_NOTIFY_API_KEY. Hint: Try again later."
+      }
+    },
+    {
+      "input": {
+        "message": "bad key",
+        "hint": "Check the key."
+      },
+      "expected": {
+        "message": "bad key. Hint: Check the key.",
+        "errorMessage": "bad key. Hint: Check the key.",
+        "withoutHint": "bad key",
+        "foreignWithoutHint": "bad key.",
+        "rehinted": "bad key. Hint: Try again later."
+      }
+    },
+    {
+      "input": {
+        "message": "Slow down!",
+        "hint": "Wait."
+      },
+      "expected": {
+        "message": "Slow down! Hint: Wait.",
+        "errorMessage": "Slow down! Hint: Wait.",
+        "withoutHint": "Slow down!",
+        "foreignWithoutHint": "Slow down!",
+        "rehinted": "Slow down! Hint: Try again later."
+      }
+    },
+    {
+      "input": {
+        "message": "Too many requests?",
+        "hint": "Wait."
+      },
+      "expected": {
+        "message": "Too many requests? Hint: Wait.",
+        "errorMessage": "Too many requests? Hint: Wait.",
+        "withoutHint": "Too many requests?",
+        "foreignWithoutHint": "Too many requests?",
+        "rehinted": "Too many requests? Hint: Try again later."
+      }
+    },
+    {
+      "input": {
+        "message": "",
+        "hint": "Check the key."
+      },
+      "expected": {
+        "message": "Hint: Check the key.",
+        "errorMessage": "Hint: Check the key.",
+        "withoutHint": "",
+        "foreignWithoutHint": "",
+        "rehinted": "Hint: Try again later."
+      }
+    },
+    {
+      "input": {
+        "message": "   ",
+        "hint": "Check the key."
+      },
+      "expected": {
+        "message": "Hint: Check the key.",
+        "errorMessage": "Hint: Check the key.",
+        "withoutHint": "   ",
+        "foreignWithoutHint": "",
+        "rehinted": "Hint: Try again later."
+      }
+    },
+    {
+      "input": {
+        "message": "bad key  ",
+        "hint": "Check the key."
+      },
+      "expected": {
+        "message": "bad key. Hint: Check the key.",
+        "errorMessage": "bad key. Hint: Check the key.",
+        "withoutHint": "bad key  ",
+        "foreignWithoutHint": "bad key.",
+        "rehinted": "bad key. Hint: Try again later."
+      }
+    },
+    {
+      "input": {
+        "message": "bad key",
+        "hint": null
+      },
+      "expected": {
+        "message": "bad key",
+        "errorMessage": "bad key",
+        "withoutHint": "bad key",
+        "foreignWithoutHint": "bad key",
+        "rehinted": "bad key. Hint: Try again later."
+      }
+    },
+    {
+      "input": {
+        "message": "bad key",
+        "hint": ""
+      },
+      "expected": {
+        "message": "bad key",
+        "errorMessage": "bad key",
+        "withoutHint": "bad key",
+        "foreignWithoutHint": "bad key",
+        "rehinted": "bad key. Hint: Try again later."
+      }
+    },
+    {
+      "input": {
+        "message": "bad key",
+        "hint": "   "
+      },
+      "expected": {
+        "message": "bad key",
+        "errorMessage": "bad key",
+        "withoutHint": "bad key",
+        "foreignWithoutHint": "bad key",
+        "rehinted": "bad key. Hint: Try again later."
+      }
+    },
+    {
+      "input": {
+        "message": "Bad key; check RYU_NOTIFY_API_KEY.",
+        "hint": "check RYU_NOTIFY_API_KEY."
+      },
+      "expected": {
+        "message": "Bad key; check RYU_NOTIFY_API_KEY.",
+        "errorMessage": "Bad key; check RYU_NOTIFY_API_KEY.",
+        "withoutHint": "Bad key; check RYU_NOTIFY_API_KEY.",
+        "foreignWithoutHint": "Bad key; check RYU_NOTIFY_API_KEY.",
+        "rehinted": "Bad key; check RYU_NOTIFY_API_KEY. Hint: Try again later."
+      }
+    },
+    {
+      "input": {
+        "message": "Bad key. Hint: Rotate it.",
+        "hint": "Rotate it."
+      },
+      "expected": {
+        "message": "Bad key. Hint: Rotate it.",
+        "errorMessage": "Bad key. Hint: Rotate it.",
+        "withoutHint": "Bad key. Hint: Rotate it.",
+        "foreignWithoutHint": "Bad key.",
+        "rehinted": "Bad key. Hint: Rotate it. Hint: Try again later."
+      }
+    },
+    {
+      "input": {
+        "message": "bad key",
+        "hint": "  Check the key.  "
+      },
+      "expected": {
+        "message": "bad key. Hint: Check the key.",
+        "errorMessage": "bad key. Hint: Check the key.",
+        "withoutHint": "bad key",
+        "foreignWithoutHint": "bad key.",
+        "rehinted": "bad key. Hint: Try again later."
+      }
+    },
+    {
+      "input": {
+        "message": "Unauthorized: key",
+        "hint": "key"
+      },
+      "expected": {
+        "message": "Unauthorized: key",
+        "errorMessage": "Unauthorized: key",
+        "withoutHint": "Unauthorized: key",
+        "foreignWithoutHint": "Unauthorized: key",
+        "rehinted": "Unauthorized: key. Hint: Try again later."
+      }
+    },
+    {
+      "input": {
+        "message": "Unauthorized key supplied",
+        "hint": "key"
+      },
+      "expected": {
+        "message": "Unauthorized key supplied. Hint: key",
+        "errorMessage": "Unauthorized key supplied. Hint: key",
+        "withoutHint": "Unauthorized key supplied",
+        "foreignWithoutHint": "Unauthorized key supplied.",
+        "rehinted": "Unauthorized key supplied. Hint: Try again later."
+      }
+    },
+    {
+      "input": {
+        "message": "Check the key. Then retry.",
+        "hint": "Check the key."
+      },
+      "expected": {
+        "message": "Check the key. Then retry. Hint: Check the key.",
+        "errorMessage": "Check the key. Then retry. Hint: Check the key.",
+        "withoutHint": "Check the key. Then retry.",
+        "foreignWithoutHint": "Check the key. Then retry.",
+        "rehinted": "Check the key. Then retry. Hint: Try again later."
+      }
+    },
+    {
+      "input": {
+        "message": "bad key. Check the key",
+        "hint": "Check the key."
+      },
+      "expected": {
+        "message": "bad key. Check the key",
+        "errorMessage": "bad key. Check the key",
+        "withoutHint": "bad key. Check the key",
+        "foreignWithoutHint": "bad key. Check the key",
+        "rehinted": "bad key. Check the key. Hint: Try again later."
+      }
+    }
+  ],
+  "sitesSettings": [
+    {
+      "name": "patch laid over the stored settings",
+      "call": "updateSettings",
+      "patch": {
+        "audience": "invited",
+        "viewers": [
+          "ada@example.com"
+        ],
+        "workspaceId": null
+      },
+      "expectedRevision": null,
+      "stored": {
+        "mode": "local",
+        "audience": "private",
+        "workspaceId": "ws_1",
+        "viewers": [],
+        "editors": [],
+        "optionalSignIn": false,
+        "allowRemix": false,
+        "database": {
+          "databaseId": "db_1",
+          "spaceId": "space_1"
+        },
+        "extensions": {
+          "connections": [],
+          "mcp": false
+        }
+      },
+      "put": null,
+      "requests": [
+        {
+          "method": "GET",
+          "path": "/api/sites/projects/site_1",
+          "body": null
+        },
+        {
+          "method": "PUT",
+          "path": "/api/sites/projects/site_1/settings",
+          "body": {
+            "expectedRevision": 2,
+            "settings": {
+              "audience": "invited",
+              "mode": "local",
+              "workspaceId": null,
+              "viewers": [
+                "ada@example.com"
+              ],
+              "editors": [],
+              "optionalSignIn": false,
+              "allowRemix": false,
+              "database": {
+                "databaseId": "db_1",
+                "spaceId": "space_1"
+              },
+              "extensions": {
+                "connections": [],
+                "mcp": false
+              }
+            }
+          }
+        }
+      ],
+      "outcome": {
+        "revision": 3,
+        "settings": {
+          "audience": "invited",
+          "mode": "local",
+          "workspaceId": null,
+          "viewers": [
+            "ada@example.com"
+          ],
+          "editors": [],
+          "optionalSignIn": false,
+          "allowRemix": false,
+          "database": {
+            "databaseId": "db_1",
+            "spaceId": "space_1"
+          },
+          "extensions": {
+            "connections": [],
+            "mcp": false
+          }
+        }
+      }
+    },
+    {
+      "name": "pinned stale revision",
+      "call": "updateSettings",
+      "patch": {
+        "allowRemix": true
+      },
+      "expectedRevision": 1,
+      "stored": {
+        "mode": "local",
+        "audience": "private",
+        "workspaceId": "ws_1",
+        "viewers": [],
+        "editors": [],
+        "optionalSignIn": false,
+        "allowRemix": false,
+        "database": {
+          "databaseId": "db_1",
+          "spaceId": "space_1"
+        },
+        "extensions": {
+          "connections": [],
+          "mcp": false
+        }
+      },
+      "put": {
+        "status": 409,
+        "body": {
+          "error": {
+            "code": "conflict",
+            "message": "Site changed."
+          }
+        }
+      },
+      "requests": [
+        {
+          "method": "GET",
+          "path": "/api/sites/projects/site_1",
+          "body": null
+        },
+        {
+          "method": "PUT",
+          "path": "/api/sites/projects/site_1/settings",
+          "body": {
+            "expectedRevision": 1,
+            "settings": {
+              "audience": "private",
+              "mode": "local",
+              "workspaceId": "ws_1",
+              "viewers": [],
+              "editors": [],
+              "optionalSignIn": false,
+              "allowRemix": true,
+              "database": {
+                "databaseId": "db_1",
+                "spaceId": "space_1"
+              },
+              "extensions": {
+                "connections": [],
+                "mcp": false
+              }
+            }
+          }
+        }
+      ],
+      "outcome": {
+        "error": {
+          "code": "conflict",
+          "details": {
+            "expectedRevision": 1,
+            "projectId": "site_1",
+            "step": "settings"
+          },
+          "hint": null,
+          "retryable": false,
+          "status": 409
+        }
+      }
+    },
+    {
+      "name": "make public",
+      "call": "makePublic",
+      "patch": null,
+      "expectedRevision": null,
+      "stored": {
+        "mode": "local",
+        "audience": "private",
+        "workspaceId": "ws_1",
+        "viewers": [],
+        "editors": [],
+        "optionalSignIn": false,
+        "allowRemix": false,
+        "database": {
+          "databaseId": "db_1",
+          "spaceId": "space_1"
+        },
+        "extensions": {
+          "connections": [],
+          "mcp": false
+        }
+      },
+      "put": null,
+      "requests": [
+        {
+          "method": "GET",
+          "path": "/api/sites/projects/site_1",
+          "body": null
+        },
+        {
+          "method": "PUT",
+          "path": "/api/sites/projects/site_1/settings",
+          "body": {
+            "expectedRevision": 2,
+            "settings": {
+              "audience": "public",
+              "mode": "local",
+              "workspaceId": "ws_1",
+              "viewers": [],
+              "editors": [],
+              "optionalSignIn": false,
+              "allowRemix": false,
+              "database": {
+                "databaseId": "db_1",
+                "spaceId": "space_1"
+              },
+              "extensions": {
+                "connections": [],
+                "mcp": false
+              }
+            }
+          }
+        }
+      ],
+      "outcome": {
+        "revision": 3,
+        "settings": {
+          "audience": "public",
+          "mode": "local",
+          "workspaceId": "ws_1",
+          "viewers": [],
+          "editors": [],
+          "optionalSignIn": false,
+          "allowRemix": false,
+          "database": {
+            "databaseId": "db_1",
+            "spaceId": "space_1"
+          },
+          "extensions": {
+            "connections": [],
+            "mcp": false
+          }
+        }
+      }
+    },
+    {
+      "name": "make public refused",
+      "call": "makePublic",
+      "patch": null,
+      "expectedRevision": null,
+      "stored": {
+        "mode": "local",
+        "audience": "private",
+        "workspaceId": "ws_1",
+        "viewers": [],
+        "editors": [],
+        "optionalSignIn": false,
+        "allowRemix": false,
+        "database": {
+          "databaseId": "db_1",
+          "spaceId": "space_1"
+        },
+        "extensions": {
+          "connections": [],
+          "mcp": false
+        }
+      },
+      "put": {
+        "status": 403,
+        "body": {
+          "error": {
+            "code": "policy_denied",
+            "message": "Public publishing is disabled by the operator"
+          }
+        }
+      },
+      "requests": [
+        {
+          "method": "GET",
+          "path": "/api/sites/projects/site_1",
+          "body": null
+        },
+        {
+          "method": "PUT",
+          "path": "/api/sites/projects/site_1/settings",
+          "body": {
+            "expectedRevision": 2,
+            "settings": {
+              "audience": "public",
+              "mode": "local",
+              "workspaceId": "ws_1",
+              "viewers": [],
+              "editors": [],
+              "optionalSignIn": false,
+              "allowRemix": false,
+              "database": {
+                "databaseId": "db_1",
+                "spaceId": "space_1"
+              },
+              "extensions": {
+                "connections": [],
+                "mcp": false
+              }
+            }
+          }
+        }
+      ],
+      "outcome": {
+        "error": {
+          "code": "policy_denied",
+          "details": {
+            "expectedRevision": 2,
+            "projectId": "site_1",
+            "step": "settings"
+          },
+          "hint": "Public Sites are off on this Sites process. The operator allows them with RYU_SITES_PUBLIC=1 or the runtime config's publicEnabled (ryu.sites.status() reports publicEnabled); until then choose private, invited or workspace.",
+          "retryable": false,
+          "status": 403
+        }
+      }
+    },
+    {
+      "name": "stored public refused without an audience",
+      "call": "updateSettings",
+      "patch": {
+        "allowRemix": true
+      },
+      "expectedRevision": null,
+      "stored": {
+        "mode": "local",
+        "audience": "public",
+        "workspaceId": "ws_1",
+        "viewers": [],
+        "editors": [],
+        "optionalSignIn": false,
+        "allowRemix": false,
+        "database": {
+          "databaseId": "db_1",
+          "spaceId": "space_1"
+        },
+        "extensions": {
+          "connections": [],
+          "mcp": false
+        }
+      },
+      "put": {
+        "status": 403,
+        "body": {
+          "error": {
+            "code": "policy_denied",
+            "message": "Public publishing is disabled by the operator"
+          }
+        }
+      },
+      "requests": [
+        {
+          "method": "GET",
+          "path": "/api/sites/projects/site_1",
+          "body": null
+        },
+        {
+          "method": "PUT",
+          "path": "/api/sites/projects/site_1/settings",
+          "body": {
+            "expectedRevision": 2,
+            "settings": {
+              "audience": "public",
+              "mode": "local",
+              "workspaceId": "ws_1",
+              "viewers": [],
+              "editors": [],
+              "optionalSignIn": false,
+              "allowRemix": true,
+              "database": {
+                "databaseId": "db_1",
+                "spaceId": "space_1"
+              },
+              "extensions": {
+                "connections": [],
+                "mcp": false
+              }
+            }
+          }
+        }
+      ],
+      "outcome": {
+        "error": {
+          "code": "policy_denied",
+          "details": {
+            "expectedRevision": 2,
+            "projectId": "site_1",
+            "step": "settings"
+          },
+          "hint": "This Site is still saved with the public audience, but public Sites are now off on this Sites process, so the settings route refuses every change to it. Send an audience too (private, invited or workspace) with your change, or ask the operator to allow public Sites again.",
+          "retryable": false,
+          "status": 403
+        }
+      }
+    },
+    {
+      "name": "configuration refusal is not retried",
+      "call": "updateSettings",
+      "patch": {
+        "audience": "invited"
+      },
+      "expectedRevision": null,
+      "stored": {
+        "mode": "local",
+        "audience": "private",
+        "workspaceId": "ws_1",
+        "viewers": [],
+        "editors": [],
+        "optionalSignIn": false,
+        "allowRemix": false,
+        "database": {
+          "databaseId": "db_1",
+          "spaceId": "space_1"
+        },
+        "extensions": {
+          "connections": [],
+          "mcp": false
+        }
+      },
+      "put": {
+        "status": 503,
+        "body": {
+          "error": {
+            "code": "unavailable",
+            "message": "Connect platform identity before enabling sharing or sign-in"
+          }
+        }
+      },
+      "requests": [
+        {
+          "method": "GET",
+          "path": "/api/sites/projects/site_1",
+          "body": null
+        },
+        {
+          "method": "PUT",
+          "path": "/api/sites/projects/site_1/settings",
+          "body": {
+            "expectedRevision": 2,
+            "settings": {
+              "audience": "invited",
+              "mode": "local",
+              "workspaceId": "ws_1",
+              "viewers": [],
+              "editors": [],
+              "optionalSignIn": false,
+              "allowRemix": false,
+              "database": {
+                "databaseId": "db_1",
+                "spaceId": "space_1"
+              },
+              "extensions": {
+                "connections": [],
+                "mcp": false
+              }
+            }
+          }
+        }
+      ],
+      "outcome": {
+        "error": {
+          "code": "unavailable",
+          "details": {
+            "expectedRevision": 2,
+            "projectId": "site_1",
+            "step": "settings"
+          },
+          "hint": null,
+          "retryable": false,
+          "status": 503
+        }
+      }
+    },
+    {
+      "name": "null audience",
+      "call": "updateSettings",
+      "patch": {
+        "audience": null
+      },
+      "expectedRevision": null,
+      "stored": {
+        "mode": "local",
+        "audience": "private",
+        "workspaceId": "ws_1",
+        "viewers": [],
+        "editors": [],
+        "optionalSignIn": false,
+        "allowRemix": false,
+        "database": {
+          "databaseId": "db_1",
+          "spaceId": "space_1"
+        },
+        "extensions": {
+          "connections": [],
+          "mcp": false
+        }
+      },
+      "put": null,
+      "requests": [],
+      "outcome": {
+        "error": {
+          "code": "invalid_request",
+          "details": {
+            "fields": [
+              "audience"
+            ]
+          },
+          "hint": null,
+          "retryable": false,
+          "status": 0
+        }
+      }
+    },
+    {
+      "name": "empty patch",
+      "call": "updateSettings",
+      "patch": {},
+      "expectedRevision": null,
+      "stored": {
+        "mode": "local",
+        "audience": "private",
+        "workspaceId": "ws_1",
+        "viewers": [],
+        "editors": [],
+        "optionalSignIn": false,
+        "allowRemix": false,
+        "database": {
+          "databaseId": "db_1",
+          "spaceId": "space_1"
+        },
+        "extensions": {
+          "connections": [],
+          "mcp": false
+        }
+      },
+      "put": null,
+      "requests": [],
+      "outcome": {
+        "error": {
+          "code": "invalid_request",
+          "details": null,
+          "hint": null,
+          "retryable": false,
+          "status": 0
+        }
+      }
+    },
+    {
+      "name": "managed setting",
+      "call": "updateSettings",
+      "patch": {
+        "database": null
+      },
+      "expectedRevision": null,
+      "stored": {
+        "mode": "local",
+        "audience": "private",
+        "workspaceId": "ws_1",
+        "viewers": [],
+        "editors": [],
+        "optionalSignIn": false,
+        "allowRemix": false,
+        "database": {
+          "databaseId": "db_1",
+          "spaceId": "space_1"
+        },
+        "extensions": {
+          "connections": [],
+          "mcp": false
+        }
+      },
+      "put": null,
+      "requests": [],
+      "outcome": {
+        "error": {
+          "code": "invalid_request",
+          "details": {
+            "fields": [
+              "database"
+            ]
+          },
+          "hint": null,
+          "retryable": false,
+          "status": 0
+        }
+      }
+    }
+  ],
+  "passportReplies": [
+    {
+      "schema": "connectionList",
+      "body": {
+        "connections": [
+          {
+            "created_at": 1760000000,
+            "domain": "github.com",
+            "flow_status": "IDLE",
+            "id": "conn_0123456789abcdef",
+            "last_checked": 0,
+            "profile_id": "work",
+            "source": "manual",
+            "status": "NEEDS_AUTH",
+            "updated_at": 1760000000
+          }
+        ]
+      },
+      "accepted": true
+    },
+    {
+      "schema": "connectionList",
+      "body": {
+        "connections": [],
+        "extra": {
+          "kept": true
+        }
+      },
+      "accepted": true
+    },
+    {
+      "schema": "connectionList",
+      "body": {
+        "connections": [
+          {
+            "created_at": 1760000000,
+            "domain": "github.com",
+            "flow_status": "IDLE",
+            "id": "conn_0123456789abcdef",
+            "last_checked": 0,
+            "profile_id": "work",
+            "source": "manual",
+            "status": "SIGNED_IN",
+            "updated_at": 1760000000
+          }
+        ]
+      },
+      "accepted": false
+    },
+    {
+      "schema": "connectionList",
+      "body": {
+        "connections": [
+          {
+            "created_at": 1760000000,
+            "domain": "github.com",
+            "flow_status": "DONE?",
+            "id": "conn_0123456789abcdef",
+            "last_checked": 0,
+            "profile_id": "work",
+            "source": "manual",
+            "status": "NEEDS_AUTH",
+            "updated_at": 1760000000
+          }
+        ]
+      },
+      "accepted": false
+    },
+    {
+      "schema": "connectionList",
+      "body": {
+        "connections": {
+          "id": "conn_1"
+        }
+      },
+      "accepted": false
+    },
+    {
+      "schema": "connectionList",
+      "body": {},
+      "accepted": false
+    },
+    {
+      "schema": "connectionList",
+      "body": [],
+      "accepted": false
+    },
+    {
+      "schema": "connectionList",
+      "body": null,
+      "accepted": false
+    },
+    {
+      "schema": "connectionList",
+      "body": {
+        "connections": [
+          {
+            "created_at": 1760000000,
+            "domain": "github.com",
+            "flow_status": "IDLE",
+            "id": "conn_0123456789abcdef",
+            "last_checked": true,
+            "profile_id": "work",
+            "source": "manual",
+            "status": "NEEDS_AUTH",
+            "updated_at": 1760000000
+          }
+        ]
+      },
+      "accepted": false
+    },
+    {
+      "schema": "connectionList",
+      "body": {
+        "connections": [
+          null
+        ]
+      },
+      "accepted": false
+    },
+    {
+      "schema": "createdConnection",
+      "body": {
+        "connection": {
+          "created_at": 1760000000,
+          "domain": "github.com",
+          "flow_status": "IDLE",
+          "id": "conn_0123456789abcdef",
+          "last_checked": 0,
+          "profile_id": "work",
+          "source": "manual",
+          "status": "NEEDS_AUTH",
+          "updated_at": 1760000000
+        }
+      },
+      "accepted": true
+    },
+    {
+      "schema": "createdConnection",
+      "body": {
+        "connection": {
+          "created_at": 1760000000,
+          "domain": null,
+          "flow_status": "IDLE",
+          "id": "conn_0123456789abcdef",
+          "last_checked": 0,
+          "profile_id": "work",
+          "source": "manual",
+          "status": "NEEDS_AUTH",
+          "updated_at": 1760000000
+        }
+      },
+      "accepted": false
+    },
+    {
+      "schema": "createdConnection",
+      "body": {
+        "id": "conn_1"
+      },
+      "accepted": false
+    },
+    {
+      "schema": "deletedConnection",
+      "body": {
+        "deleted": true,
+        "id": "conn_1"
+      },
+      "accepted": true
+    },
+    {
+      "schema": "deletedConnection",
+      "body": {
+        "deleted": "yes",
+        "id": "conn_1"
+      },
+      "accepted": false
+    },
+    {
+      "schema": "deletedConnection",
+      "body": {
+        "deleted": true
+      },
+      "accepted": false
+    },
+    {
+      "schema": "loginFlow",
+      "body": {
+        "flow_id": "flow_1",
+        "kind": {
+          "kind": "hosted",
+          "url": "https://passport.example.com/flow/1"
+        }
+      },
+      "accepted": true
+    },
+    {
+      "schema": "loginFlow",
+      "body": {
+        "flow_id": "flow_1",
+        "kind": {
+          "kind": "manual",
+          "note": "x"
+        }
+      },
+      "accepted": true
+    },
+    {
+      "schema": "loginFlow",
+      "body": {
+        "flow_id": "flow_1",
+        "kind": {
+          "kind": "hosted"
+        }
+      },
+      "accepted": false
+    },
+    {
+      "schema": "loginFlow",
+      "body": {
+        "flow_id": "flow_1",
+        "kind": {
+          "kind": "device"
+        }
+      },
+      "accepted": false
+    },
+    {
+      "schema": "loginFlow",
+      "body": {
+        "flow_id": "flow_1",
+        "kind": "manual"
+      },
+      "accepted": false
+    },
+    {
+      "schema": "loginFlow",
+      "body": {
+        "kind": {
+          "kind": "manual"
+        }
+      },
+      "accepted": false
+    },
+    {
+      "schema": "fetchResult",
+      "body": {
+        "authenticated": true,
+        "content": "{}",
+        "status": 200,
+        "truncated": false
+      },
+      "accepted": true
+    },
+    {
+      "schema": "fetchResult",
+      "body": {
+        "authenticated": true,
+        "content": "{}",
+        "status": 200,
+        "truncated": false,
+        "wwwAuthenticate": [
+          "Bearer realm=\"api\""
+        ]
+      },
+      "accepted": true
+    },
+    {
+      "schema": "fetchResult",
+      "body": {
+        "authenticated": true,
+        "content": "{}",
+        "status": "200",
+        "truncated": false
+      },
+      "accepted": false
+    },
+    {
+      "schema": "fetchResult",
+      "body": {
+        "authenticated": true,
+        "content": "{}",
+        "status": 200,
+        "truncated": false,
+        "wwwAuthenticate": null
+      },
+      "accepted": false
+    },
+    {
+      "schema": "fetchResult",
+      "body": {
+        "authenticated": true,
+        "content": "{}",
+        "status": 200,
+        "truncated": false,
+        "wwwAuthenticate": [
+          1
+        ]
+      },
+      "accepted": false
+    },
+    {
+      "schema": "fetchResult",
+      "body": {
+        "status": 200,
+        "content": "{}"
+      },
+      "accepted": false
+    },
+    {
+      "schema": "fetchResult",
+      "body": {
+        "authenticated": true,
+        "content": "{}",
+        "status": 200,
+        "truncated": 0
+      },
+      "accepted": false
+    },
+    {
+      "schema": "profileList",
+      "body": {
+        "profiles": [
+          {
+            "profile_id": "work",
+            "connections": [
+              {
+                "created_at": 1760000000,
+                "domain": "github.com",
+                "flow_status": "IDLE",
+                "id": "conn_0123456789abcdef",
+                "last_checked": 0,
+                "profile_id": "work",
+                "source": "manual",
+                "status": "NEEDS_AUTH",
+                "updated_at": 1760000000
+              }
+            ]
+          }
+        ]
+      },
+      "accepted": true
+    },
+    {
+      "schema": "profileList",
+      "body": {
+        "profiles": []
+      },
+      "accepted": true
+    },
+    {
+      "schema": "profileList",
+      "body": {
+        "profiles": [
+          {
+            "profile_id": "work"
+          }
+        ]
+      },
+      "accepted": false
+    },
+    {
+      "schema": "profileList",
+      "body": {
+        "profiles": [
+          {
+            "profile_id": 1,
+            "connections": []
+          }
+        ]
+      },
+      "accepted": false
+    },
+    {
+      "schema": "profileList",
+      "body": {
+        "profiles": [
+          {
+            "profile_id": "work",
+            "connections": [
+              {
+                "id": "conn_1"
+              }
+            ]
+          }
+        ]
+      },
+      "accepted": false
+    },
+    {
+      "schema": "profileList",
+      "body": {
+        "profiles": [
+          "work"
+        ]
+      },
+      "accepted": false
+    },
+    {
+      "schema": "profileList",
+      "body": {
+        "profiles": null
+      },
+      "accepted": false
+    },
+    {
+      "schema": "capabilities",
+      "body": {
+        "api_version": "v1",
+        "service": "passport",
+        "features": {
+          "idempotency_keys": true
+        }
+      },
+      "accepted": true
+    },
+    {
+      "schema": "capabilities",
+      "body": {
+        "api_version": "v1",
+        "service": "passport",
+        "features": {
+          "idempotency_keys": "true"
+        }
+      },
+      "accepted": false
+    },
+    {
+      "schema": "capabilities",
+      "body": {
+        "api_version": "v1",
+        "features": {}
+      },
+      "accepted": false
+    },
+    {
+      "schema": "usageReport",
+      "body": {
+        "from": "a",
+        "meters": {
+          "connectionSeconds": 1,
+          "fetches": 2
+        },
+        "ok": true,
+        "to": "b",
+        "type": "passport.usage"
+      },
+      "accepted": true
+    },
+    {
+      "schema": "usageReport",
+      "body": {
+        "from": "a",
+        "meters": {
+          "fetches": 2
+        },
+        "ok": true,
+        "to": "b",
+        "type": "passport.usage"
+      },
+      "accepted": false
+    },
+    {
+      "schema": "usageReport",
+      "body": {
+        "from": "a",
+        "meters": {
+          "connectionSeconds": 1,
+          "fetches": 2
+        },
+        "ok": "true",
+        "to": "b",
+        "type": "passport.usage"
+      },
+      "accepted": false
+    },
+    {
+      "schema": "usageReport",
+      "body": [],
+      "accepted": false
+    }
+  ]
+}

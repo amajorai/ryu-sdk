@@ -1,0 +1,3284 @@
+openapi: 3.1.0
+info:
+  title: Ryu Gateway API
+  version: "1.0.0"
+  description: |
+    The **Ryu Gateway** is the OpenAI-compatible control layer that governs every
+    model call: routing, fallback, rate-limiting, firewall/PII-DLP, budgets, evals,
+    and audit. Point any OpenAI-compatible client at the gateway by swapping its
+    base URL; the request surface below is a superset of the OpenAI API plus Ryu's
+    governance, eval, and audit endpoints.
+
+    Authentication is via a bearer token (`Authorization: Bearer <api-key>`). When
+    the gateway runs with `auth.require_auth = false`, anonymous requests are
+    allowed. Admin endpoints (`/v1/config`, `/v1/audit`) additionally require the
+    master key or a loopback peer.
+
+    Every response, errors included, carries an `x-request-id` header; on a
+    governed model call it matches the Gateway audit record. Browser callers on
+    an allowed origin can read it, along with `Retry-After`, `RateLimit`,
+    `RateLimit-Policy`, `x-provider` and `x-routed-model`.
+
+    Errors from the shared error path use one JSON envelope,
+    `{"error":{"message","type","code"}}`, where `type` and `code` are the same
+    stable code (see the `ErrorCode` schema). The router uses the same envelope
+    for an unmatched route (404 `not_found`), a wrong method (405
+    `method_not_allowed`, with an `Allow` header), a body over the size limit
+    (413 `request_too_large`), a malformed or mistyped JSON body (400, 415 or
+    422 `invalid_request_error`) and the server-wide request timeout (504
+    `gateway_timeout`). A few older handlers still answer their own shape:
+    `/v1/evals/run` and `/v1/evals/score` validation errors are
+    `{"error":"<message>"}`, and `/v1/batches` validation errors are
+    `{"error":{"code":"invalid_batch_request","message"}}` with no `type`.
+    Passthrough routes return the upstream body unchanged.
+
+    An upstream provider failure is always a 502 `provider_error`, whatever
+    status the provider sent; when that status is known it is in
+    `error.upstream_status`.
+servers:
+  - url: http://localhost:7981
+    description: Local gateway (default bind)
+security:
+  - bearerAuth: []
+tags:
+  - name: Inference
+    description: OpenAI Chat Completions and Responses, image, and audio generation.
+  - name: Models
+    description: Available models and configured modalities.
+  - name: Evals
+    description: Provider scoring and dataset eval runs.
+  - name: Batch
+    description: Admin-only asynchronous OpenRouter inference jobs.
+  - name: Governance
+    description: Grant validation and manifest signing/verification.
+  - name: Audit
+    description: Usage audit log and sandbox execution governance.
+  - name: Config
+    description: Runtime gateway configuration (admin).
+  - name: Channels
+    description: Approving the senders of channel bots (Telegram, WhatsApp, Slack, Discord, iMessage).
+  - name: Tools
+    description: Tool integrations (Composio registry) and governed direct execution.
+  - name: Security
+    description: Firewall guardrail checks over caller-supplied text.
+  - name: Web
+    description: Governed web search and fetch (Ryu extensions, not OpenAI standards).
+  - name: Health
+    description: Liveness, provider status, and observability metrics.
+paths:
+  /v1/chat/completions:
+    post:
+      tags: [Inference]
+      summary: Create a chat completion
+      description: |
+        OpenAI-compatible chat completion. Set `stream: true` to receive a
+        Server-Sent Events stream of `chat.completion.chunk` objects. Per-request
+        governance is driven by optional `x-ryu-*` headers (user/agent identity,
+        per-agent provider/model slot overrides, session correlation).
+      operationId: createChatCompletion
+      parameters:
+        - $ref: "#/components/parameters/UserIdHeader"
+        - $ref: "#/components/parameters/EndUserHeader"
+        - $ref: "#/components/parameters/AgentIdHeader"
+        - name: x-ryu-slot-chat-provider
+          in: header
+          required: false
+          description: Per-agent chat provider override.
+          schema: { type: string }
+        - name: x-ryu-slot-chat-model
+          in: header
+          required: false
+          description: Per-agent chat model override.
+          schema: { type: string }
+        - name: x-ryu-session-id
+          in: header
+          required: false
+          description: Core conversation id, recorded in the audit log for correlation.
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChatCompletionRequest"
+      responses:
+        "200":
+          description: A chat completion (or an SSE stream when `stream` is true).
+          headers:
+            x-request-id:
+              description: Gateway request id.
+              schema: { type: string }
+            x-provider:
+              description: Upstream provider that served the request.
+              schema: { type: string }
+            x-cache:
+              description: Exact-cache result.
+              schema: { type: string, enum: [HIT, MISS] }
+            x-degraded:
+              description: Set to `fallback:<provider>` when served by a fallback.
+              schema: { type: string }
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChatCompletionResponse"
+            text/event-stream:
+              schema:
+                type: string
+                description: "SSE stream of chat.completion.chunk objects (one per `data:` line)."
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "405": { $ref: "#/components/responses/MethodNotAllowed" }
+        "413": { $ref: "#/components/responses/PayloadTooLarge" }
+        "415": { $ref: "#/components/responses/UnsupportedMediaType" }
+        "422": { $ref: "#/components/responses/UnprocessableEntity" }
+        "429": { $ref: "#/components/responses/RateLimited" }
+        "504": { $ref: "#/components/responses/GatewayTimeout" }
+  /v1/agents/{agent_id}/chat/completions:
+    post:
+      tags: [Inference]
+      summary: Create a chat completion for an agent
+      description: |
+        The same request and response as `POST /v1/chat/completions`, with the
+        agent identity taken from the path instead of an `x-ryu-agent-id`
+        header. It gives an agent process that makes its own HTTP calls an
+        agent-specific base URL (`<gateway>/v1/agents/<agent_id>`), so its usage
+        and budgets bind to that agent. The usual authentication rules still
+        decide whether the key may act for that agent.
+      operationId: createAgentChatCompletion
+      parameters:
+        - name: agent_id
+          in: path
+          required: true
+          description: The agent id, used as `x-ryu-agent-id`.
+          schema: { type: string, minLength: 1 }
+        - $ref: "#/components/parameters/UserIdHeader"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChatCompletionRequest"
+      responses:
+        "200":
+          description: A chat completion (or an SSE stream when `stream` is true).
+          headers:
+            x-request-id: { $ref: "#/components/headers/RequestId" }
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChatCompletionResponse"
+            text/event-stream:
+              schema:
+                type: string
+                description: "SSE stream of chat.completion.chunk objects (one per `data:` line)."
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "405": { $ref: "#/components/responses/MethodNotAllowed" }
+        "413": { $ref: "#/components/responses/PayloadTooLarge" }
+        "415": { $ref: "#/components/responses/UnsupportedMediaType" }
+        "422": { $ref: "#/components/responses/UnprocessableEntity" }
+        "429": { $ref: "#/components/responses/RateLimited" }
+        "502": { $ref: "#/components/responses/ProviderError" }
+        "504": { $ref: "#/components/responses/GatewayTimeout" }
+  /v1/agents/{agent_id}/{agent_proof}/chat/completions:
+    post:
+      tags: [Inference]
+      summary: Create a chat completion for a proven agent
+      description: |
+        Like `POST /v1/agents/{agent_id}/chat/completions`, for agent routes that
+        Ryu Core manages. `agent_proof` is a route proof Core mints for its own
+        Gateway key and that agent, so a caller holding another key cannot move
+        spend to the agent by rewriting the path. Standalone callers use the
+        route without a proof.
+      operationId: createProvenAgentChatCompletion
+      parameters:
+        - name: agent_id
+          in: path
+          required: true
+          description: The agent id, used as `x-ryu-agent-id`.
+          schema: { type: string, minLength: 1 }
+        - name: agent_proof
+          in: path
+          required: true
+          description: The Core-minted route proof, sent on as `x-ryu-agent-proof`.
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChatCompletionRequest"
+      responses:
+        "200":
+          description: A chat completion (or an SSE stream when `stream` is true).
+          headers:
+            x-request-id: { $ref: "#/components/headers/RequestId" }
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChatCompletionResponse"
+            text/event-stream:
+              schema:
+                type: string
+                description: "SSE stream of chat.completion.chunk objects (one per `data:` line)."
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "405": { $ref: "#/components/responses/MethodNotAllowed" }
+        "413": { $ref: "#/components/responses/PayloadTooLarge" }
+        "415": { $ref: "#/components/responses/UnsupportedMediaType" }
+        "422": { $ref: "#/components/responses/UnprocessableEntity" }
+        "429": { $ref: "#/components/responses/RateLimited" }
+        "502": { $ref: "#/components/responses/ProviderError" }
+        "504": { $ref: "#/components/responses/GatewayTimeout" }
+  /v1/responses:
+    post:
+      tags: [Inference]
+      summary: Create a Responses API response
+      description: |
+        Create a response through the governed Gateway inference pipeline. Supports text and
+        image-URL input, function tools and namespaces, text custom tools, bounded regex
+        constraints, JSON output formats, streaming, and
+        `previous_response_id` continuation. Reasoning effort, text verbosity, service tier, and
+        prompt-cache hints are mapped to the shared Chat Completions pipeline. Reasoning summary
+        and encrypted-reasoning include hints are accepted for Pi client compatibility, but
+        reasoning items are not returned. Hosted web search uses the Gateway web service and
+        requires a separate web-search operation grant. Cached-only calls never use live
+        search and report unavailable when no cached backend exists. Other hosted tools,
+        Lark grammar constraints, file/audio/video input, conversations,
+        background responses, non-text function outputs, and response retrieval/deletion are not
+        supported; their 400 errors name the supported alternative. `max_tool_calls` caps hosted
+        tool calls, and `top_logprobs` or `include: [message.output_text.logprobs]` returns
+        provider token logprobs on `output_text` (and on streamed text deltas). Unknown top-level request fields are rejected.
+      operationId: createResponse
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [model, input]
+              properties:
+                model: { type: string }
+                input:
+                  oneOf:
+                    - type: string
+                    - type: array
+                      items: { type: object, additionalProperties: true }
+                instructions: { type: string }
+                previous_response_id: { type: string }
+                prompt_cache_key: { type: string, maxLength: 64 }
+                prompt_cache_retention:
+                  type: string
+                  enum: [in_memory, 24h]
+                  deprecated: true
+                service_tier: { type: string, minLength: 1 }
+                stream: { type: boolean, default: false }
+                store: { type: boolean, default: true }
+                max_output_tokens: { type: integer, minimum: 1 }
+                max_tool_calls:
+                  type: integer
+                  minimum: 0
+                  description: >-
+                    Maximum number of Gateway-hosted tool calls (hosted web search) for this
+                    response. Once reached, the hosted tool is withdrawn and any further hosted
+                    call is reported as a failed `web_search_call` with
+                    `max_tool_calls_exceeded`. Client function and custom tool calls are
+                    returned to the client and do not count.
+                top_logprobs:
+                  type: integer
+                  minimum: 0
+                  maximum: 20
+                  description: >-
+                    Number of most likely alternatives per output token. Implies
+                    `message.output_text.logprobs`. When the routed provider returns no token
+                    logprobs the response fails instead of returning text without them.
+                tools:
+                  type: array
+                  items:
+                    oneOf:
+                      - $ref: "#/components/schemas/ResponsesFunctionTool"
+                      - $ref: "#/components/schemas/ResponsesCustomTool"
+                      - type: object
+                        required: [type, name, tools]
+                        additionalProperties: false
+                        properties:
+                          type: { type: string, enum: [namespace] }
+                          name: { type: string, minLength: 1, maxLength: 64 }
+                          description: { type: string }
+                          tools:
+                            type: array
+                            minItems: 1
+                            items:
+                              oneOf:
+                                - $ref: "#/components/schemas/ResponsesFunctionTool"
+                                - $ref: "#/components/schemas/ResponsesCustomTool"
+                      - type: object
+                        required: [type]
+                        additionalProperties: false
+                        properties:
+                          type: { type: string, enum: [web_search, web_search_preview] }
+                          external_web_access: { type: boolean, default: true }
+                          search_context_size: { type: string, enum: [low, medium, high] }
+                tool_choice: { oneOf: [{ type: string }, { type: object }] }
+                temperature: { type: number, minimum: 0, maximum: 2 }
+                top_p: { type: number, minimum: 0, maximum: 1 }
+                reasoning:
+                  type: object
+                  properties:
+                    effort: { type: string, enum: [none, minimal, low, medium, high, xhigh] }
+                    summary: { type: string, enum: [auto, concise, detailed] }
+                  additionalProperties: false
+                text:
+                  type: object
+                  properties:
+                    verbosity: { type: string, enum: [low, medium, high] }
+                    format:
+                      oneOf:
+                        - type: object
+                          properties:
+                            type: { type: string, enum: [text] }
+                          required: [type]
+                          additionalProperties: false
+                        - type: object
+                          properties:
+                            type: { type: string, enum: [json_object] }
+                          required: [type]
+                          additionalProperties: false
+                        - type: object
+                          properties:
+                            type: { type: string, enum: [json_schema] }
+                            name: { type: string, minLength: 1 }
+                            description: { type: string }
+                            schema: { type: object, additionalProperties: true }
+                            strict: { type: boolean }
+                          required: [type, name, schema]
+                          additionalProperties: false
+                  additionalProperties: false
+                metadata: { type: object, additionalProperties: { type: string } }
+                client_metadata:
+                  type: object
+                  additionalProperties: { type: string }
+                  description: Client diagnostics only; not forwarded upstream or used as policy authority.
+                include:
+                  type: array
+                  items:
+                    type: string
+                    enum: [reasoning.encrypted_content, message.output_text.logprobs]
+                truncation: { type: string, enum: [disabled] }
+                background:
+                  type: boolean
+                  description: >-
+                    True is not supported and returns 400; false is accepted.
+                conversation:
+                  description: Not supported; use previous_response_id instead.
+                  nullable: true
+                prompt:
+                  description: Not supported; requests containing this property return 400.
+              additionalProperties: false
+      responses:
+        "200":
+          description: Responses API response, or semantic SSE events when `stream` is true.
+          headers:
+            x-request-id:
+              description: Unique id for the Gateway audit log.
+              schema: { type: string }
+            x-provider:
+              description: Upstream provider selected by Gateway routing.
+              schema: { type: string }
+            x-routed-model:
+              description: Model selected by Gateway routing.
+              schema: { type: string }
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [id, object, status, model, output]
+                properties:
+                  id: { type: string }
+                  object: { type: string, enum: [response] }
+                  status: { type: string, enum: [completed, incomplete, failed] }
+                  model: { type: string }
+                  output: { type: array, items: { type: object, additionalProperties: true } }
+                  usage: { type: object, additionalProperties: true }
+            text/event-stream:
+              schema:
+                type: string
+                description: Responses semantic SSE events, ending with response.completed, response.incomplete, or response.failed.
+        "400":
+          description: Invalid or unsupported Responses request.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "405": { $ref: "#/components/responses/MethodNotAllowed" }
+        "413": { $ref: "#/components/responses/PayloadTooLarge" }
+        "415": { $ref: "#/components/responses/UnsupportedMediaType" }
+        "422": { $ref: "#/components/responses/UnprocessableEntity" }
+        "429": { $ref: "#/components/responses/RateLimited" }
+        "504": { $ref: "#/components/responses/GatewayTimeout" }
+  /v1/cursor/chat/completions:
+    post:
+      tags: [Inference]
+      summary: Create a chat completion (Cursor alias)
+      description: |
+        Labelled alias for `POST /v1/chat/completions`. Cursor's "Override OpenAI
+        Base URL" already emits the OpenAI `/v1/chat/completions` shape, so point
+        Cursor at `<gateway>/v1/cursor` for the same governed pipeline.
+      operationId: createCursorChatCompletion
+      parameters:
+        - $ref: "#/components/parameters/UserIdHeader"
+        - $ref: "#/components/parameters/EndUserHeader"
+        - $ref: "#/components/parameters/AgentIdHeader"
+        - name: x-ryu-slot-chat-provider
+          in: header
+          required: false
+          schema: { type: string }
+        - name: x-ryu-slot-chat-model
+          in: header
+          required: false
+          schema: { type: string }
+        - name: x-ryu-session-id
+          in: header
+          required: false
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChatCompletionRequest"
+      responses:
+        "200":
+          description: A chat completion (or an SSE stream when `stream` is true).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChatCompletionResponse"
+            text/event-stream:
+              schema:
+                type: string
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "405": { $ref: "#/components/responses/MethodNotAllowed" }
+        "413": { $ref: "#/components/responses/PayloadTooLarge" }
+        "415": { $ref: "#/components/responses/UnsupportedMediaType" }
+        "422": { $ref: "#/components/responses/UnprocessableEntity" }
+        "429": { $ref: "#/components/responses/RateLimited" }
+        "504": { $ref: "#/components/responses/GatewayTimeout" }
+  /v1/images/generations:
+    post:
+      tags: [Inference]
+      summary: Create an image
+      operationId: createImage
+      parameters:
+        - $ref: "#/components/parameters/UserIdHeader"
+        - $ref: "#/components/parameters/EndUserHeader"
+        - $ref: "#/components/parameters/AgentIdHeader"
+        - name: x-ryu-slot-image-provider
+          in: header
+          required: false
+          schema: { type: string }
+        - name: x-ryu-slot-image-model
+          in: header
+          required: false
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ImageGenerationRequest"
+      responses:
+        "200":
+          description: Generated image(s).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ImageGenerationResponse"
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "405": { $ref: "#/components/responses/MethodNotAllowed" }
+        "413": { $ref: "#/components/responses/PayloadTooLarge" }
+        "415": { $ref: "#/components/responses/UnsupportedMediaType" }
+        "422": { $ref: "#/components/responses/UnprocessableEntity" }
+        "504": { $ref: "#/components/responses/GatewayTimeout" }
+  /v1/audio/speech:
+    post:
+      tags: [Inference]
+      summary: Generate Audio
+      operationId: createSpeech
+      parameters:
+        - $ref: "#/components/parameters/UserIdHeader"
+        - $ref: "#/components/parameters/EndUserHeader"
+        - $ref: "#/components/parameters/AgentIdHeader"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SpeechRequest"
+      responses:
+        "200":
+          description: >-
+            Normalized audio envelope. Providers that answer with audio bytes
+            (OpenAI) are returned inline as base64 under `b64_json`; job-based
+            providers (fal, replicate) return a hosted `url` instead.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SpeechResponse"
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "405": { $ref: "#/components/responses/MethodNotAllowed" }
+        "413": { $ref: "#/components/responses/PayloadTooLarge" }
+        "415": { $ref: "#/components/responses/UnsupportedMediaType" }
+        "422": { $ref: "#/components/responses/UnprocessableEntity" }
+        "504": { $ref: "#/components/responses/GatewayTimeout" }
+  /v1/audio/transcriptions:
+    post:
+      tags: [Inference]
+      summary: Voice Recognition transcription
+      operationId: createTranscription
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/TranscriptionRequest"
+      responses:
+        "200":
+          description: Transcribed text.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  text: { type: string }
+                required: [text]
+        "401": { $ref: "#/components/responses/Unauthorized" }
+  /v1/videos/generations:
+    post:
+      tags: [Inference]
+      summary: Submit a video generation job
+      description: >-
+        Job-based video generation (cloud runs can take minutes). Returns `202`
+        with `{ id, status }`; poll `GET /v1/videos/generations/{id}` for the
+        result. Honors `x-ryu-slot-video-provider` / `x-ryu-slot-video-model`
+        per-agent slot overrides. Reference media (first/last frames, a source
+        clip, an audio track) travels inline as `data:` URIs in model-specific
+        fields, so the request body may be up to 64 MiB. Every non-`data:` text
+        field of the body, not only `prompt`, passes the inbound DLP scan.
+      operationId: createVideoGeneration
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        "202":
+          description: Job accepted.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id: { type: string }
+                  status: { type: string }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "405": { $ref: "#/components/responses/MethodNotAllowed" }
+        "413": { $ref: "#/components/responses/PayloadTooLarge" }
+        "415": { $ref: "#/components/responses/UnsupportedMediaType" }
+        "422": { $ref: "#/components/responses/UnprocessableEntity" }
+        "504": { $ref: "#/components/responses/GatewayTimeout" }
+  /v1/videos/generations/{id}:
+    get:
+      tags: [Inference]
+      summary: Poll a video generation job
+      operationId: getVideoGeneration
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Current job status and, when succeeded, media payload.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+        "401": { $ref: "#/components/responses/Unauthorized" }
+  /v1/audio/generations:
+    post:
+      tags: [Inference]
+      summary: Submit an audio generation job
+      description: >-
+        Job-based music and sound-effect generation (cloud runs can take
+        minutes). Speech from text stays on `/v1/audio/speech`. Returns `202`
+        with `{ id, status }`; poll `GET /v1/audio/generations/{id}` for the
+        result. The body is `{ model, prompt, ... }` plus the model's own input
+        fields, which queue-based providers (Fal, Replicate) receive unchanged;
+        providers with a fixed video schema reject audio. Honors
+        `x-ryu-slot-audio-provider` / `x-ryu-slot-audio-model` per-agent slot
+        overrides. The body may be up to 64 MiB, and every non-`data:` text
+        field passes the inbound DLP scan.
+      operationId: createAudioGeneration
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [prompt]
+              properties:
+                model: { type: string }
+                prompt: { type: string }
+              additionalProperties: true
+      responses:
+        "202":
+          description: Job accepted.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id: { type: string }
+                  status: { type: string }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "413":
+          description: The request body exceeds the 64 MiB media-job limit.
+  /v1/audio/generations/{id}:
+    get:
+      tags: [Inference]
+      summary: Poll an audio generation job
+      operationId: getAudioGeneration
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: >-
+            Current job status and, when succeeded, `data: [{ url }]` with the
+            generated audio.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+        "401": { $ref: "#/components/responses/Unauthorized" }
+  /v1/modalities:
+    get:
+      tags: [Models]
+      summary: List configured modalities
+      operationId: listModalities
+      description: Requires a Gateway key when the Gateway enforces authentication.
+      responses:
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "200":
+          description: Configured modality → provider/model mapping.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  modalities:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        modality: { type: string, examples: [chat, image, tts, stt, video, audio] }
+                        provider: { type: string }
+                        model: { type: string }
+                        configured: { type: boolean }
+  /v1/models:
+    get:
+      tags: [Models]
+      summary: List available models
+      operationId: listModels
+      description: Requires a Gateway key when the Gateway enforces authentication.
+      responses:
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "200":
+          description: OpenAI-compatible model list.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ModelList"
+  /v1/tools/composio:
+    get:
+      tags: [Tools]
+      summary: List configured Composio actions
+      operationId: listComposioTools
+      responses:
+        "200":
+          description: Composio actions exposed as tools.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  object: { type: string, const: list }
+                  composio_enabled: { type: boolean }
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        name: { type: string }
+                        type: { type: string, const: composio }
+                        description: { type: string }
+  /v1/exec/tool:
+    post:
+      tags: [Tools]
+      summary: Governed direct tool or code execution
+      description: >-
+        The gateway governance front for direct tool/code execution (#475).
+        `kind` defaults to `tool` (forward to Core MCP `tools/call`); `execute`
+        and `resume` forward to Core's PTC sandbox endpoints. Requires a
+        trusted-forwarder or master API key; disabled when mesh mode is on.
+        `agent_id` is required for Core's fail-closed agent scoping.
+      operationId: execTool
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                kind:
+                  type: string
+                  enum: [tool, execute, resume]
+                  default: tool
+                tool_id: { type: string }
+                arguments: { type: object, additionalProperties: true }
+                code: { type: string }
+                execution_id: { type: string }
+                action: { type: string }
+                content: { type: object, additionalProperties: true }
+                request_id: { type: string }
+                agent_id: { type: string }
+                user_id: { type: string }
+                session_id: { type: string }
+                widget:
+                  type: object
+                  properties:
+                    instance_id: { type: string }
+                    origin_server: { type: string }
+      responses:
+        "200":
+          description: Execution outcome from Core (governed forward).
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  result: { type: object, additionalProperties: true }
+                  error: { type: string }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+  /v1/exec/scan:
+    post:
+      tags: [Tools]
+      summary: Pre-exec command governance scan
+      description: >-
+        COMMAND-SCAN: scans a `backend` + `command` pair against the hardline
+        blocklist and risk patterns. Returns `{ decision, reason, findings }`.
+        Trusted-forwarder or master key only. Mode follows `RYU_EXEC_APPROVAL_MODE`.
+      operationId: execScan
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                backend: { type: string }
+                command: { type: string }
+                session_id: { type: string }
+                agent: { type: string }
+              required: [backend, command]
+      responses:
+        "200":
+          description: Scan verdict.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  decision:
+                    type: string
+                    enum: [allow, deny, review]
+                  reason: { type: string }
+                  findings:
+                    type: array
+                    items: { type: object, additionalProperties: true }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+  /v1/evals:
+    get:
+      tags: [Evals]
+      summary: Get eval configuration and provider scores (admin)
+      description: Requires the master key (or a loopback peer in no-auth mode).
+      operationId: getEvals
+      responses:
+        "200":
+          description: Eval config plus rolling per-provider scores.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  enabled: { type: boolean }
+                  sample_rate: { type: number, format: float, minimum: 0, maximum: 1 }
+                  max_latency_ms: { type: integer }
+                  providers:
+                    type: object
+                    additionalProperties: { type: number, format: float }
+                  online:
+                    $ref: "#/components/schemas/OnlineEvalsSummary"
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+  /v1/evals/online:
+    get:
+      tags: [Evals]
+      summary: List online eval scores for production traffic (admin)
+      description: >-
+        Recent catalog-evaluator scores for sampled production requests, newest
+        first, linked to the request id and (when tracing is on) the W3C trace
+        id. Requires the master key (or a loopback peer in no-auth mode).
+      operationId: getOnlineEvals
+      parameters:
+        - { name: request_id, in: query, required: false, schema: { type: string } }
+        - { name: trace_id, in: query, required: false, schema: { type: string } }
+        - { name: tenant, in: query, required: false, schema: { type: string } }
+        - { name: agent_id, in: query, required: false, schema: { type: string } }
+        - { name: evaluator, in: query, required: false, schema: { type: string } }
+        - { name: failed_only, in: query, required: false, schema: { type: boolean } }
+        - { name: limit, in: query, required: false, schema: { type: integer, minimum: 1, maximum: 1000, default: 100 } }
+      responses:
+        "200":
+          description: Online eval configuration, counters, and matching records.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  online:
+                    $ref: "#/components/schemas/OnlineEvalsSummary"
+                  records:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/OnlineEvalRecord"
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+  /v1/evals/run:
+    post:
+      tags: [Evals]
+      summary: Run an eval dataset
+      description: Runs a dataset (or the built-in 3-case set when omitted) through the pipeline and scores each case.
+      operationId: runEvals
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EvalRunRequest"
+      responses:
+        "200":
+          description: Per-case scores and aggregate.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EvalRunResponse"
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "503": { $ref: "#/components/responses/ScreeningUnavailable" }
+  /v1/evals/score:
+    post:
+      tags: [Evals]
+      summary: Score a completed output
+      description: >-
+        Scores an already-completed production response without replaying its
+        provider call. Deterministic assertions run locally; model-graded
+        assertions may make an explicit judge call through the normal pipeline.
+      operationId: scoreOnline
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OnlineScoreRequest"
+      responses:
+        "200":
+          description: Online score and per-assertion results.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OnlineScoreResponse"
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "503": { $ref: "#/components/responses/ScreeningUnavailable" }
+  /v1/batches:
+    post:
+      tags: [Batch]
+      summary: Submit an OpenRouter batch
+      description: >-
+        Requires the Gateway master key. Submits directly to the configured
+        OpenRouter account; batch rows do not traverse the normal per-request
+        Gateway routing, budget, firewall, or wallet settlement pipeline. The
+        configured `data_collection: deny` and ZDR policies are enforced by
+        refusing the submission because the Batch API does not document those
+        request-level controls. A successful submission returns `202` while the
+        provider validates and queues the job. `requests` must be last on the
+        wire; the Gateway serializer preserves this ordering.
+      operationId: createOpenRouterBatch
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [endpoint, model, requests]
+              properties:
+                endpoint:
+                  type: string
+                  enum: [/v1/chat/completions, /v1/responses, /v1/messages, /v1/embeddings]
+                model: { type: string, maxLength: 256 }
+                completion_window: { type: string, enum: [24h] }
+                provider:
+                  type: object
+                  additionalProperties: false
+                  required: [only]
+                  properties:
+                    only:
+                      type: array
+                      minItems: 1
+                      items: { type: string, maxLength: 128 }
+                requests:
+                  type: array
+                  minItems: 1
+                  maxItems: 10000
+                  items:
+                    type: object
+                    additionalProperties: false
+                    required: [custom_id, body]
+                    properties:
+                      custom_id: { type: string, minLength: 1, maxLength: 256 }
+                      body:
+                        type: object
+                        additionalProperties: true
+      responses:
+        "202":
+          description: Batch accepted for asynchronous validation.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OpenRouterBatch"
+        "400":
+          description: Invalid batch request or unsupported OpenRouter request shape.
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "402": { $ref: "#/components/responses/PaymentRequired" }
+        "409":
+          description: Gateway privacy or provider options cannot be enforced for batch requests.
+        "429": { $ref: "#/components/responses/RateLimited" }
+        "502": { $ref: "#/components/responses/ProviderError" }
+    get:
+      tags: [Batch]
+      summary: List OpenRouter batches
+      description: >-
+        Requires the Gateway master key. Lists jobs in the configured
+        OpenRouter workspace using cursor pagination; repeat `status` to include
+        multiple values. Page size is limited to 100.
+      operationId: listOpenRouterBatches
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          schema: { type: integer, minimum: 1, maximum: 100 }
+        - name: after
+          in: query
+          required: false
+          description: Opaque cursor from the previous page's `last_id`.
+          schema: { type: string }
+        - name: status
+          in: query
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+              enum: [validating, in_progress, completed, failed, expired, cancelled]
+        - name: created_after
+          in: query
+          required: false
+          schema: { type: string, maxLength: 64 }
+        - name: created_before
+          in: query
+          required: false
+          schema: { type: string, maxLength: 64 }
+      responses:
+        "200":
+          description: Cursor-paginated batch metadata.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OpenRouterBatchPage"
+        "400": { description: Invalid list filter. }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "502": { $ref: "#/components/responses/ProviderError" }
+  /v1/batches/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: OpenRouter batch ID returned by the submit endpoint.
+        schema: { type: string, pattern: "^batch_[A-Za-z0-9_-]+$" }
+    get:
+      tags: [Batch]
+      summary: Poll an OpenRouter batch
+      description: >-
+        Requires the Gateway master key. Completed batches return their
+        per-request results inline, correlated by `custom_id`.
+      operationId: getOpenRouterBatch
+      responses:
+        "200":
+          description: Current batch state and, on completion, inline results.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OpenRouterBatch"
+        "400": { description: Invalid batch ID. }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { description: Batch not found in the OpenRouter workspace. }
+        "502": { $ref: "#/components/responses/ProviderError" }
+    delete:
+      tags: [Batch]
+      summary: Delete a terminal OpenRouter batch
+      description: >-
+        Requires the Gateway master key. Deletes the batch and requests
+        immediate removal of retained request and result artifacts. OpenRouter
+        rejects deletion while a batch is still running; this endpoint does not
+        cancel jobs.
+      operationId: deleteOpenRouterBatch
+      responses:
+        "200":
+          description: Batch record and applicable provider artifacts were deleted.
+          content:
+            application/json:
+              schema: { type: object, additionalProperties: true }
+        "400": { description: Invalid batch ID. }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { description: Batch not found in the OpenRouter workspace. }
+        "409": { description: Batch is still in progress. }
+        "502": { $ref: "#/components/responses/ProviderError" }
+  /v1/evaluators:
+    get:
+      tags: [Evals]
+      summary: Get the shared evaluator catalog
+      description: >-
+        Returns the full unified evaluator catalog — the one taxonomy that powers
+        both inline guardrails and offline evals. Each entry carries a
+        `capabilities` gate ({ inline, offline }) selecting which surface may offer
+        it and an `enforced` honesty flag (true only when wired to real execution).
+        The built-in seed table is merged with any user-authored `custom_evaluators`
+        from config (a custom entry overrides a built-in by `id` and reports
+        `builtin: false`). Read-only; not behind the admin gate.
+      operationId: getEvaluators
+      security: []
+      responses:
+        "200":
+          description: The shared evaluator catalog.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  evaluators:
+                    type: array
+                    items: { $ref: "#/components/schemas/Evaluator" }
+  /v1/grants/validate:
+    post:
+      tags: [Governance]
+      summary: Validate requested grants against policy
+      operationId: validateGrants
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                app_id: { type: string }
+                grants:
+                  type: array
+                  items: { type: string }
+              required: [grants]
+      responses:
+        "200":
+          description: Approved / denied grants.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  approved: { type: array, items: { type: string } }
+                  denied: { type: array, items: { type: string } }
+                  all_approved: { type: boolean }
+  /v1/manifests/sign:
+    post:
+      tags: [Governance]
+      summary: Sign a manifest (master key)
+      description: Privileged ed25519 signing oracle. The caller must present the Gateway master key as the bearer, from any peer and in any mode (every require_auth Gateway, the Core-managed Gateway and the hosted fleet); a Gateway with no master key cannot sign. Cross-site browser requests are refused.
+      operationId: signManifest
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                manifest: { type: object, additionalProperties: true }
+              required: [manifest]
+      responses:
+        "200":
+          description: Signature over the manifest.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  algorithm: { type: string, const: ed25519 }
+                  signature: { type: string, description: hex }
+                  public_key: { type: string, description: base64 }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+  /v1/manifests/verify:
+    post:
+      tags: [Governance]
+      summary: Verify a manifest signature
+      operationId: verifyManifest
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                manifest: { type: object, additionalProperties: true }
+                signature: { type: string }
+                public_key: { type: string }
+              required: [manifest, signature]
+      responses:
+        "200":
+          description: Verification result.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  valid: { type: boolean }
+  /v1/manifests/pubkey:
+    get:
+      tags: [Governance]
+      summary: Get the gateway's public verifying key
+      operationId: getManifestPubkey
+      security: []
+      responses:
+        "200":
+          description: The gateway ed25519 public key.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  algorithm: { type: string, const: ed25519 }
+                  public_key: { type: string, description: base64 }
+  /v1/audit:
+    get:
+      tags: [Audit]
+      summary: Query the usage audit log (admin)
+      description: Requires the master key. Returns recorded model calls with token and cost accounting.
+      operationId: queryAudit
+      parameters:
+        - { name: api_key, in: query, schema: { type: string } }
+        - { name: org_id, in: query, schema: { type: string } }
+        - { name: team_id, in: query, schema: { type: string } }
+        - { name: project_id, in: query, schema: { type: string } }
+        - { name: provider, in: query, schema: { type: string } }
+        - { name: model, in: query, schema: { type: string } }
+        - { name: errors_only, in: query, schema: { type: boolean } }
+        - { name: limit, in: query, schema: { type: integer } }
+        - { name: request_id, in: query, schema: { type: string } }
+        - { name: session_id, in: query, schema: { type: string } }
+        - { name: agent_id, in: query, schema: { type: string } }
+        - { name: event_type, in: query, schema: { type: string } }
+        - { name: widget_instance_id, in: query, schema: { type: string } }
+      responses:
+        "200":
+          description: Matching audit entries.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count: { type: integer }
+                  entries:
+                    type: array
+                    items: { $ref: "#/components/schemas/AuditEntry" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+  /v1/audit/prune:
+    post:
+      tags: [Audit]
+      summary: Apply local audit retention
+      description: Owner-only maintenance pass using the configured retention bounds.
+      operationId: pruneAudit
+      responses:
+        "200":
+          description: Number of rows removed and active bounds.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  kind: { type: string, const: retention }
+                  deleted_rows: { type: integer }
+                  retention_days: { type: integer, nullable: true }
+                  max_rows: { type: integer, nullable: true }
+        "403": { $ref: "#/components/responses/Forbidden" }
+  /v1/traffic:
+    get:
+      tags: [Audit]
+      summary: Stream live request traffic (admin)
+      description: |
+        Server-Sent Events. Each event is framed `event: traffic` with an `id:` line holding
+        the request id and a `data:` line holding one `TrafficEvent`. A new subscriber first
+        receives a bounded tail of recent events, then live ones; a comment line every 15
+        seconds keeps the connection open. One request can produce more than one event (a
+        guardrail verdict, then its completion or failure), so deduplicate on `seq`, never on
+        `request_id`.
+
+        Requires the master key, or a loopback peer when auth is disabled. The master key
+        sees every organization and may narrow the stream with `org`. Any other caller bound
+        to an organization only ever receives that organization's events and is refused
+        another one's. Events carry no prompt or response text, no full key and no end-user
+        hash.
+      operationId: streamTraffic
+      parameters:
+        - name: org
+          in: query
+          required: false
+          description: Only stream events whose `org_id` is this organization id.
+          schema: { type: string, minLength: 1, maxLength: 256 }
+      responses:
+        "200":
+          description: SSE stream of `TrafficEvent` objects (one per `data:` line).
+          content:
+            text/event-stream:
+              schema: { $ref: "#/components/schemas/TrafficEvent" }
+        "400":
+          description: The `org` parameter is not a valid organization id.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403":
+          description: >-
+            The caller may not read the feed, or asked for another organization's events
+            (`error.type` is `policy_violation`).
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+  /v1/exec/audit:
+    post:
+      tags: [Audit]
+      summary: Ingest a sandbox execution event
+      description: Trusted-forwarder or master key only.
+      operationId: ingestExecAudit
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                backend: { type: string }
+                command: { type: string }
+                duration_ms: { type: integer }
+                exit_code: { type: integer }
+                session_id: { type: string }
+                error: { type: string }
+              required: [backend, command, duration_ms, exit_code]
+      responses:
+        "200":
+          description: Acknowledged.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  exec_count: { type: integer }
+        "403": { $ref: "#/components/responses/Forbidden" }
+  /v1/exec/budget/check:
+    post:
+      tags: [Audit]
+      summary: Pre-run sandbox execution budget gate
+      operationId: checkExecBudget
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                backend: { type: string }
+                command: { type: string }
+              required: [backend, command]
+      responses:
+        "200":
+          description: Whether the command is allowed.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  allowed: { type: boolean }
+                  reason: { type: string }
+                  current_count: { type: integer }
+                  max_count: { type: integer }
+        "403": { $ref: "#/components/responses/Forbidden" }
+  /sandbox/tick:
+    post:
+      tags: [Audit]
+      summary: Meter one sandbox heartbeat
+      description: |
+        Core→Gateway control call (trusted-forwarder or master key only). Core
+        posts one tick per sandbox run per heartbeat interval; the gateway accrues
+        the marked-up cost, debits the org wallet, and returns a
+        continue/warn/kill verdict. Not part of the standard OpenAI-compatible
+        client surface — see [Loopback and internal routes](/docs/gateway/loopback-routes).
+      operationId: sandboxTick
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SandboxTickRequest"
+      responses:
+        "200":
+          description: Accrual snapshot and verdict for this tick.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SandboxTickResponse"
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+  /sandbox/quote:
+    post:
+      tags: [Audit]
+      summary: Quote a sandbox's hourly rate
+      description: |
+        Core→Gateway control call (trusted-forwarder or master key only). Core
+        asks what a Box or sandbox of a given shape would be billed per hour
+        before it starts one, so its credit pre-flight and the Gateway's ticks
+        read the same rate table: the per-size Box rates when those are
+        configured, otherwise the per-resource sandbox rates plus the sandbox
+        markup. Not part of the standard OpenAI-compatible client surface — see
+        [Loopback and internal routes](/docs/gateway/loopback-routes).
+      operationId: sandboxQuote
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SandboxQuoteRequest"
+      responses:
+        "200":
+          description: The hourly rate for this shape.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SandboxQuoteResponse"
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+  /sandbox/complete:
+    post:
+      tags: [Audit]
+      summary: Complete a sandbox run
+      description: |
+        Core→Gateway control call (trusted-forwarder or master key only). Core
+        sends it once it will never tick `run_id` again: after the final
+        accounting of a normal completion, or after a kill verdict's provider
+        teardown is confirmed. It removes the run's accrual and any sticky kill
+        state, and is idempotent: a repeated or unknown completion answers
+        `removed: false`. Not part of the standard OpenAI-compatible client
+        surface — see [Loopback and internal routes](/docs/gateway/loopback-routes).
+      operationId: sandboxComplete
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SandboxCompleteRequest"
+      responses:
+        "200":
+          description: Whether accrual state existed and was removed.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SandboxCompleteResponse"
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+  /v1/firewall/check:
+    post:
+      tags: [Security]
+      summary: Run firewall guardrails over caller text
+      description: >-
+        Scans `text` for the requested guardrail names (e.g. `pii`, `jailbreak`,
+        `toxicity`). Returns `{ allowed, reason }`. Read-only over caller data.
+        Requires a Gateway API key when auth is on. Used by Core workflow
+        Guardrails nodes.
+      operationId: firewallCheck
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                text: { type: string }
+                checks:
+                  type: array
+                  items: { type: string }
+      responses:
+        "200":
+          description: Verdict.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  allowed: { type: boolean }
+                  reason: { type: string, nullable: true }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+  /v1/metrics:
+    get:
+      tags: [Health]
+      summary: Gateway metrics snapshot (admin)
+      description: Requires the master key (or a loopback peer in no-auth mode).
+      operationId: getMetrics
+      responses:
+        "200":
+          description: Prometheus-style or JSON metrics (implementation-defined).
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+  /v1/concurrency:
+    get:
+      tags: [Health]
+      summary: Local-engine admission queue depth
+      description: >-
+        Layer-2 observability for the local engine admission queue. Requires
+        the master key (or a loopback peer in no-auth mode).
+      operationId: getConcurrency
+      responses:
+        "200":
+          description: Queue depth snapshot.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+  /v1/savings:
+    get:
+      tags: [Health]
+      summary: Community savings aggregate
+      description: |
+        Public, ungated anonymous aggregate of compression, cache, and Gateway
+        protection counters
+        (no per-provider maps, quota, or keys). Core's opt-out community-stats
+        beacon reads this endpoint. Alias: `GET /savings`.
+      operationId: getCommunitySavings
+      security: []
+      responses:
+        "200":
+          description: Aggregate savings counters.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CommunitySavings"
+  /v1/config:
+    get:
+      tags: [Config]
+      summary: Get gateway config (admin, redacted)
+      description: Requires the master key (or a loopback peer in no-auth mode). Secrets are redacted.
+      operationId: getConfig
+      responses:
+        "200":
+          description: Current redacted config.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GatewayConfig"
+        "403": { $ref: "#/components/responses/Forbidden" }
+    put:
+      tags: [Config]
+      summary: Update gateway config (admin)
+      description: |
+        Partial update. `providerAccountPolicies`, `providerAccountStrategies`, `firewall`, `budgets`, and `auth.api_keys` hot-swap;
+        `routing` and provider credentials require a restart.
+      operationId: putConfig
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GatewayConfig"
+      responses:
+        "200":
+          description: Applied.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  providerAccountsApplied: { type: boolean, description: Live account settings were applied. }
+        "403": { $ref: "#/components/responses/Forbidden" }
+  /v1/channels/pairing/approve:
+    post:
+      tags: [Channels]
+      summary: Approve a channel pairing code (admin)
+      description: |
+        Admits the direct-message sender who was given `code` by a channel bot under the default `pairing`
+        policy. Pending codes are never written to the Gateway log, so the owner relays the code the sender
+        received. Requires the master key (or a loopback peer in no-auth mode). A code is single use and
+        expires after 24 hours. The response names the platform only, never the sender id or number.
+      operationId: approveChannelPairing
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [code]
+              additionalProperties: false
+              properties:
+                code:
+                  type: string
+                  maxLength: 32
+                  description: The pairing code the sender received. Case and surrounding spaces are ignored.
+      responses:
+        "200":
+          description: The sender is paired and their next message is answered.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  approved: { type: boolean, const: true }
+                  platform: { type: string, description: The channel the sender messaged from. }
+        "400": { description: The code is empty or too long., content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } } }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { description: No pending sender holds that code (wrong, expired, or already approved)., content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } } }
+        "503": { description: Channels have not started on this Gateway., content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } } }
+  /health:
+    get:
+      tags: [Health]
+      summary: (Alias) Health check
+      description: Alias for `GET /v1/health`.
+      operationId: health_alias
+      security: []
+      responses:
+        "200":
+          description: Gateway status and configured providers.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, examples: [ok] }
+                  version: { type: string }
+                  providers: { type: array, items: { type: string } }
+                  auth_required: { type: boolean }
+  /metrics:
+    get:
+      tags: [Health]
+      summary: (Alias) Gateway metrics snapshot
+      description: Alias for `GET /v1/metrics`. Requires the master key (or a loopback peer in no-auth mode).
+      operationId: getMetrics_alias
+      responses:
+        "200":
+          description: Prometheus-style or JSON metrics (implementation-defined).
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+  /savings:
+    get:
+      tags: [Health]
+      summary: (Alias) Community savings aggregate
+      description: Alias for `GET /v1/savings` (compression, cache, and Gateway protection counters).
+      operationId: getCommunitySavings_alias
+      security: []
+      responses:
+        "200":
+          description: Aggregate savings counters.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+  /v1/health:
+    get:
+      tags: [Health]
+      summary: Health check
+      operationId: health
+      security: []
+      responses:
+        "200":
+          description: Gateway status and configured providers.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, examples: [ok] }
+                  version: { type: string }
+                  providers: { type: array, items: { type: string } }
+                  auth_required: { type: boolean }
+  /:
+    get:
+      tags: [Health]
+      summary: Describe this Gateway
+      description: |
+        Returns a short JSON description of the Gateway. When the operator sets
+        `RYU_PRODUCT_DASHBOARD_URL`, it answers a temporary redirect to that URL
+        instead.
+      operationId: getGatewayHome
+      security: []
+      responses:
+        "200":
+          description: Gateway name, version, and health path.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  name: { type: string, const: ryu-gateway }
+                  version: { type: string }
+                  health: { type: string, const: /health }
+                required: [name, version, health]
+        "307":
+          description: Redirect to the operator-configured dashboard.
+          headers:
+            Location:
+              description: The value of `RYU_PRODUCT_DASHBOARD_URL`.
+              schema: { type: string }
+  /.well-known/security.txt:
+    get:
+      tags: [Health]
+      summary: Security contact (RFC 9116)
+      description: The operator's security contact, from the Gateway's public-contact configuration.
+      operationId: getSecurityTxt
+      security: []
+      responses:
+        "200":
+          description: An RFC 9116 security.txt document.
+          content:
+            text/plain:
+              schema: { type: string }
+        "404": { $ref: "#/components/responses/NotFound" }
+  /v1/embeddings:
+    post:
+      tags: [Inference]
+      summary: Create embeddings
+      description: |
+        OpenAI-compatible embeddings, routed through the governed pipeline. The
+        Gateway resolves `model` through its routing table; callers never send an
+        upstream URL or key. `input` is a string or an array of at most 256
+        strings, each at most 16,384 bytes of UTF-8 (bytes, not characters: CJK
+        text takes about three bytes per character). A longer input answers 400.
+      operationId: createEmbedding
+      parameters:
+        - $ref: "#/components/parameters/UserIdHeader"
+        - $ref: "#/components/parameters/AgentIdHeader"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                model: { type: string, minLength: 1 }
+                input:
+                  oneOf:
+                    - { type: string, description: At most 16384 UTF-8 bytes. }
+                    - type: array
+                      maxItems: 256
+                      items: { type: string, description: At most 16384 UTF-8 bytes. }
+              required: [model, input]
+              additionalProperties: true
+      responses:
+        "200":
+          description: The provider's OpenAI-shaped embedding list.
+          headers:
+            x-request-id: { $ref: "#/components/headers/RequestId" }
+            x-provider:
+              description: Upstream provider that served the request.
+              schema: { type: string }
+            x-routed-model:
+              description: Model selected after routing.
+              schema: { type: string }
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                properties:
+                  object: { type: string, const: list }
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: true
+                      properties:
+                        object: { type: string, const: embedding }
+                        index: { type: integer }
+                        embedding: { type: array, items: { type: number } }
+                  model: { type: string }
+                  usage: { $ref: "#/components/schemas/Usage" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "405": { $ref: "#/components/responses/MethodNotAllowed" }
+        "413": { $ref: "#/components/responses/PayloadTooLarge" }
+        "415": { $ref: "#/components/responses/UnsupportedMediaType" }
+        "422": { $ref: "#/components/responses/UnprocessableEntity" }
+        "429": { $ref: "#/components/responses/RateLimited" }
+        "502": { $ref: "#/components/responses/ProviderError" }
+        "504": { $ref: "#/components/responses/GatewayTimeout" }
+  /v1/rerank:
+    post:
+      tags: [Inference]
+      summary: Rerank documents
+      description: |
+        Score `documents` against `query` through the governed pipeline. At most
+        128 documents; the query and each document are at most 32,768 bytes of
+        UTF-8 (bytes, not characters). A longer input answers 400.
+      operationId: createRerank
+      parameters:
+        - $ref: "#/components/parameters/UserIdHeader"
+        - $ref: "#/components/parameters/AgentIdHeader"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                model: { type: string, minLength: 1 }
+                query: { type: string, minLength: 1, description: At most 32768 UTF-8 bytes. }
+                documents:
+                  type: array
+                  maxItems: 128
+                  items: { type: string, description: At most 32768 UTF-8 bytes. }
+              required: [model, query, documents]
+              additionalProperties: true
+      responses:
+        "200":
+          description: The provider's rerank result.
+          headers:
+            x-request-id: { $ref: "#/components/headers/RequestId" }
+            x-provider:
+              description: Upstream provider that served the request.
+              schema: { type: string }
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "405": { $ref: "#/components/responses/MethodNotAllowed" }
+        "413": { $ref: "#/components/responses/PayloadTooLarge" }
+        "415": { $ref: "#/components/responses/UnsupportedMediaType" }
+        "422": { $ref: "#/components/responses/UnprocessableEntity" }
+        "429": { $ref: "#/components/responses/RateLimited" }
+        "502": { $ref: "#/components/responses/ProviderError" }
+        "504": { $ref: "#/components/responses/GatewayTimeout" }
+  /v1/messages:
+    post:
+      tags: [Inference]
+      summary: Create an Anthropic Messages response
+      description: |
+        Anthropic Messages dialect, translated into the governed pipeline and
+        answered in Anthropic's wire format, so Anthropic-dialect clients can use
+        the Gateway as their base URL. Set `stream: true` for Anthropic SSE events.
+        The key may be sent as `Authorization: Bearer <key>` or `x-api-key`.
+      operationId: createAnthropicMessage
+      security:
+        - bearerAuth: []
+        - anthropicApiKey: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                model: { type: string }
+                max_tokens: { type: integer }
+                system: {}
+                messages: { type: array, items: { type: object, additionalProperties: true } }
+                stream: { type: boolean, default: false }
+              required: [model, messages]
+              additionalProperties: true
+      responses:
+        "200":
+          description: An Anthropic `message` object, or an SSE stream when `stream` is true.
+          headers:
+            x-request-id: { $ref: "#/components/headers/RequestId" }
+            x-routed-model:
+              description: Model selected after routing.
+              schema: { type: string }
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+            text/event-stream:
+              schema:
+                type: string
+                description: Anthropic Messages stream events.
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "405": { $ref: "#/components/responses/MethodNotAllowed" }
+        "413": { $ref: "#/components/responses/PayloadTooLarge" }
+        "415": { $ref: "#/components/responses/UnsupportedMediaType" }
+        "422": { $ref: "#/components/responses/UnprocessableEntity" }
+        "429": { $ref: "#/components/responses/RateLimited" }
+        "502": { $ref: "#/components/responses/ProviderError" }
+        "504": { $ref: "#/components/responses/GatewayTimeout" }
+  /v1beta/models/{spec}:
+    post:
+      tags: [Inference]
+      summary: Gemini generateContent
+      description: |
+        Google Gemini dialect. `spec` is `<model>:generateContent` or
+        `<model>:streamGenerateContent` (an SSE stream). The model comes from the
+        path. The key may be sent as `Authorization: Bearer <key>`,
+        `x-goog-api-key`, or the `key` query parameter.
+      operationId: geminiGenerateContent
+      security:
+        - bearerAuth: []
+        - googApiKey: []
+        - googApiKeyQuery: []
+      parameters:
+        - name: spec
+          in: path
+          required: true
+          description: Model and operation, for example `gemini-2.0-flash:generateContent`.
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                contents: { type: array, items: { type: object, additionalProperties: true } }
+              additionalProperties: true
+      responses:
+        "200":
+          description: A Gemini `GenerateContentResponse`, or an SSE stream for `:streamGenerateContent`.
+          headers:
+            x-request-id: { $ref: "#/components/headers/RequestId" }
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+            text/event-stream:
+              schema:
+                type: string
+                description: Gemini streaming chunks.
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "405": { $ref: "#/components/responses/MethodNotAllowed" }
+        "413": { $ref: "#/components/responses/PayloadTooLarge" }
+        "415": { $ref: "#/components/responses/UnsupportedMediaType" }
+        "422": { $ref: "#/components/responses/UnprocessableEntity" }
+        "429": { $ref: "#/components/responses/RateLimited" }
+        "502": { $ref: "#/components/responses/ProviderError" }
+        "504": { $ref: "#/components/responses/GatewayTimeout" }
+  /v1/auth/status:
+    get:
+      tags: [Health]
+      summary: Check a credential
+      description: Verifies the bearer key without calling a provider or disclosing configuration.
+      operationId: getAuthStatus
+      responses:
+        "200":
+          description: The credential's role.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  authenticated:
+                    type: boolean
+                    description: Whether this Gateway requires authentication (`auth.require_auth`).
+                  admin: { type: boolean, description: True for the master (admin) key. }
+                  trustedForwarder: { type: boolean, description: True for a trusted-forwarder key (Core's relay). }
+                required: [authenticated, admin, trustedForwarder]
+        "401": { $ref: "#/components/responses/Unauthorized" }
+  /v1/auth/readiness:
+    get:
+      tags: [Health]
+      summary: Signed readiness proof
+      description: |
+        For a supervisor that holds the master key: returns the Gateway's
+        readiness (version, listener, auth mode, key fingerprints) signed with
+        HMAC-SHA256 under the master key. The request must carry a 64-hex-character
+        `nonce` and an `x-ryu-readiness-proof` header. The request proof and the
+        response signature use different MAC inputs, so a response cannot be
+        replayed as a request proof. A malformed nonce, a wrong proof, or a
+        Gateway without a master key answers 401 `invalid_api_key`; only a
+        missing `nonce` parameter is a 400.
+      operationId: getAuthReadiness
+      security: []
+      parameters:
+        - name: nonce
+          in: query
+          required: true
+          schema: { type: string, pattern: "^[0-9a-fA-F]{64}$" }
+        - name: x-ryu-readiness-proof
+          in: header
+          required: true
+          description: |
+            `hex(HMAC-SHA256(master_key, "ryu-gateway-readiness-request-v1:" + nonce))`,
+            64 hex characters.
+          schema: { type: string }
+      responses:
+        "200":
+          description: The signed readiness document.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  readiness:
+                    type: object
+                    properties:
+                      protocol: { type: string, const: ryu-gateway-readiness-v1 }
+                      version: { type: string }
+                      nonce: { type: string }
+                      listener: { type: string }
+                      require_auth: { type: boolean }
+                      inference_keys: { type: array, items: { type: string } }
+                      core_keys: { type: array, items: { type: string } }
+                  signature:
+                    type: string
+                    description: |
+                      `hex(HMAC-SHA256(master_key, json(readiness)))`, where
+                      `json(readiness)` is the compact JSON serialization of the
+                      `readiness` object with its fields in the order listed here.
+                required: [readiness, signature]
+        "400":
+          description: The `nonce` query parameter is missing (`invalid_request_error`).
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+  /v1/web/search:
+    post:
+      tags: [Web]
+      summary: Governed web search
+      description: |
+        A Ryu extension, not an OpenAI standard. Searches through a configured web
+        provider under the caller's policy and budget. Requires a key allowed the
+        web-search operation. Unknown body fields are rejected.
+      operationId: webSearch
+      parameters:
+        - $ref: "#/components/parameters/UserIdHeader"
+        - $ref: "#/components/parameters/AgentIdHeader"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                query: { type: string, minLength: 1, maxLength: 400, description: At most 50 words; no control characters. }
+                limit: { type: integer, minimum: 1, maximum: 10, default: 10 }
+                provider: { type: string, description: A provider id from `GET /v1/web/capabilities`. }
+              required: [query]
+      responses:
+        "200":
+          description: Search results.
+          headers:
+            x-request-id: { $ref: "#/components/headers/RequestId" }
+            x-provider:
+              description: Web provider that served the request.
+              schema: { type: string }
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                properties:
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        title: { type: string, nullable: true }
+                        url: { type: string }
+                        snippet: { type: string }
+                        score: { type: number, nullable: true }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "405": { $ref: "#/components/responses/MethodNotAllowed" }
+        "413": { $ref: "#/components/responses/PayloadTooLarge" }
+        "415": { $ref: "#/components/responses/UnsupportedMediaType" }
+        "422": { $ref: "#/components/responses/UnprocessableEntity" }
+        "429": { $ref: "#/components/responses/RateLimited" }
+        "502": { $ref: "#/components/responses/ProviderError" }
+        "504": { $ref: "#/components/responses/GatewayTimeout" }
+  /v1/web/fetch:
+    post:
+      tags: [Web]
+      summary: Governed web fetch
+      description: |
+        A Ryu extension. Fetches one public HTTP(S) URL through a configured web
+        provider and returns its content. Requires a key allowed the web-fetch
+        operation. Unknown body fields are rejected.
+      operationId: webFetch
+      parameters:
+        - $ref: "#/components/parameters/UserIdHeader"
+        - $ref: "#/components/parameters/AgentIdHeader"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                url: { type: string, format: uri, description: A public HTTP(S) URL. }
+                format: { type: string, enum: [markdown, text], default: markdown }
+                provider: { type: string, description: A provider id from `GET /v1/web/capabilities`. }
+              required: [url]
+      responses:
+        "200":
+          description: Fetched page content.
+          headers:
+            x-request-id: { $ref: "#/components/headers/RequestId" }
+            x-provider:
+              description: Web provider that served the request.
+              schema: { type: string }
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                properties:
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: true
+                      properties:
+                        url: { type: string }
+                        title: { type: string, nullable: true }
+                        content: { type: string }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "405": { $ref: "#/components/responses/MethodNotAllowed" }
+        "413": { $ref: "#/components/responses/PayloadTooLarge" }
+        "415": { $ref: "#/components/responses/UnsupportedMediaType" }
+        "422": { $ref: "#/components/responses/UnprocessableEntity" }
+        "429": { $ref: "#/components/responses/RateLimited" }
+        "502": { $ref: "#/components/responses/ProviderError" }
+        "504": { $ref: "#/components/responses/GatewayTimeout" }
+  /v1/web/capabilities:
+    get:
+      tags: [Web]
+      summary: Web providers available to this key
+      description: Lists the web providers the caller's key and policy may use, and whether each is ready.
+      operationId: getWebCapabilities
+      responses:
+        "200":
+          description: Web providers.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  providers:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id: { type: string }
+                        operations: { type: array, items: { type: string, enum: [search, fetch] } }
+                        formats: { type: array, items: { type: string, enum: [markdown, text] } }
+                        configured: { type: boolean }
+                        ready: { type: boolean }
+                        diagnostic: { type: string, nullable: true }
+                        auth_mode: { type: string, nullable: true, enum: [anonymous, accounts, null] }
+                        context_fields: { type: array, items: { type: string } }
+                        sunset: { type: string, nullable: true }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+  /v1/wallet:
+    get:
+      tags: [Audit]
+      summary: Wallet balance (admin)
+      description: Requires the master key, or a loopback caller when the Gateway runs without required auth. The managed wallet balance as of the last metered call.
+      operationId: getWallet
+      parameters:
+        - { name: org_id, in: query, schema: { type: string } }
+      responses:
+        "200":
+          description: Balance in micro-USD.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  org_id: { type: string, nullable: true }
+                  balance_micro_usd: { type: integer, nullable: true }
+                  empty: { type: boolean, nullable: true }
+                  accounting_unavailable: { type: boolean, nullable: true }
+        "401": { $ref: "#/components/responses/AdminUnauthorized" }
+  /v1/budget/spend:
+    get:
+      tags: [Audit]
+      summary: Live budget spend (admin)
+      description: Requires the master key, or a loopback caller when the Gateway runs without required auth. Per-user, per-agent and per-session charged spend with the configured caps, in micro-USD.
+      operationId: getBudgetSpend
+      parameters:
+        - { name: user_id, in: query, schema: { type: string } }
+        - { name: agent_id, in: query, schema: { type: string } }
+        - { name: session_id, in: query, schema: { type: string } }
+      responses:
+        "200":
+          description: Spend counters and limits.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  users: { type: object, additionalProperties: true }
+                  agents: { type: object, additionalProperties: true }
+                  sessions: { type: object, additionalProperties: true }
+                  currency: { type: string, const: USD }
+                  unit: { type: string, const: micro_usd }
+                  limits: { type: object, additionalProperties: true }
+        "401": { $ref: "#/components/responses/AdminUnauthorized" }
+  /v1/audit/usage:
+    get:
+      tags: [Audit]
+      summary: Usage rollup (admin)
+      description: Requires the master key, or a loopback caller when the Gateway runs without required auth, and an enabled audit log. Ranges may not exceed 400 days.
+      operationId: queryAuditUsage
+      parameters:
+        - { name: from, in: query, required: true, description: Inclusive RFC 3339 lower bound., schema: { type: string, format: date-time } }
+        - { name: until, in: query, required: true, description: Exclusive RFC 3339 upper bound., schema: { type: string, format: date-time } }
+        - { name: provider, in: query, schema: { type: string } }
+        - { name: model, in: query, schema: { type: string } }
+      responses:
+        "200":
+          description: Usage events rolled up by provider and model.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/AdminUnauthorized" }
+  /v1/doctor:
+    get:
+      tags: [Config]
+      summary: Configuration doctor (admin)
+      description: Requires the master key, or a loopback caller when the Gateway runs without required auth. A read-only report of configuration, security, and performance findings.
+      operationId: getDoctor
+      responses:
+        "200":
+          description: The doctor report.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+        "401": { $ref: "#/components/responses/AdminUnauthorized" }
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: API key issued by the gateway, or the master key for admin endpoints.
+    anthropicApiKey:
+      type: apiKey
+      in: header
+      name: x-api-key
+      description: The Gateway key, sent the way Anthropic clients send theirs (`/v1/messages` only).
+    googApiKey:
+      type: apiKey
+      in: header
+      name: x-goog-api-key
+      description: The Gateway key, sent the way Gemini clients send theirs (`/v1beta` only).
+    googApiKeyQuery:
+      type: apiKey
+      in: query
+      name: key
+      description: The Gateway key as a `key` query parameter (`/v1beta` only).
+  headers:
+    RequestId:
+      description: Gateway request id. Present on every response, errors included.
+      schema: { type: string }
+    RetryAfter:
+      description: |
+        Seconds to wait before retrying. On an inbound `rate_limit_exceeded` from
+        the per-key request or burst limit, it is the time until that limiter
+        admits another request. Other inbound refusals (organization limits,
+        token-per-minute limits) send no `Retry-After`; back off on your own. On
+        `provider_rate_limited` it is the provider's own value, when sent.
+      schema: { type: integer, minimum: 0 }
+    RateLimitPolicy:
+      description: |
+        IETF RateLimit-Policy (draft-ietf-httpapi-ratelimit-headers), for example
+        `"requests";q=60;w=60` (per-key requests per minute) or `"burst";q=10;w=1`.
+        Sent on an inbound `rate_limit_exceeded` when the per-key request or burst
+        limiter refused, on every inference route.
+      schema: { type: string }
+    RateLimit:
+      description: |
+        IETF RateLimit, for example `"requests";r=0;t=1`: nothing remains and `t`
+        seconds until the next request is admitted. Sent with RateLimit-Policy.
+      schema: { type: string }
+  parameters:
+    UserIdHeader:
+      name: x-ryu-user-id
+      in: header
+      required: false
+      description: Per-user budget identity.
+      schema: { type: string }
+    EndUserHeader:
+      name: x-ryu-end-user
+      in: header
+      required: false
+      description: |
+        Your own id for the end user behind this request: your internal id or a
+        hash of it, never an email or phone number. 1 to 128 printable ASCII
+        characters with no spaces, optionally prefixed `session:` for a
+        logged-out visitor. The Gateway hashes it per organization and never
+        stores or forwards the raw value. A malformed value is refused with
+        `400`, `code: "invalid_end_user"`.
+      schema: { type: string, minLength: 1, maxLength: 128, pattern: "^[!-~]+$" }
+    AgentIdHeader:
+      name: x-ryu-agent-id
+      in: header
+      required: false
+      description: Per-agent budget identity.
+      schema: { type: string }
+  responses:
+    Unauthorized:
+      description: Missing or invalid API key.
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    Forbidden:
+      description: Caller is not permitted (admin/loopback only).
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    AdminUnauthorized:
+      description: |
+        Not the master key (`invalid_api_key`). A loopback caller is admitted
+        without it only when the Gateway runs without required auth; a
+        cross-site browser request or a non-loopback `Host` is refused even then.
+      headers:
+        x-request-id: { $ref: "#/components/headers/RequestId" }
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    BadRequest:
+      description: |
+        The request is invalid (`invalid_request_error`), for example a body that
+        is not JSON.
+      headers:
+        x-request-id: { $ref: "#/components/headers/RequestId" }
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    NotFound:
+      description: No route or resource matches (`not_found`).
+      headers:
+        x-request-id: { $ref: "#/components/headers/RequestId" }
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    MethodNotAllowed:
+      description: The path exists but not for this method (`method_not_allowed`).
+      headers:
+        x-request-id: { $ref: "#/components/headers/RequestId" }
+        Allow:
+          description: The methods the path accepts.
+          schema: { type: string }
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    PayloadTooLarge:
+      description: The request body is over the route's size limit (`request_too_large`).
+      headers:
+        x-request-id: { $ref: "#/components/headers/RequestId" }
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    UnsupportedMediaType:
+      description: |
+        The body was sent without `Content-Type: application/json`
+        (`invalid_request_error`).
+      headers:
+        x-request-id: { $ref: "#/components/headers/RequestId" }
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    UnprocessableEntity:
+      description: |
+        The body is JSON of the wrong shape, such as a missing required field or a
+        field of the wrong type (`invalid_request_error`).
+      headers:
+        x-request-id: { $ref: "#/components/headers/RequestId" }
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    GatewayTimeout:
+      description: |
+        The server-wide request timeout (300 seconds) passed before the response
+        started (`gateway_timeout`). Use streaming for long generations.
+      headers:
+        x-request-id: { $ref: "#/components/headers/RequestId" }
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    RateLimited:
+      description: |
+        The Gateway's own inbound limit (`rate_limit_exceeded`) or the upstream
+        provider's limit (`provider_rate_limited`) was reached.
+      headers:
+        x-request-id: { $ref: "#/components/headers/RequestId" }
+        Retry-After: { $ref: "#/components/headers/RetryAfter" }
+        RateLimit-Policy: { $ref: "#/components/headers/RateLimitPolicy" }
+        RateLimit: { $ref: "#/components/headers/RateLimit" }
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    PaymentRequired:
+      description: OpenRouter account payment is required.
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    ProviderError:
+      description: |
+        The upstream provider failed (`provider_error`). Upstream 4xx and 5xx
+        answers both arrive as this 502; `error.upstream_status` carries the
+        provider's status when it is known.
+      headers:
+        x-request-id: { $ref: "#/components/headers/RequestId" }
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    ScreeningUnavailable:
+      description: >-
+        Request screening is temporarily unavailable (`error.code` is
+        `screening_unavailable`), for example a hosted Gateway that holds no
+        version of the Ryu platform policy. Retry after the `Retry-After` header.
+      headers:
+        Retry-After:
+          description: Seconds to wait before retrying.
+          schema: { type: integer }
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+  schemas:
+    ResponsesFunctionTool:
+      type: object
+      required: [type, name, parameters]
+      additionalProperties: false
+      properties:
+        type: { type: string, enum: [function] }
+        name: { type: string, minLength: 1, maxLength: 64 }
+        description: { type: string }
+        parameters: { type: object, additionalProperties: true }
+        strict: { type: boolean }
+    ResponsesCustomTool:
+      type: object
+      required: [type, name]
+      additionalProperties: false
+      properties:
+        type: { type: string, enum: [custom] }
+        name: { type: string, minLength: 1, maxLength: 64 }
+        description: { type: string }
+        format:
+          oneOf:
+            - type: object
+              required: [type]
+              additionalProperties: false
+              properties:
+                type: { type: string, enum: [text] }
+            - type: object
+              required: [type, syntax, definition]
+              additionalProperties: false
+              properties:
+                type: { type: string, enum: [grammar] }
+                syntax: { type: string, enum: [regex] }
+                definition: { type: string, minLength: 1, maxLength: 16384 }
+    ErrorCode:
+      description: |
+        Stable error code; `error.type` and `error.code` carry the same value.
+        The enum lists the codes the Gateway's shared error path and router emit.
+        Individual routes may add their own codes, so treat an unknown code as a
+        generic failure for its HTTP status.
+      anyOf:
+        - type: string
+          enum:
+            - invalid_request_error
+            - invalid_api_key
+            - policy_violation
+            - not_found
+            - model_not_found
+            - method_not_allowed
+            - config_revision_conflict
+            - request_too_large
+            - budget_exceeded
+            - insufficient_credits
+            - provider_payment_required
+            - rate_limit_exceeded
+            - provider_rate_limited
+            - internal_error
+            - provider_error
+            - circuit_open
+            - engine_overloaded
+            - credit_accounting_unavailable
+            - all_providers_unavailable
+            - gateway_timeout
+        - type: string
+    Error:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [message, type, code]
+          properties:
+            message: { type: string }
+            type: { $ref: "#/components/schemas/ErrorCode" }
+            code: { $ref: "#/components/schemas/ErrorCode" }
+            upstream_status:
+              type: integer
+              minimum: 400
+              maximum: 599
+              description: |
+                On `provider_error`, the HTTP status the upstream provider answered,
+                when known. The Gateway's own status stays 502.
+            retry_after:
+              type: integer
+              minimum: 0
+              description: Seconds to wait, on `rate_limit_exceeded` (per-key request or burst limit only) and `provider_rate_limited` (when the provider sent one).
+            reset_at:
+              type: integer
+              description: On `provider_rate_limited`, the provider's reset time in Unix seconds, when sent.
+        currentRevision:
+          description: On `config_revision_conflict`, the configuration revision to refresh from.
+    OpenRouterBatch:
+      type: object
+      additionalProperties: true
+      properties:
+        id: { type: string, pattern: "^batch_[A-Za-z0-9_-]+$" }
+        object: { type: string, const: batch }
+        endpoint:
+          type: string
+          enum: [/v1/chat/completions, /v1/responses, /v1/messages, /v1/embeddings]
+        model: { type: string }
+        completion_window: { type: string, enum: [24h] }
+        status:
+          type: string
+          enum: [validating, in_progress, finalizing, completed, failed, expired, cancelling, cancelled]
+        created_at: { type: integer, description: Unix timestamp in seconds. }
+        finalized_at: { type: integer, nullable: true, description: Unix timestamp in seconds. }
+        request_counts:
+          type: object
+          properties:
+            total: { type: integer }
+            completed: { type: integer }
+            failed: { type: integer }
+        usage:
+          type: object
+          nullable: true
+          properties:
+            prompt_tokens: { type: integer }
+            completion_tokens: { type: integer }
+            total_tokens: { type: integer }
+            cost: { type: number, format: double }
+            is_byok: { type: boolean }
+        results:
+          type: array
+          nullable: true
+          items:
+            type: object
+            additionalProperties: true
+            properties:
+              id: { type: string }
+              custom_id: { type: string }
+              response:
+                type: object
+                nullable: true
+                properties:
+                  status_code: { type: integer }
+                  request_id: { type: string }
+                  body: { type: object, additionalProperties: true }
+              error: { type: object, nullable: true, additionalProperties: true }
+        error: { type: object, nullable: true, additionalProperties: true }
+      required: [id, endpoint, model, status]
+    OpenRouterBatchPage:
+      type: object
+      properties:
+        object: { type: string, const: list }
+        data:
+          type: array
+          items: { $ref: "#/components/schemas/OpenRouterBatch" }
+        first_id: { type: string, nullable: true }
+        last_id: { type: string, nullable: true }
+        has_more: { type: boolean }
+      required: [data, has_more]
+    ChatMessage:
+      type: object
+      properties:
+        role: { type: string, enum: [system, user, assistant, tool] }
+        content: { type: string }
+      required: [role, content]
+    ChatCompletionRequest:
+      type: object
+      properties:
+        model: { type: string, description: Routed via the gateway model map. }
+        messages:
+          type: array
+          items: { $ref: "#/components/schemas/ChatMessage" }
+        stream: { type: boolean, default: false }
+        temperature: { type: number, format: float }
+        top_p: { type: number, format: float }
+        max_tokens: { type: integer }
+      required: [model, messages]
+      additionalProperties: true
+    ChatCompletionResponse:
+      type: object
+      properties:
+        id: { type: string }
+        object: { type: string, const: chat.completion }
+        created: { type: integer }
+        model: { type: string }
+        choices:
+          type: array
+          items:
+            type: object
+            properties:
+              index: { type: integer }
+              message: { $ref: "#/components/schemas/ChatMessage" }
+              finish_reason: { type: string }
+        usage: { $ref: "#/components/schemas/Usage" }
+    Usage:
+      type: object
+      properties:
+        prompt_tokens: { type: integer }
+        completion_tokens: { type: integer }
+        total_tokens: { type: integer }
+    ImageGenerationRequest:
+      type: object
+      properties:
+        model: { type: string }
+        prompt: { type: string }
+        "n": { type: integer, default: 1 }
+        size: { type: string, examples: ["1024x1024"] }
+        quality: { type: string, enum: [standard, hd] }
+        response_format: { type: string, enum: [url, b64_json] }
+      required: [prompt]
+      additionalProperties: true
+    ImageGenerationResponse:
+      type: object
+      properties:
+        created: { type: integer }
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              url: { type: string }
+              b64_json: { type: string }
+    SpeechRequest:
+      type: object
+      properties:
+        model: { type: string }
+        input: { type: string }
+        voice: { type: string, examples: [alloy] }
+        response_format: { type: string, enum: [mp3, opus, aac, flac, wav, pcm] }
+        speed: { type: number, format: float, minimum: 0.25, maximum: 4.0 }
+      required: [model, input]
+      additionalProperties: true
+    SpeechResponse:
+      type: object
+      properties:
+        object: { type: string, examples: [audio] }
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              b64_json:
+                type: string
+                description: Base64 audio bytes, when the provider returned audio inline.
+              url:
+                type: string
+                description: Hosted audio URL, when the provider is job-based.
+              content_type: { type: string, examples: [audio/wav] }
+        raw:
+          description: The provider's own payload when it answered in JSON.
+          nullable: true
+    TranscriptionRequest:
+      type: object
+      properties:
+        file: { type: string, format: binary }
+        model: { type: string }
+        language: { type: string }
+        prompt: { type: string }
+        response_format: { type: string, enum: [json, text, vtt, srt] }
+        temperature: { type: number, format: float }
+      required: [file, model]
+    ModelList:
+      type: object
+      properties:
+        object: { type: string, const: list }
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              id: { type: string }
+              object: { type: string, const: model }
+              created: { type: integer }
+              owned_by: { type: string }
+    EvalRunRequest:
+      type: object
+      properties:
+        model:
+          type: string
+          description: >-
+            Model under test. When omitted (and `models` is empty) the Gateway's
+            `[evals].default_model`, then its pinned chat model, is used; with neither
+            configured the request returns 400.
+        models: { type: array, items: { type: string }, maxItems: 32 }
+        agent_id: { type: string }
+        judge_model: { type: string }
+        system_prompt: { type: string }
+        system_messages:
+          type: array
+          items: { $ref: "#/components/schemas/EvalMessage" }
+        max_concurrency: { type: integer, minimum: 1, maximum: 32, default: 1 }
+        timeout_ms: { type: integer, minimum: 100, maximum: 120000 }
+        repeat: { type: integer, minimum: 1, maximum: 20, default: 1 }
+        cache: { type: boolean, default: false }
+        tags: { type: object, additionalProperties: { type: string } }
+        prefix: { type: string }
+        suffix: { type: string }
+        prompt_id: { type: string }
+        evaluators:
+          type: array
+          description: >-
+            Optional run-level registry evaluator ids (from GET /v1/evaluators) to
+            score every case against, in addition to any per-case `evaluators`.
+            Empty/omitted preserves the assertion-only behavior.
+          items: { type: string }
+        dataset:
+          type: array
+          items:
+            type: object
+            properties:
+              id: { type: string }
+              description: { type: string }
+              prompt: { type: string }
+              expected: { type: string }
+              context: { description: Optional reference/context payload for faithfulness and factuality checks. }
+              provider: { type: string }
+              providers: { type: array, items: { type: string } }
+              provider_output: { description: Precomputed provider output; skips the provider call. }
+              provider_output_provider: { type: string, description: Source label for a precomputed response. }
+              provider_output_policy_pass: { type: boolean, description: Whether the external provider response is known to have cleared policy checks. Omit when unmeasured. }
+              provider_latency_ms: { type: integer, minimum: 0, description: Externally measured operation turnaround in milliseconds. }
+              provider_cost_micro_usd: { type: integer, minimum: 0, description: Provider-reported row cost in micro-USD. }
+              vars: { type: object, additionalProperties: true }
+              metadata: { type: object, additionalProperties: true }
+              options: { type: object, additionalProperties: true }
+              assertions:
+                type: array
+                items: { $ref: "#/components/schemas/EvalAssertion" }
+              evaluators:
+                type: array
+                description: Per-case registry evaluator ids, unioned with the run-level set.
+                items: { type: string }
+            required: [prompt]
+    EvalMessage:
+      type: object
+      properties:
+        role: { type: string, enum: [system, user, assistant] }
+        content: { type: string }
+      required: [role, content]
+    EvalAssertion:
+      type: object
+      properties:
+        kind: { type: string }
+        value: { type: string }
+        rubric: { type: string }
+        assertions:
+          type: array
+          items: { $ref: "#/components/schemas/EvalAssertion" }
+        threshold: { type: number, format: float, minimum: 0, maximum: 1 }
+        weight: { type: number, format: float, minimum: 0 }
+        provider: { type: string }
+        transform: { type: string }
+        metric: { type: string }
+        config: { type: object, additionalProperties: true }
+        not: { type: boolean, description: Negate the assertion verdict and score. }
+      required: [kind]
+      additionalProperties: true
+    OnlineEvalsSummary:
+      type: object
+      properties:
+        enabled: { type: boolean }
+        running: { type: boolean }
+        sample_rate: { type: number, format: float, minimum: 0, maximum: 1 }
+        evaluators: { type: array, items: { type: string } }
+        judge_model: { type: string, nullable: true }
+        max_judge_calls_per_minute: { type: integer }
+        tenants: { type: array, items: { type: string } }
+        stats:
+          type: object
+          properties:
+            enqueued: { type: integer }
+            droppedQueueFull: { type: integer }
+            scored: { type: integer }
+            judgeBudgetSkipped: { type: integer }
+            stored: { type: integer }
+    OnlineEvalRecord:
+      type: object
+      required: [requestId, tenant, model, provider, scores, pass, enqueuedAtMs, scoredAtMs]
+      properties:
+        requestId: { type: string }
+        traceId: { type: string }
+        tenant: { type: string }
+        agentId: { type: string }
+        model: { type: string }
+        provider: { type: string }
+        judgeModel: { type: string }
+        pass: { type: boolean, description: Every executed evaluator passed. }
+        enqueuedAtMs: { type: integer }
+        scoredAtMs: { type: integer }
+        scores:
+          type: array
+          items:
+            type: object
+            properties:
+              id: { type: string }
+              category: { type: string }
+              score: { type: number, format: float }
+              pass: { type: boolean }
+              detail: { type: string }
+              executed: { type: boolean }
+    OnlineScoreRequest:
+      type: object
+      properties:
+        id: { type: string }
+        description: { type: string }
+        agent_id: { type: string }
+        model:
+          type: string
+          description: >-
+            Model that produced `response`. When omitted the Gateway's configured
+            default model is used. With none configured, deterministic-only scoring
+            records the model as `unspecified`, and a request with a model-graded
+            assertion or LLM-judge evaluator returns 400.
+        judge_model:
+          type: string
+          description: >-
+            Judge for model-graded checks. Defaults to `[evals].judge_model`, then
+            `model`. An evaluator's own `offline.judgeModel` still takes precedence.
+        prompt: { type: string }
+        response: { description: Completed response or an OpenAI-shaped provider payload. }
+        expected: { type: string }
+        context: { description: Optional reference/context payload for faithfulness and factuality checks. }
+        vars: { type: object, additionalProperties: true }
+        metadata: { type: object, additionalProperties: true }
+        latency_ms: { type: integer, minimum: 0 }
+        policy_pass: { type: boolean, description: Optional externally measured policy result; omitted means unmeasured. }
+        cost_micro_usd: { type: integer, minimum: 0 }
+        threshold: { type: number, format: float, minimum: 0, maximum: 1 }
+        assertions:
+          type: array
+          items: { $ref: "#/components/schemas/EvalAssertion" }
+        evaluators: { type: array, items: { type: string } }
+      required: [response]
+    OnlineScoreResponse:
+      type: object
+      properties:
+        kind: { type: string, const: online_score }
+        scored_at: { type: string, format: date-time }
+        score: { type: object, additionalProperties: true }
+      required: [kind, scored_at, score]
+    Evaluator:
+      type: object
+      description: >-
+        One entry in the shared evaluator catalog. Struct fields serialize
+        camelCase; the `impl` union is tagged on `kind`; category/target are
+        snake_case enums.
+      properties:
+        id: { type: string, description: Stable snake_case id, e.g. "pii_leakage". }
+        name: { type: string }
+        description: { type: string }
+        category:
+          type: string
+          enum: [security, safety, quality, conversation, trajectory, image, voice, custom]
+        target:
+          type: string
+          enum: [input, output, conversation, trajectory, image, audio]
+        capabilities:
+          type: object
+          description: First-class gate selecting which surfaces may offer this evaluator.
+          properties:
+            inline: { type: boolean }
+            offline: { type: boolean }
+        impl:
+          type: object
+          description: How the judgment is computed (internally tagged on `kind`).
+          properties:
+            kind:
+              type: string
+              enum: [regex, heuristic, llm_judge, code, builtin]
+        inline:
+          type: object
+          nullable: true
+          description: Inline-guardrail config; present only when capabilities.inline.
+          properties:
+            action:
+              type: string
+              enum: [block, warn_and_continue, sanitize]
+        offline:
+          type: object
+          nullable: true
+          description: Offline-eval config; present only when capabilities.offline.
+          properties:
+            threshold: { type: number, format: float, minimum: 0, maximum: 1 }
+            judgeModel: { type: string, nullable: true }
+        builtin: { type: boolean, description: false for user-authored evaluators. }
+        enforced:
+          type: boolean
+          description: Honesty flag; true only when wired to real execution.
+        higherIsBetter:
+          type: boolean
+          description: Score polarity; false ⇒ a higher score is worse (negative-signal judge).
+      required: [id, name, category, target, capabilities, impl, builtin, enforced]
+    EvalRunResponse:
+      type: object
+      properties:
+        cases:
+          type: array
+          items:
+            type: object
+            properties:
+              prompt: { type: string }
+              latency_ms: { type: integer }
+              latency_available: { type: boolean, description: False when the source did not measure this latency. }
+              token_efficiency: { type: number, format: float }
+              policy_pass: { type: boolean }
+              policy_available: { type: boolean, description: False when Gateway did not evaluate policy for a precomputed response. }
+              substring_match: { type: boolean }
+              score: { type: number, format: float }
+        aggregate:
+          type: object
+          properties:
+            avg_latency_ms: { type: number, format: float }
+            latency_available_cases: { type: integer }
+            avg_token_efficiency: { type: number, format: float }
+            policy_pass_rate: { type: number, format: float }
+            policy_available_cases: { type: integer }
+            avg_score: { type: number, format: float }
+    AuditEntry:
+      type: object
+      properties:
+        id: { type: string }
+        timestamp: { type: string, format: date-time }
+        api_key: { type: string }
+        request_id: { type: string }
+        session_id: { type: string }
+        org_id: { type: string }
+        team_id: { type: string }
+        project_id: { type: string }
+        model: { type: string }
+        provider: { type: string }
+        input_tokens: { type: integer }
+        output_tokens: { type: integer }
+        cost_micro_usd: { type: integer, nullable: true }
+        event_type: { type: string }
+        feature: { type: string, nullable: true }
+        managed_inference: { type: boolean }
+        widget_instance_id: { type: string, nullable: true }
+        error: { type: string }
+    TrafficVerdict:
+      type: object
+      description: >-
+        What the deciding layer did with the request. Names layers, detectors and catalogue
+        codes only, never matched text, scores or segment paths.
+      required: [decided_by, action, detector_ids, evaluator_ids, code]
+      properties:
+        decided_by:
+          type: string
+          enum: [platform_floor, node, org, agent, evaluator, inspector, rate_limit, budget, standing, none]
+          description: The layer whose decision this is. `none` when no policy layer acted.
+        action:
+          type: string
+          enum: [allow, warn, sanitize, block]
+        detector_ids:
+          type: array
+          items: { type: string }
+          description: >-
+            Detection kinds, the organization's own pattern names or inspector categories. A
+            Ryu platform policy decision names only the detection kind.
+        evaluator_ids:
+          type: array
+          items: { type: string }
+        code:
+          type: string
+          nullable: true
+          description: The error catalogue `code` the client received, when the request failed.
+    TrafficEvent:
+      type: object
+      description: >-
+        One live traffic row. Fields after `ts` were added for the live policy map; older
+        clients can ignore them.
+      properties:
+        request_id: { type: string }
+        api_key: { type: string, description: The key prefix followed by `***`, never the full key. }
+        provider: { type: string }
+        model: { type: string, nullable: true }
+        input_tokens: { type: integer }
+        output_tokens: { type: integer }
+        cache_hit: { type: boolean }
+        latency_ms: { type: integer }
+        error:
+          type: string
+          nullable: true
+          description: >-
+            A redacted failure reason. For a decision by the Ryu platform policy, the
+            inspector or an evaluator it is a fixed summary such as `blocked by inspector`.
+        event_type: { type: string }
+        session_id: { type: string, nullable: true }
+        user_id: { type: string, nullable: true }
+        agent_id: { type: string, nullable: true }
+        managed_inference: { type: boolean }
+        provider_cost_micro_usd: { type: integer, nullable: true }
+        ts: { type: string, format: date-time }
+        seq:
+          type: integer
+          format: int64
+          description: Strictly increasing per Gateway process. Deduplicate on this.
+        kind:
+          type: string
+          enum: [completion, verdict, cache_hit, failure]
+        route:
+          type: string
+          nullable: true
+          description: The matched route template, for example `/v1/chat/completions`.
+        custody:
+          type: string
+          enum: [fleet, managed_node, self_hosted]
+        credential_origin:
+          type: string
+          enum: [ryu_vault, ryu_fallback, node_operator, caller_subscription, local, unknown]
+          description: >-
+            Whose credential the request spent. `unknown` when the request was refused before
+            a provider was chosen.
+        org_id: { type: string, nullable: true }
+        team_ids:
+          type: array
+          nullable: true
+          items: { type: string }
+        credential_id_prefix:
+          type: string
+          nullable: true
+          description: The first characters of the hosted credential id, followed by `***`.
+        status:
+          type: integer
+          nullable: true
+          description: HTTP status returned to the client. Null on a `verdict` row.
+        verdict: { $ref: "#/components/schemas/TrafficVerdict" }
+        stage_latency_ms:
+          type: object
+          properties:
+            screen:
+              type: integer
+              nullable: true
+              description: Milliseconds spent in the checks before dispatch.
+            upstream:
+              type: integer
+              nullable: true
+              description: Milliseconds from the end of screening to the end of the request.
+    CommunitySavings:
+      type: object
+      description: Anonymous aggregate compression, cache, and Gateway protection counters.
+      properties:
+        requests: { type: integer, format: int64 }
+        api_calls_protected: { type: integer, format: int64 }
+        malicious_calls_blocked: { type: integer, format: int64 }
+        input_tokens: { type: integer, format: int64 }
+        output_tokens: { type: integer, format: int64 }
+        tokens_saved: { type: integer, format: int64 }
+        cache_hit_rate: { type: number, format: double }
+      required: [requests, api_calls_protected, malicious_calls_blocked, input_tokens, output_tokens, tokens_saved, cache_hit_rate]
+    SandboxSpec:
+      type: object
+      description: Provisioned sandbox resources being billed for this tick.
+      properties:
+        vcpu: { type: integer, minimum: 0 }
+        mem_gib: { type: integer, minimum: 0 }
+        storage_gib: { type: integer, minimum: 0 }
+        gpu:
+          type: string
+          enum: [none, h200, h100, rtx_pro_6000, rtx_5090, rtx_4090]
+        gpu_count: { type: integer, minimum: 0, default: 0 }
+        os:
+          type: string
+          enum: [linux, windows]
+      required: [vcpu, mem_gib, storage_gib, gpu, os]
+    SandboxSize:
+      type: string
+      description: The Box size a session or cloud-task Box was created with.
+      enum: [small, default, large]
+    SandboxQuoteRequest:
+      type: object
+      properties:
+        spec: { $ref: "#/components/schemas/SandboxSpec" }
+        size:
+          oneOf:
+            - $ref: "#/components/schemas/SandboxSize"
+            - type: "null"
+          description: The Box size, for a session or cloud-task Box. When set and size rates are configured, the quote is that size's hourly rate.
+      required: [spec]
+    SandboxCompleteRequest:
+      type: object
+      properties:
+        run_id: { type: string, description: Sandbox run identifier whose accrual state Core no longer needs. }
+      required: [run_id]
+    SandboxCompleteResponse:
+      type: object
+      properties:
+        run_id: { type: string, description: Echo of the completed run. }
+        removed:
+          type: boolean
+          description: Whether accrual state existed and was removed. `false` on a repeated or unknown completion.
+      required: [run_id, removed]
+    SandboxQuoteResponse:
+      type: object
+      properties:
+        rate_micro_usd_per_hour:
+          type: integer
+          minimum: 0
+          description: The customer rate a run of this shape would be billed at, in micro-USD per hour, from this Gateway's own rate table.
+      required: [rate_micro_usd_per_hour]
+    SandboxTickRequest:
+      type: object
+      properties:
+        run_id: { type: string, description: Sandbox run identifier; the accrual key. }
+        org_id:
+          type: string
+          nullable: true
+          description: Org whose wallet is debited. Omitted when Core cannot resolve an org.
+        spec: { $ref: "#/components/schemas/SandboxSpec" }
+        elapsed_seconds_delta:
+          type: integer
+          minimum: 0
+          description: Seconds elapsed since Core's previous tick for this run.
+        tick_index:
+          type: integer
+          minimum: 0
+          description: Monotonic tick counter from 0; guards against double-accrual on retry.
+        per_run_budget_micro_usd:
+          type: integer
+          minimum: 0
+          default: 0
+          description: Per-run execution cap in micro-USD. `0` means no cap.
+      required: [run_id, spec, elapsed_seconds_delta, tick_index]
+    SandboxVerdict:
+      type: string
+      enum: [continue, warn, kill_budget, kill_balance]
+    SandboxTickResponse:
+      type: object
+      properties:
+        accrued_micro_usd:
+          type: integer
+          description: Cumulative billed (marked-up) micro-USD accrued for this run.
+        balance_micro_usd:
+          type: integer
+          nullable: true
+          description: Authoritative wallet balance after the debit, or null when unknown.
+        verdict: { $ref: "#/components/schemas/SandboxVerdict" }
+      required: [accrued_micro_usd, verdict]
+    ProviderPoolStrategy:
+      type: string
+      description: Canonical provider/model pool policy; weighted_round_robin is retained for compatibility. Use the node's advertised capabilities.
+      enum: [priority, weighted, round_robin, context_relay, fill_first, p2c, random, least_used, cost_optimized, reset_aware, reset_window, headroom, strict_random, auto, lkgp, context_optimized, cache_optimized, fusion, pipeline, quota_weighted, weighted_round_robin]
+    PoolExecutionConfig:
+      type: object
+      additionalProperties: false
+      description: Bounded fusion/pipeline execution. Total timeout must be at least the per-target timeout; at most eight targets may be enabled.
+      properties:
+        leg_timeout_ms: { type: integer, minimum: 1, maximum: 30000, default: 30000 }
+        total_timeout_ms: { type: integer, minimum: 1, maximum: 120000, default: 120000 }
+        max_output_bytes: { type: integer, minimum: 1, maximum: 262144, default: 262144 }
+        quorum: { type: integer, minimum: 1, maximum: 8, default: 2 }
+        grace_ms: { type: integer, minimum: 0, maximum: 5000, default: 250 }
+    AutoScoringWeights:
+      type: object
+      nullable: true
+      additionalProperties: false
+      description: Optional Auto ranking coefficients. Absent config uses the pinned full defaults; omitted fields in a partial object are zero. All supplied values must be finite, 0–1000, with a positive total.
+      properties:
+        quota: { type: number, minimum: 0, maximum: 1000 }
+        health: { type: number, minimum: 0, maximum: 1000 }
+        cost_inv: { type: number, minimum: 0, maximum: 1000 }
+        latency_inv: { type: number, minimum: 0, maximum: 1000 }
+        task_fit: { type: number, minimum: 0, maximum: 1000 }
+        stability: { type: number, minimum: 0, maximum: 1000 }
+        tier_priority: { type: number, minimum: 0, maximum: 1000 }
+        tier_affinity: { type: number, minimum: 0, maximum: 1000 }
+        specificity_match: { type: number, minimum: 0, maximum: 1000 }
+        context_affinity: { type: number, minimum: 0, maximum: 1000 }
+        cache_affinity: { type: number, minimum: 0, maximum: 1000 }
+        session_availability: { type: number, minimum: 0, maximum: 1000 }
+        reset_window_affinity: { type: number, minimum: 0, maximum: 1000 }
+        connection_density: { type: number, minimum: 0, maximum: 1000 }
+        quality: { type: number, minimum: 0, maximum: 1000 }
+        reliability: { type: number, minimum: 0, maximum: 1000 }
+    ProviderPoolConfig:
+      type: object
+      required: [members]
+      properties:
+        strategy: { $ref: '#/components/schemas/ProviderPoolStrategy' }
+        sticky_limit: { type: integer, minimum: 1, maximum: 100, default: 1 }
+        wait_for_cooldown_ms: { type: integer, minimum: 0, maximum: 30000, default: 0 }
+        execution: { $ref: '#/components/schemas/PoolExecutionConfig' }
+        auto_weights: { $ref: '#/components/schemas/AutoScoringWeights' }
+        judge:
+          type: object
+          nullable: true
+          additionalProperties: false
+          required: [provider, model]
+          description: Required for fusion. A configured concrete chat target; pool aliases are not permitted.
+          properties:
+            provider: { type: string }
+            model: { type: string, minLength: 1, maxLength: 256 }
+        members:
+          type: array
+          minItems: 1
+          maxItems: 32
+          items:
+            type: object
+            required: [provider, model]
+            properties:
+              provider: { type: string }
+              model: { type: string }
+              priority: { type: integer, minimum: 0, maximum: 255, default: 0 }
+              weight: { type: integer, minimum: 0, maximum: 65535, default: 1 }
+              enabled: { type: boolean, default: true }
+              last_resort: { type: boolean, default: false }
+              context_tokens: { type: integer, nullable: true, minimum: 1, maximum: 2000000 }
+    GatewayConfig:
+      type: object
+      description: Firewall, budgets, providers, auth, and routing config. Secrets are redacted on read.
+      properties:
+        strategyCapabilities:
+          type: object
+          readOnly: true
+          required: [chat, web]
+          description: Supported strategy wires for chat and web. Older nodes omit this field. Web excludes chat-only execution/context/cache policies.
+          properties:
+            chat:
+              type: array
+              items: { $ref: '#/components/schemas/ProviderPoolStrategy' }
+            web:
+              type: array
+              items: { $ref: '#/components/schemas/ProviderPoolStrategy' }
+        providerAccountPolicies:
+          type: object
+          writeOnly: true
+          description: Merge complete account settings by provider and opaque account ID; 1–128 accounts per update. Applied live without a restart.
+          additionalProperties:
+            type: object
+            additionalProperties:
+              type: object
+              required: [name, enabled, priority]
+              additionalProperties: false
+              properties:
+                name: { type: string, minLength: 1, maxLength: 80 }
+                enabled: { type: boolean }
+                priority: { type: integer, minimum: 0, maximum: 65535 }
+        providerAccountStrategies:
+          type: object
+          writeOnly: true
+          description: Merge new-session API-key account routing by provider. Supported keys are openai, anthropic, and openrouter; applies live after provider reload.
+          additionalProperties:
+            type: string
+            enum: [round_robin, quota_first, fill_first, reset_first]
+        firewall: { type: object, additionalProperties: true }
+        budgets: { type: object, additionalProperties: true }
+        providers: { type: object, additionalProperties: true }
+        auth:
+          type: object
+          properties:
+            require_auth: { type: boolean }
+            api_keys:
+              type: array
+              items:
+                type: object
+                properties:
+                  name: { type: string }
+                  key: { type: string }
+                  trusted_forwarder: { type: boolean }
+                  org_id: { type: string }
+                  team_id: { type: string }
+        routing:
+          type: object
+          properties:
+            provider_pools:
+              type: object
+              additionalProperties: { $ref: '#/components/schemas/ProviderPoolConfig' }
+            default_provider: { type: string }
+            model_map: { type: object, additionalProperties: true }
+            fallback_chain:
+              type: array
+              items: { type: string }

@@ -1,0 +1,42 @@
+{
+  "id": "@ryu/sandbox",
+  "name": "Ephemeral Sandbox",
+  "version": "1.0.0",
+  "description": "Runs agent-executed code in a throwaway sandbox rather than directly on your machine, so a command that goes wrong takes the sandbox with it and nothing else.",
+  "tagline": "Run agent code somewhere it cannot hurt you",
+  "keywords": ["sandbox", "security", "isolation", "execution"],
+  "category": "Sandbox",
+  "engines": {
+    "ryu": ">=0.0.1"
+  },
+  "runnables": [
+    {
+      "id": "policy-sandbox",
+      "name": "Wasmtime ephemeral sandbox (sandbox_exec)",
+      "kind": "policy",
+      "config": {
+        "policy_type": "sandbox",
+        "definition": {
+          "backend": "wasmtime",
+          "note": "On/off switch for the Core-local wasmtime sandbox tool (sandbox.sandbox_exec). Enabling this plugin makes the sandbox tool available; disabling marks it unavailable. Core-local — no gateway restart."
+        }
+      }
+    }
+  ],
+  "contributes": {
+    "policies": [
+      {
+        "id": "policy-sandbox",
+        "title": "Ephemeral Sandbox"
+      }
+    ]
+  },
+  "permission_grants": [],
+  "permission_levels": [
+    {
+      "id": "tool.exec",
+      "label": "Can run code",
+      "description": "Execute commands and code inside an ephemeral sandbox on this node."
+    }
+  ]
+}

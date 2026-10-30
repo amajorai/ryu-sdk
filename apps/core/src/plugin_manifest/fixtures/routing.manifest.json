@@ -1,0 +1,47 @@
+{
+  "id": "@ryu/routing",
+  "name": "Smart Model Routing",
+  "version": "1.0.0",
+  "description": "Picks the model for each turn instead of sending everything to one: cheap work goes to a cheap model and hard work goes to a strong one, so quality holds without paying top-tier rates for every message.",
+  "tagline": "Send each turn to the model that fits it",
+  "keywords": ["routing", "models", "cost", "policy"],
+  "category": "Core",
+  "engines": {
+    "ryu": ">=0.0.1"
+  },
+  "runnables": [
+    {
+      "id": "policy-smart-routing",
+      "name": "Smart (classifier) model routing",
+      "kind": "policy",
+      "config": {
+        "policy_type": "routing",
+        "definition": {
+          "feature": "smart_routing",
+          "note": "On/off switch over the gateway's classifier-driven smart routing. The model_map and ordered rules stay owned by GET/PUT /v1/config; enabling this plugin forces smart_routing.enabled on at the next gateway restart."
+        }
+      }
+    }
+  ],
+  "contributes": {
+    "policies": [
+      {
+        "id": "policy-smart-routing",
+        "title": "Smart Routing"
+      }
+    ]
+  },
+  "permission_grants": [],
+  "permission_levels": [
+    {
+      "id": "gateway.view",
+      "label": "Can view routing",
+      "description": "See which model each kind of request is routed to."
+    },
+    {
+      "id": "gateway.configure",
+      "label": "Can change routing",
+      "description": "Change which models requests are routed to, affecting cost and quality for everyone."
+    }
+  ]
+}

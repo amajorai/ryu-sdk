@@ -1,0 +1,217 @@
+{
+  "tags": ["capture", "memory"],
+  "author": { "name": "Ryu", "url": "https://ryuhq.com" },
+  "repository": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/shadow",
+  "homepage": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/shadow",
+  "privacyPolicyUrl": "https://ryuhq.com/privacy",
+  "termsOfServiceUrl": "https://ryuhq.com/terms",
+  "id": "@ryu/shadow",
+  "name": "Shadow",
+  "version": "0.1.14",
+  "stability": "stable",
+  "description": "Search everything Shadow has captured (screen text, audio transcripts, input) and summarize recent activity. Exposed as declarative HTTP tools that reach the device-local Shadow sidecar through Core's authenticated `/api/shadow/*` proxy (which injects Shadow's bearer token).",
+  "icon": "record",
+  "iconDither": { "from": 296, "to": "transparent", "direction": "down" },
+  "tagline": "Recall what you have seen and done",
+  "keywords": ["capture", "memory"],
+  "category": "Knowledge & Memory",
+  "surfaces": {
+    "gateway": { "support": "none" },
+    "core": { "support": "full" },
+    "desktop": { "support": "full" },
+    "island": { "support": "full" },
+    "mobile": { "support": "full" },
+    "extension": { "support": "full" },
+    "web": { "support": "full" },
+    "cli": { "support": "full" }
+  },
+  "engines": { "ryu": ">=0.1.0" },
+  "runnables": [
+    {
+      "id": "tool-shadow-search",
+      "name": "Shadow Search",
+      "kind": "tool",
+      "config": {
+        "slug": "shadow.search",
+        "backend": "http",
+        "method": "GET",
+        "url": "core:/api/shadow/search",
+        "secret_headers": {
+          "Authorization": "Bearer env:RYU_TOKEN"
+        },
+        "fail_open": true,
+        "unwrap_body": true,
+        "description": "Full-text search over everything Shadow has captured (screen text, audio transcripts, input). Returns matching timeline entries. Shadow capture is cross-platform (Windows, macOS, Linux); when the sidecar is not running the tool reports itself unavailable.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "q": {
+              "type": "string",
+              "description": "Text to search for across captured screen/audio/input history."
+            },
+            "limit": {
+              "type": "integer",
+              "description": "Max results to return (default 20).",
+              "minimum": 1
+            }
+          },
+          "required": ["q"]
+        }
+      }
+    },
+    {
+      "id": "tool-shadow-semantic-search",
+      "name": "Shadow Semantic Search",
+      "kind": "tool",
+      "config": {
+        "slug": "shadow.semantic_search",
+        "backend": "http",
+        "method": "GET",
+        "url": "core:/api/shadow/search/semantic",
+        "secret_headers": {
+          "Authorization": "Bearer env:RYU_TOKEN"
+        },
+        "fail_open": true,
+        "unwrap_body": true,
+        "description": "Semantic (vector) search over captured history. Use for fuzzy, meaning-based recall when exact keywords are unknown. Shadow capture is cross-platform (Windows, macOS, Linux); when the sidecar is not running the tool reports itself unavailable.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "q": {
+              "type": "string",
+              "description": "Natural-language query matched semantically against captured history."
+            },
+            "limit": {
+              "type": "integer",
+              "description": "Max results to return (default 5).",
+              "minimum": 1
+            }
+          },
+          "required": ["q"]
+        }
+      }
+    },
+    {
+      "id": "tool-shadow-timeline",
+      "name": "Shadow Timeline",
+      "kind": "tool",
+      "config": {
+        "slug": "shadow.timeline",
+        "backend": "http",
+        "method": "GET",
+        "url": "core:/api/shadow/timeline",
+        "secret_headers": {
+          "Authorization": "Bearer env:RYU_TOKEN"
+        },
+        "fail_open": true,
+        "unwrap_body": true,
+        "description": "Fetch captured timeline entries within an explicit time range (microseconds since the Unix epoch). Shadow capture is cross-platform (Windows, macOS, Linux); when the sidecar is not running the tool reports itself unavailable.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "start": {
+              "type": "integer",
+              "description": "Range start, microseconds since the Unix epoch."
+            },
+            "end": {
+              "type": "integer",
+              "description": "Range end, microseconds since the Unix epoch."
+            }
+          },
+          "required": ["start", "end"]
+        }
+      }
+    },
+    {
+      "id": "tool-shadow-recent-context",
+      "name": "Shadow Recent Context",
+      "kind": "tool",
+      "config": {
+        "slug": "shadow.recent_context",
+        "backend": "http",
+        "method": "GET",
+        "url": "core:/api/shadow/context/recent",
+        "secret_headers": {
+          "Authorization": "Bearer env:RYU_TOKEN"
+        },
+        "fail_open": true,
+        "unwrap_body": true,
+        "description": "Summarize what the user has been doing in the last N minutes, drawn from captured history. Shadow capture is cross-platform (Windows, macOS, Linux); when the sidecar is not running the tool reports itself unavailable.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "q": {
+              "type": "integer",
+              "description": "How many minutes back to summarize (Shadow defaults the window when omitted; typically 10).",
+              "minimum": 1
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "tool-shadow-computer-use",
+      "name": "Shadow Computer Use",
+      "kind": "tool",
+      "config": {
+        "slug": "shadow.computer_use",
+        "backend": "http",
+        "method": "POST",
+        "url": "core:/api/shadow/computer-use/run",
+        "secret_headers": {
+          "Authorization": "Bearer env:RYU_TOKEN"
+        },
+        "fail_open": false,
+        "unwrap_body": true,
+        "description": "Use the configured Shadow computer-use planner (Shadow, Jev Ultrafast, or an enabled local model plugin) to perform a user-requested task through the current accessibility tree. Requires an explicit user request. The task is bounded to the configured step limit, and Shadow rechecks the focused window and selected control immediately before acting. It can click visible controls, enter requested text, and scroll; it never presses Enter or submits a form automatically.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "goal": {
+              "type": "string",
+              "description": "A concise user-requested computer task. Do not include credentials unless the user explicitly asked to enter them.",
+              "minLength": 1,
+              "maxLength": 4096
+            }
+          },
+          "required": ["goal"]
+        },
+        "output_schema": {
+          "type": "object",
+          "properties": {
+            "planner": {
+              "type": "string",
+              "enum": ["native", "jev", "local", "laya"]
+            },
+            "status": {
+              "type": "string",
+              "enum": ["completed", "blocked", "step_limit"]
+            },
+            "steps": { "type": "array" },
+            "message": { "type": "string" }
+          },
+          "required": ["planner", "status", "steps", "message"]
+        }
+      }
+    }
+  ],
+  "contributes": {
+    "settings_tabs": [
+      {
+        "id": "shadow.settings",
+        "title": "Shadow",
+        "scope": "node",
+        "view": "shadow",
+        "fields": [
+          {
+            "type": "secret",
+            "pref_key": "SHADOW_JEV_API_KEY",
+            "label": "Jev API key",
+            "description": "Stored encrypted on this node and injected only into the Shadow process. Required by the Jev planner; leave blank for the native or local model planner."
+          }
+        ]
+      }
+    ]
+  },
+  "permission_grants": ["tool:http-egress:127.0.0.1"]
+}

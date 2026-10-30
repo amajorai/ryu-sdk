@@ -1,0 +1,10 @@
+# Install policy for the SDK hub (amajorai/ryu-sdk).
+#
+# A seven-day minimum release age is a common global Bun setting (and the
+# monorepo's own policy). The hub pins `@types/bun` to the Bun toolchain it is
+# built with, and that release, with its `bun-types` dependency, can be newer
+# than the window right after a Bun upgrade, so the lockfile could not be
+# generated. Exempt exactly those two packages; everything else keeps the gate.
+[install]
+minimumReleaseAge = 604800
+minimumReleaseAgeExcludes = ["@types/bun", "bun-types"]
