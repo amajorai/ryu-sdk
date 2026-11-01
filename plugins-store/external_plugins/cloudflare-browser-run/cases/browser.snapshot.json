@@ -1,0 +1,92 @@
+{
+  "tool": "browser.snapshot",
+  "kind": "adapter",
+  "code_file": "adapters/browser.snapshot.js",
+  "adapter_tools": [],
+  "cases": [
+    {
+      "name": "prefers structuredContent over text and keeps an opaque snapshot under content",
+      "input": {
+        "tab_id": "https://example.com/"
+      },
+      "provider": {
+        "call": [
+          {
+            "structuredContent": {
+              "title": "S"
+            },
+            "content": [
+              {
+                "type": "text",
+                "text": "ignored"
+              }
+            ]
+          }
+        ]
+      },
+      "expect": {
+        "content": {
+          "title": "S"
+        },
+        "tab_id": "https://example.com/",
+        "url": "https://example.com/",
+        "raw": {
+          "structuredContent": {
+            "title": "S"
+          },
+          "content": [
+            {
+              "type": "text",
+              "text": "ignored"
+            }
+          ]
+        }
+      },
+      "expectCalls": [
+        {
+          "path": "callTool",
+          "args": {
+            "url": "https://example.com/"
+          }
+        }
+      ]
+    },
+    {
+      "name": "a tab id is required",
+      "input": {
+        "tab_id": "  "
+      },
+      "provider": {},
+      "expect": {
+        "error": "tab_id is required; Cloudflare Browser Run uses the URL as the tab id"
+      },
+      "expectCalls": []
+    },
+    {
+      "name": "an empty answer is surfaced raw",
+      "input": {
+        "tab_id": "https://example.com/"
+      },
+      "provider": {
+        "call": [
+          {
+            "content": []
+          }
+        ]
+      },
+      "expect": {
+        "raw": {
+          "content": []
+        }
+      },
+      "expectCalls": [
+        {
+          "path": "callTool",
+          "args": {
+            "url": "https://example.com/"
+          }
+        }
+      ]
+    }
+  ]
+}

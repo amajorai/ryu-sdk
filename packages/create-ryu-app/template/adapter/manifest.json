@@ -1,0 +1,44 @@
+{
+  "id": "com.example.__APP_NAME__",
+  "name": "__APP_DISPLAY_NAME__",
+  "version": "0.1.0",
+  "description": "__APP_DISPLAY_NAME__ — a capability adapter that maps the example.verb capability onto a provider tool.",
+  "category": "Developer Tools",
+  "permission_grants": ["tool:execute", "tool:http-egress:api.example.com"],
+  "runnables": [
+    {
+      "id": "tool-provider",
+      "name": "provider.tool",
+      "kind": "tool",
+      "config": {
+        "slug": "provider.tool",
+        "backend": "http",
+        "method": "POST",
+        "url": "https://api.example.com/search",
+        "unwrap_body": true,
+        "fail_open": true,
+        "description": "Searches the example provider for a query. Replace the URL with your provider's endpoint.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "query": { "type": "string", "description": "What to search for." }
+          },
+          "required": ["query"]
+        }
+      }
+    }
+  ],
+  "provides": [
+    {
+      "capability": "example.verb",
+      "version": "1.0.0",
+      "selectable": true,
+      "tools": {
+        "search": {
+          "tool": "provider.tool",
+          "adapter": { "code_file": "adapters/search.js" }
+        }
+      }
+    }
+  ]
+}

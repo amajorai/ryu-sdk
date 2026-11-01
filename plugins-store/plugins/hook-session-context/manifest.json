@@ -1,0 +1,41 @@
+{
+  "tags": ["context", "date", "time", "hooks"],
+  "author": { "name": "Ryu", "url": "https://ryuhq.com" },
+  "repository": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/hook-session-context",
+  "homepage": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/hook-session-context",
+  "privacyPolicyUrl": "https://ryuhq.com/privacy",
+  "termsOfServiceUrl": "https://ryuhq.com/terms",
+  "id": "@ryu/session-context",
+  "name": "Session Context",
+  "version": "0.1.14",
+  "stability": "experimental",
+  "description": "Injects the current date and time at the start of every session, so the agent stops guessing what \"today\" means and can reason about recency and deadlines. Also the smallest working turn hook in the catalog, which makes it a good template to copy.",
+  "tagline": "Tell the agent what today's date is",
+  "keywords": ["context", "date", "time", "hooks"],
+  "category": "Developer Tools",
+  "icon": "sticky-note-01",
+  "iconDither": { "from": 359, "to": "transparent", "direction": "down" },
+  "surfaces": {
+    "gateway": { "support": "none" },
+    "core": { "support": "full" },
+    "desktop": { "support": "full" },
+    "island": { "support": "full" },
+    "mobile": { "support": "full" },
+    "extension": { "support": "full" },
+    "web": { "support": "full" },
+    "cli": { "support": "full" }
+  },
+  "engines": { "ryu": ">=0.1.0" },
+  "runnables": [],
+  "permission_grants": [],
+  "activation_events": ["*"],
+  "contributes": {
+    "turn_hooks": [
+      {
+        "id": "session-context.start",
+        "on": "session_start",
+        "code_file": "hooks/start.js"
+      }
+    ]
+  }
+}

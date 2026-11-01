@@ -1,0 +1,24 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "ryu.tool-firewall",
+  "version": "0.1.14",
+  "description": "A worked reference for pre- and post-tool hooks: the pre hook denies any tool call whose input matches a destructive pattern (`rm -rf`, `DROP TABLE`, `mkfs`), and the post hook notes what each tool returned. The pattern set is deliberately tiny — copy this directory as the starting point for your own tool policy.",
+  "author": {
+    "name": "Ryu",
+    "url": "https://ryuhq.com"
+  },
+  "homepage": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/tool-firewall",
+  "repository": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/tool-firewall",
+  "keywords": [
+    "security",
+    "tools",
+    "hooks",
+    "example"
+  ],
+  "extensions": {
+    "com.ryuhq.ryu": {
+      "id": "@ryu/tool-firewall",
+      "displayName": "Tool Firewall"
+    }
+  }
+}

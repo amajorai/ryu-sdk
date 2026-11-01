@@ -1,0 +1,43 @@
+# Ryu SDK examples
+
+Small, runnable examples for building on Ryu with [`@ryuhq/sdk`](../packages/sdk). Every
+example routes model calls through the **gateway** — no provider keys live in code.
+
+## Run
+
+```bash
+bun install
+# point at your gateway (defaults shown)
+export RYU_GATEWAY_URL=http://127.0.0.1:7981
+export RYU_GATEWAY_TOKEN=...        # if your gateway requires auth
+export RYU_MODEL=gpt-4o-mini        # any model your gateway routes
+
+bun run examples/agent/minimal-agent.ts "the sea at dawn"
+bun run examples/tool/calculator.ts
+bun run examples/workflow/summarize-and-rate.ts
+bun run examples/gateway/openai-compat-smoke.ts
+
+# launch the browser proof for the SDK-built support app
+bun run --cwd examples/support-widget dev
+```
+
+## What's here
+
+| Example | Shows |
+|---|---|
+| [`agent/minimal-agent.ts`](./agent/minimal-agent.ts) | `defineAgent` — wrap a `run` function as an agent Runnable that calls a model via the gateway |
+| [`tool/calculator.ts`](./tool/calculator.ts) | `defineTool` — a typed, JSON-Schema-validated deterministic tool (no model needed) |
+| [`workflow/summarize-and-rate.ts`](./workflow/summarize-and-rate.ts) | `defineWorkflow` — compose a tool + a model call; agents/tools/workflows are peers under one `run(input, ctx)` contract |
+| [`gateway/openai-compat-smoke.ts`](./gateway/openai-compat-smoke.ts) | Hit the gateway's OpenAI-compatible `/v1/chat/completions` directly |
+| [`support-widget/`](./support-widget/) | A complete SDK-built customer-support app: executable `defineTool`, `defineApp` widget, packed HTML, and a browser preview |
+| [`app/`](./app/) | A full-page Ryu App: one `companion` runnable whose sandboxed UI uses `host.storage`, `host.sideModel` and `host.runAgent` |
+| [`auth-bridge/`](./auth-bridge/) | An auth bridge: a `kind: "node"` sidecar that serves a provider subscription as an OpenAI-compatible model provider (`provides_provider`) |
+
+## The one rule
+
+Every model call goes through the Ryu **gateway** (`defineModel` / `ctx.gateway`),
+never a provider base URL directly — that's where routing, firewall, budgets, and
+audit apply. To scaffold a full project with a `manifest.json`, use
+[`create-ryu-app`](../packages/create-ryu-app): `bunx create-ryu-app my-app`.
+Check any example manifest with `bunx ryu validate <dir>` and side-load a packed one
+into your node with `bunx ryu install <dir>`.
