@@ -1,0 +1,57 @@
+{
+  "tags": ["web", "scraping", "extract"],
+  "author": { "name": "Ryu", "url": "https://ryuhq.com" },
+  "repository": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/scrapling",
+  "homepage": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/scrapling",
+  "privacyPolicyUrl": "https://ryuhq.com/privacy",
+  "termsOfServiceUrl": "https://ryuhq.com/terms",
+  "id": "@ryu/scrapling",
+  "name": "Scrapling",
+  "version": "0.1.14",
+  "stability": "experimental",
+  "description": "Adaptive web-page extraction via the Scrapling MCP server (https://scrapling.readthedocs.io), a BYO local install. Provides the swappable `web.extract` layer as a THIRD provider alongside the local `spider` CLI and the hosted BYOK services, so selecting it re-points the stable `web.extract` tool at a fetcher that impersonates a real browser TLS fingerprint. No API key. Requires `pip install \"scrapling[ai]\"` and the `scrapling` binary on PATH; selecting Scrapling before that makes `web.extract` unavailable until you install it or select a working provider. Deliberately provides NO `web.crawl`: neither the MCP server nor the CLI follows links — only Scrapling's Python `Spider` class crawls, and it is not reachable over MCP.",
+  "iconUrl": "https://raw.githubusercontent.com/D4Vinci/Scrapling/main/docs/assets/logo.png",
+  "iconPadding": "md",
+  "iconDither": { "from": 84, "to": 112, "direction": "down" },
+  "tagline": "Anti-bot page extraction, no API key",
+  "keywords": ["web", "scraping", "extract"],
+  "category": "Search",
+  "surfaces": {
+    "gateway": { "support": "none" },
+    "core": { "support": "full" },
+    "desktop": { "support": "full" },
+    "island": { "support": "full" },
+    "mobile": { "support": "full" },
+    "extension": { "support": "full" },
+    "web": { "support": "full" },
+    "cli": { "support": "full" }
+  },
+  "engines": {
+    "ryu": ">=0.1.0"
+  },
+  "runnables": [],
+  "provides": [
+    {
+      "capability": "web.extract",
+      "version": "1.0.0",
+      "title": "Extract",
+      "selectable": true,
+      "tools": {
+        "web.extract": {
+          "tool": "scrapling.get",
+          "adapter": {
+            "code_file": "adapters/web.extract.js"
+          }
+        }
+      }
+    }
+  ],
+  "permission_grants": ["mcp:scrapling", "tool:execute"],
+  "mcp_servers": {
+    "scrapling": {
+      "command": "scrapling",
+      "args": ["mcp"],
+      "description": "Scrapling — adaptive web scraping over MCP (get, bulk_get, fetch, stealthy_fetch, screenshot, browser sessions). Launched via `scrapling mcp`; unavailable until `pip install \"scrapling[ai]\"` has been run and `scrapling` is on PATH. The browser-backed tools additionally need `scrapling install` to download Chromium and Camoufox."
+    }
+  }
+}
