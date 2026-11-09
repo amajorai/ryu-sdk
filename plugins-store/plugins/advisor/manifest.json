@@ -1,0 +1,107 @@
+{
+  "tags": ["review", "second-opinion", "quality"],
+  "author": { "name": "Ryu", "url": "https://ryuhq.com" },
+  "repository": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/advisor",
+  "homepage": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/advisor",
+  "privacyPolicyUrl": "https://ryuhq.com/privacy",
+  "termsOfServiceUrl": "https://ryuhq.com/terms",
+  "id": "@ryu/advisor",
+  "name": "Advisor",
+  "version": "0.1.14",
+  "stability": "experimental",
+  "category": "Research",
+  "description": "Consult a stronger reviewer model for a second opinion — as an auto-review turn hook (toggle / `/advisor`) and as the model-callable `advisor.consult` tool, a declarative HTTP tool routed through Core's `/api/advisor/consult` bridge.",
+  "tagline": "A stronger second model reviews your answers",
+  "keywords": ["review", "second-opinion", "quality"],
+  "icon": "bulb",
+  "iconDither": { "from": 261, "to": "transparent", "direction": "down" },
+  "surfaces": {
+    "gateway": { "support": "none" },
+    "core": { "support": "full" },
+    "desktop": { "support": "full" },
+    "island": { "support": "limited" },
+    "mobile": { "support": "limited" },
+    "extension": { "support": "limited" },
+    "web": { "support": "full" },
+    "cli": { "support": "full" }
+  },
+  "engines": { "ryu": ">=0.1.0" },
+  "runnables": [
+    {
+      "id": "tool-advisor-consult",
+      "name": "Advisor Consult",
+      "kind": "tool",
+      "config": {
+        "slug": "advisor.consult",
+        "backend": "http",
+        "method": "POST",
+        "url": "core:/api/advisor/consult",
+        "secret_headers": {
+          "Authorization": "Bearer env:RYU_TOKEN"
+        },
+        "fail_open": true,
+        "unwrap_body": true,
+        "description": "Consult a stronger advisor model for a second opinion. Call this BEFORE substantive work (before committing to an approach), when you are stuck, or before declaring a task done. The advisor reviews the question and context you provide and returns concrete, actionable advice. Give its advice serious weight. Returns { ok, model, advice }.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "question": {
+              "type": "string",
+              "description": "What you want advice on — your plan, the approach you are about to take, the bug you are stuck on, or the answer you are about to commit to."
+            },
+            "context": {
+              "type": "string",
+              "description": "Optional. The relevant details the advisor should review: your current plan, the code or answer in question, key constraints, and anything you have already tried. The advisor only sees what you put here, so include enough to judge."
+            },
+            "model": {
+              "type": "string",
+              "description": "Optional explicit advisor model id. Defaults to the configured 'advisor-model' preference, else the node default."
+            }
+          },
+          "required": ["question"]
+        }
+      }
+    }
+  ],
+  "permission_grants": ["hook:side-model", "tool:http-egress:127.0.0.1"],
+  "activation_events": ["*"],
+  "contributes": {
+    "composer_controls": [
+      {
+        "id": "advisor.toggle",
+        "type": "toggle",
+        "flag": "@ryu/advisor",
+        "label": "Advisor",
+        "description": "Consult a stronger reviewer model on the full conversation after each answer."
+      }
+    ],
+    "settings_tabs": [
+      {
+        "id": "advisor.settings",
+        "title": "Advisor",
+        "fields": [
+          {
+            "type": "model_picker",
+            "pref_key": "advisor-model",
+            "label": "Advisor model",
+            "description": "Optional model used to give planning advice. Leave empty to use the node's default."
+          }
+        ]
+      }
+    ],
+    "slash_commands": [
+      {
+        "id": "advisor.consult",
+        "command": "/advisor",
+        "description": "Ask a stronger advisor model to review the whole conversation and advise. Add a focus, e.g. '/advisor is this the right approach?'."
+      }
+    ],
+    "turn_hooks": [
+      {
+        "id": "advisor.review",
+        "on": "post_assistant_turn",
+        "code_file": "hooks/review.js"
+      }
+    ]
+  }
+}

@@ -1,0 +1,142 @@
+[
+  {
+    "note": "every Cyrillic and Greek look-alike folds inside a token holding ASCII",
+    "input": "x\u0391\u0392\u0395\u0396\u0397\u0399\u039a\u039c\u039d\u039f\u03a1\u03a4\u03a5\u03a7\u03b1\u03b9\u03ba\u03bd\u03bf\u03c1\u03c5\u03c7\u0405\u0406\u0408\u0410\u0412\u0415\u041a\u041c\u041d\u041e\u0420\u0421\u0422\u0423\u0425\u0430\u0435\u043e\u0440\u0441\u0443\u0445\u0455\u0456\u0458\u04ae\u04bb\u04c0\u04cf\u0501\u051a\u051b\u051c\u051d",
+    "folded": "xABEZHIKMNOPTYXaikvopuxSIJABEKMHOPCTYXaeopcyxsijYhIldQqWw"
+  },
+  {
+    "note": "a mixed-script address reads as ASCII",
+    "input": "ava@\u0435\u0445\u0430mple.c\u043em",
+    "folded": "ava@example.com"
+  },
+  {
+    "note": "a token without an ASCII letter, digit, @, _ or = keeps its letters",
+    "input": "\u043f\u0440\u0438\u0432\u0435\u0442 \u03b1\u03b2\u03b3 \u0430\u0441\u0435",
+    "folded": "\u043f\u0440\u0438\u0432\u0435\u0442 \u03b1\u03b2\u03b3 \u0430\u0441\u0435"
+  },
+  {
+    "note": "prose keeps its script while the mixed token beside it folds",
+    "input": "\u043f\u043e\u0447\u0442\u0430 ivan@\u0440ost.ru",
+    "folded": "\u043f\u043e\u0447\u0442\u0430 ivan@post.ru"
+  },
+  {
+    "note": "the ideographic full stop is a dot inside an ASCII token",
+    "input": "ava@example\u3002com",
+    "folded": "ava@example.com"
+  },
+  {
+    "note": "a halfwidth ideographic full stop folds the same way",
+    "input": "example\uff61com",
+    "folded": "example.com"
+  },
+  {
+    "note": "CJK prose keeps its full stop",
+    "input": "\u65e5\u672c\u8a9e\u3002",
+    "folded": "\u65e5\u672c\u8a9e\u3002"
+  },
+  {
+    "note": "combining marks on ASCII letters and digits are dropped",
+    "input": "a\u0301va@exa\u0308\u0323mple.com 4\u20e3",
+    "folded": "ava@example.com 4"
+  },
+  {
+    "note": "a mark on a non-ASCII letter, or opening the text, is kept",
+    "input": "\u0301x \u0438\u0306",
+    "folded": "\u0301x \u0438\u0306"
+  },
+  {
+    "note": "a mark on a folded look-alike is dropped",
+    "input": "x\u0430\u0301",
+    "folded": "xa"
+  },
+  {
+    "note": "tokens split on newlines and tabs too",
+    "input": "\u0430\u0441\u0435\n\u0430\u0441\u0435x\t\u0430",
+    "folded": "\u0430\u0441\u0435\nacex\t\u0430"
+  },
+  {
+    "note": "an all-look-alike address folds because it holds an @",
+    "input": "\u0430\u0441\u0435@\u0435\u0445\u0430\u0441\u0435\u3002\u0441\u043e",
+    "folded": "ace@exace.co"
+  },
+  {
+    "note": "a fullwidth at sign marks the token as an address too",
+    "input": "\u0430\u0441\u0435\uff20\u0435\u0445\u0430\u0441\u0435.\u0441\u043e",
+    "folded": "ace@exace.co"
+  },
+  {
+    "note": "an all-look-alike credential key folds because it holds an _ or =",
+    "input": "\u0410\u0420\u0406_\u041a\u0415\u03a5 \u03a4\u039f\u039a\u0395\u039d=",
+    "folded": "API_KEY TOKEN="
+  },
+  {
+    "note": "a handle folds its look-alikes and keeps its other letters",
+    "input": "@\u0438\u0432\u0430\u043d",
+    "folded": "@\u0438\u0432a\u043d"
+  },
+  {
+    "note": "Russian prose without PII keeps its script, colons and hyphens",
+    "input": "\u0412\u043e\u0442 \u043f\u0440\u0438\u043c\u0435\u0440: \u043a\u0442\u043e-\u0442\u043e \u0441\u043a\u0430\u0437\u0430\u043b \u00ab\u0443\u0440\u0430\u00bb.",
+    "folded": "\u0412\u043e\u0442 \u043f\u0440\u0438\u043c\u0435\u0440: \u043a\u0442\u043e-\u0442\u043e \u0441\u043a\u0430\u0437\u0430\u043b \u00ab\u0443\u0440\u0430\u00bb."
+  },
+  {
+    "note": "a credential name spelled wholly in look-alikes folds before a spaced =",
+    "input": "ΤΟΚΕΝ = v",
+    "folded": "TOKEN = v"
+  },
+  {
+    "note": "a look-alike credential name folds with a colon, hyphen or quotes",
+    "input": "АРІ-КЕΥ: \"раѕѕԝԁ\": Ваѕіс",
+    "folded": "API-KEY: \"passwd\": Basic"
+  },
+  {
+    "note": "look-alike PEM labels fold, including a standalone EC",
+    "input": "-----BEGIN ЕС PRIVATE ΚΕΥ-----",
+    "folded": "-----BEGIN EC PRIVATE\u0020KEY-----"
+  },
+  {
+    "note": "a database or connection name spelled wholly in look-alikes folds like the other credential names",
+    "input": "\u0501\u0391\u03a4\u0391\u0392\u0391\u0405\u0395: x \u0421\u039f\u039d\u039d\u0395\u0421\u03a4\u0399\u039f\u039d: y",
+    "folded": "dATABASE: x CONNECTION: y"
+  },
+  {
+    "note": "a look-alike word that is not a credential name keeps its script before a colon",
+    "input": "асе: сосе ТОКЕНЫ:",
+    "folded": "асе: сосе ТОКЕНЫ:"
+  },
+  {
+    "note": "a prefix-keyed secret spelled wholly in look-alikes folds with no digit, @, _ or =",
+    "input": "\u0455\u03ba-\u0430\u0435\u043e\u0440\u0441\u0443\u0445\u0455\u0456\u0458\u04bb\u04cf\u0501\u051b\u051d\u0410\u0412\u0415\u041a\u041c\u041d\u041e",
+    "folded": "\u0073k-aeopcyxsijhldqwABEKMHO"
+  },
+  {
+    "note": "look-alike AKIA, xox, pypi and eyJ prefixes fold at a word start",
+    "input": "\u0410\u039a\u0406\u0410\u0412\u0415\u0396\u0397\u0406\u039a\u039c\u039d\u041e\u0420\u0422\u03a5\u0425\u0405\u0408\u0421 \u0445\u043e\u0445\u0440-\u0430\u0441\u0435 \u0440\u0443\u0440\u0456-\u0430\u0441\u0435 \"\u0435\u0443\u0408.\u0430\u0441\u0435\"",
+    "folded": "\u0041KIABEZHIKMNOPTYXSJC \u0078oxp-ace \u0070ypi-ace \"\u0065yJ.ace\""
+  },
+  {
+    "note": "look-alike words that only resemble a secret prefix keep their script",
+    "input": "\u0455\u03ba \u0410\u039a\u0406 \u0440\u0443\u0440\u0430-\u0441\u0430\u0441\u043e \u0435\u0443 \u0430\u0455\u03ba-\u0430\u0441\u0435",
+    "folded": "\u0455\u03ba \u0410\u039a\u0406 \u0440\u0443\u0440\u0430-\u0441\u0430\u0441\u043e \u0435\u0443 \u0430\u0455\u03ba-\u0430\u0441\u0435"
+  },
+  {
+    "note": "a look-alike secret prefix or credential name in non-ASCII quotes, under a combining mark or before U+3002 still folds",
+    "input": "\u201c\u0455\u03ba-\u0430\u0435\u043e\u0440\u0441\u0443\u0445\u0455\u0456\u0458\u04bb\u04cf\u0501\u051b\u051d\u0410\u0412\u0415\u041a\u041c\u041d\u041e\u201d \u00ab\u0410\u039a\u0406\u0410\u0412\u0415\u0396\u0397\u0406\u039a\u039c\u039d\u041e\u0420\u0422\u03a5\u0425\u0405\u0408\u0421\u00bb \u0455\u0301\u03ba-\u0430\u0441\u0435\u3002 \u00ab\u03a4\u039f\u039a\u0395\u039d\u00bb:",
+    "folded": "\u201c\u0073k-aeopcyxsijhldqwABEKMHO\u201d \u00ab\u0041KIABEZHIKMNOPTYXSJC\u00bb \u0073k-ace. \u00abTOKEN\u00bb:"
+  },
+  {
+    "note": "Russian prose in guillemets and curly quotes, with stress marks and look-alike near misses, keeps its script",
+    "input": "\u00ab\u0420\u043e\u0301\u0437\u0430\u00bb, \u0441\u043a\u0430\u0437\u0430\u0301\u043b \u043e\u043d. \u201c\u0410\u039a\u0406\u201d \u0438 \u00ab\u0455\u03ba\u00bb, \u00ab\u0441\u043e\u0441\u0435\u0301\u00bb.",
+    "folded": "\u00ab\u0420\u043e\u0301\u0437\u0430\u00bb, \u0441\u043a\u0430\u0437\u0430\u0301\u043b \u043e\u043d. \u201c\u0410\u039a\u0406\u201d \u0438 \u00ab\u0455\u03ba\u00bb, \u00ab\u0441\u043e\u0441\u0435\u0301\u00bb."
+  },
+  {
+    "note": "fullwidth, ignorable, dash and native-digit folds still apply",
+    "input": "\uff15\uff15\uff15\u2011\u0661\u0662\u200b3",
+    "folded": "555-123"
+  },
+  {
+    "note": "plain ASCII is unchanged",
+    "input": "ERROR boot failed at 127.0.0.1:7980",
+    "folded": "ERROR boot failed at 127.0.0.1:7980"
+  }
+]

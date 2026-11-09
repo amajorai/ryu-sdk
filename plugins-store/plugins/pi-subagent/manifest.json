@@ -1,0 +1,57 @@
+{
+  "tags": ["subagent", "delegation", "automation", "agent"],
+  "author": { "name": "Ryu", "url": "https://ryuhq.com" },
+  "repository": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/pi-subagent",
+  "homepage": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/pi-subagent",
+  "privacyPolicyUrl": "https://ryuhq.com/privacy",
+  "termsOfServiceUrl": "https://ryuhq.com/terms",
+  "id": "@ryu/pi-subagent",
+  "name": "Subagents",
+  "version": "0.1.14",
+  "stability": "experimental",
+  "category": "Automation",
+  "description": "Adds the Task tool to the managed Pi agent, so it can delegate a bounded, context-isolated job to a child agent.",
+  "tagline": "Let the agent delegate work to child agents",
+  "keywords": ["subagent", "delegation", "automation", "agent"],
+  "icon": "user-multiple-02",
+  "iconDither": { "from": 12, "to": "transparent", "direction": "down" },
+  "surfaces": {
+    "gateway": { "support": "none" },
+    "core": { "support": "full" },
+    "desktop": { "support": "full" },
+    "island": { "support": "limited" },
+    "mobile": { "support": "limited" },
+    "extension": { "support": "limited" },
+    "web": { "support": "limited" },
+    "cli": { "support": "full" }
+  },
+  "engines": { "ryu": ">=0.1.0" },
+  "runnables": [],
+  "permission_grants": ["preferences:read"],
+  "activation_events": ["*"],
+  "contributes": {
+    "settings_tabs": [
+      {
+        "id": "pi-subagent.settings",
+        "title": "Subagents",
+        "scope": "node",
+        "fields": [
+          {
+            "type": "model_picker",
+            "pref_key": "pi-subagent-model",
+            "label": "Default subagent model",
+            "description": "Leave unset to let the main agent choose a model for each task. Selecting a model forces every subagent to use it.",
+            "placeholder": "Let the main agent decide"
+          }
+        ]
+      }
+    ],
+    "pi_extensions": [
+      {
+        "id": "subagent",
+        "file": "pi-extensions/ryu-subagent.ts",
+        "description": "Sub-agent delegation (the Task tool) for the managed Pi agent."
+      }
+    ]
+  }
+}

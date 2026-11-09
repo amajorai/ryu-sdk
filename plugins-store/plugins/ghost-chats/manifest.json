@@ -1,0 +1,42 @@
+{
+  "tags": ["chat", "temporary", "private", "ghost", "incognito"],
+  "author": { "name": "Ryu", "url": "https://ryuhq.com" },
+  "repository": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/ghost-chats",
+  "homepage": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/ghost-chats",
+  "privacyPolicyUrl": "https://ryuhq.com/privacy",
+  "termsOfServiceUrl": "https://ryuhq.com/terms",
+  "id": "@ryu/ghost-chats",
+  "name": "Temporary Chats",
+  "version": "0.1.0",
+  "stability": "experimental",
+  "category": "Productivity",
+  "description": "Start a private temporary chat that stays in the current tab and leaves no conversation history, drafts, presence, or reactions behind.",
+  "tagline": "Chat privately without saving a thread",
+  "keywords": ["chat", "temporary", "private", "ghost", "incognito"],
+  "icon": "ghost",
+  "iconDither": { "from": 286, "to": "transparent", "direction": "down" },
+  "surfaces": {
+    "gateway": { "support": "none" },
+    "core": { "support": "full" },
+    "desktop": { "support": "full" },
+    "island": { "support": "none" },
+    "mobile": { "support": "none" },
+    "extension": { "support": "none" },
+    "web": { "support": "none" },
+    "cli": { "support": "none" }
+  },
+  "engines": { "ryu": ">=0.1.0" },
+  "runnables": [],
+  "activation_events": ["*"],
+  "contributes": {
+    "chat_features": [
+      {
+        "id": "ghost-chats",
+        "kind": "ghost-chat",
+        "renderer": "temporary-chat",
+        "persistence": "none",
+        "scope": "current-tab"
+      }
+    ]
+  }
+}

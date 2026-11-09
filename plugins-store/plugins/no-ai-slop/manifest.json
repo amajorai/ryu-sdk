@@ -1,0 +1,79 @@
+{
+  "tags": ["writing", "editing", "quality", "style", "turn"],
+  "author": { "name": "Ryu", "url": "https://ryuhq.com" },
+  "repository": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/no-ai-slop",
+  "homepage": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/no-ai-slop",
+  "privacyPolicyUrl": "https://ryuhq.com/privacy",
+  "termsOfServiceUrl": "https://ryuhq.com/terms",
+  "id": "@ryu/no-ai-slop",
+  "name": "No AI Slop",
+  "version": "0.1.14",
+  "stability": "experimental",
+  "description": "Bundles the `no-ai-slop` editing skill and runs it on every finished answer: a separate reviewer with a fresh context reads the reply, names the AI-slop patterns it finds, and the agent rewrites the answer to fix them. One pass by default, configurable up to twelve, or set to 0 and trigger it by hand from the composer '+' menu. A clean answer is left alone silently.",
+  "tagline": "Every answer edited until it stops sounding like AI",
+  "keywords": ["writing", "editing", "quality", "style", "turn"],
+  "category": "Productivity",
+  "icon": "text-align-left",
+  "iconDither": { "from": 264, "to": "transparent", "direction": "down" },
+  "surfaces": {
+    "gateway": { "support": "none" },
+    "core": { "support": "full" },
+    "desktop": { "support": "full" },
+    "island": { "support": "limited" },
+    "mobile": { "support": "limited" },
+    "extension": { "support": "limited" },
+    "web": { "support": "full" },
+    "cli": { "support": "full" }
+  },
+  "engines": { "ryu": ">=0.1.0" },
+  "runnables": [],
+  "permission_grants": ["hook:run-agent", "preferences:read"],
+  "activation_events": ["*"],
+  "contributes": {
+    "composer_controls": [
+      {
+        "id": "no-ai-slop.toggle",
+        "type": "toggle",
+        "flag": "io.ryu.no-ai-slop",
+        "label": "No AI slop",
+        "description": "Check this turn's answer for AI-slop patterns, even when automatic passes are set to 0."
+      }
+    ],
+    "settings_tabs": [
+      {
+        "id": "no-ai-slop.settings",
+        "title": "No AI slop",
+        "fields": [
+          {
+            "type": "number",
+            "pref_key": "no-ai-slop-passes",
+            "label": "Automatic review passes",
+            "description": "How many times a finished answer is reviewed and rewritten. Each pass is a fresh reviewer with no memory of the last one. 0 turns automatic review off, leaving the composer '+' toggle as a manual trigger.",
+            "default": 1,
+            "min": 0,
+            "max": 12,
+            "step": 1
+          },
+          {
+            "type": "select",
+            "pref_key": "no-ai-slop-mode",
+            "label": "What a review does",
+            "description": "Rewrite has the agent revise its own answer. Report leaves the answer alone and shows the findings beside it.",
+            "default": "revise",
+            "options": [
+              { "value": "revise", "label": "Rewrite the answer" },
+              { "value": "report", "label": "Report the findings only" }
+            ]
+          }
+        ]
+      }
+    ],
+    "turn_hooks": [
+      {
+        "id": "no-ai-slop.review",
+        "on": "post_assistant_turn",
+        "code_file": "hooks/review.js"
+      }
+    ]
+  }
+}

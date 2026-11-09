@@ -1,0 +1,110 @@
+{
+  "tags": ["memory", "learning", "mistakes", "rules", "quality"],
+  "author": { "name": "Ryu", "url": "https://ryuhq.com" },
+  "repository": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/no-more-mistakes",
+  "homepage": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/no-more-mistakes",
+  "privacyPolicyUrl": "https://ryuhq.com/privacy",
+  "termsOfServiceUrl": "https://ryuhq.com/terms",
+  "id": "@ryu/no-more-mistakes",
+  "name": "No More Mistakes",
+  "version": "0.1.14",
+  "stability": "experimental",
+  "description": "Notices when you correct the agent, proposes a one-line lesson for your confirmation, and hands only explicitly saved rules to later sessions before the first word is generated. Each confirmed rule is an ordinary Space document you can read, edit or delete, and `/mistakes` lists, adds and forgets them from the chat.",
+  "tagline": "Correct it once, not every week",
+  "keywords": ["memory", "learning", "mistakes", "rules", "quality"],
+  "category": "Knowledge & Memory",
+  "icon": "eraser-01",
+  "iconDither": { "from": 12, "to": "transparent", "direction": "down" },
+  "surfaces": {
+    "gateway": { "support": "none" },
+    "core": { "support": "full" },
+    "desktop": { "support": "full" },
+    "island": { "support": "limited" },
+    "mobile": { "support": "limited" },
+    "extension": { "support": "limited" },
+    "web": { "support": "full" },
+    "cli": { "support": "full" }
+  },
+  "engines": { "ryu": ">=0.1.0" },
+  "runnables": [],
+  "permission_grants": [
+    "hook:side-model",
+    "storage:kv",
+    "preferences:read",
+    "spaces:docs"
+  ],
+  "activation_events": ["*"],
+  "contributes": {
+    "slash_commands": [
+      {
+        "id": "no-more-mistakes.list",
+        "command": "/mistakes",
+        "description": "The rules learned from past corrections. `/mistakes add <rule>` writes one by hand, `/mistakes forget <number>` drops one, `/mistakes off` stops learning in this chat."
+      }
+    ],
+    "settings_tabs": [
+      {
+        "id": "no-more-mistakes.settings",
+        "title": "No More Mistakes",
+        "scope": "node",
+        "fields": [
+          {
+            "type": "toggle",
+            "pref_key": "mistakes-capture",
+            "label": "Learn from corrections",
+            "description": "When a message reads as a correction, a side model proposes a rule as a note. Nothing is saved until you explicitly confirm it with `/mistakes add`.",
+            "default": true
+          },
+          {
+            "type": "toggle",
+            "pref_key": "mistakes-brief",
+            "label": "Brief the agent at the start of a chat",
+            "description": "Hand the rule list to the agent on the first turn of every conversation. Off keeps recording rules but stops enforcing them.",
+            "default": true
+          },
+          {
+            "type": "text",
+            "pref_key": "mistakes-space",
+            "label": "Space",
+            "description": "The Space the rules live in, by name. Created the first time a rule is written; rename it here to move future rules somewhere else.",
+            "default": "Mistakes"
+          },
+          {
+            "type": "number",
+            "pref_key": "mistakes-brief-max",
+            "label": "Rules per briefing",
+            "description": "How many of the most recent rules are handed to the agent at the start of a chat. The rest stay in the Space and stay searchable.",
+            "default": 12,
+            "min": 1,
+            "max": 50,
+            "step": 1
+          },
+          {
+            "type": "model_picker",
+            "pref_key": "mistakes-model",
+            "label": "Extraction model",
+            "description": "Optional. Reads the correction and writes the rule. Empty uses the local engine (or the node default)."
+          }
+        ]
+      }
+    ],
+    "turn_hooks": [
+      {
+        "id": "no-more-mistakes.capture",
+        "on": "pre_user_turn",
+        "code_file": "hooks/capture.js"
+      },
+      {
+        "id": "no-more-mistakes.brief",
+        "on": "session_start",
+        "code_file": "hooks/brief.js"
+      },
+      {
+        "id": "no-more-mistakes.command",
+        "on": "pre_user_turn",
+        "match": { "commands": ["/mistakes"] },
+        "code_file": "hooks/command.js"
+      }
+    ]
+  }
+}
