@@ -1,0 +1,3 @@
+[bindings.csharp]
+namespace = "Ryu.Sdk"
+access_modifier = "public"

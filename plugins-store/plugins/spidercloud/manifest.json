@@ -1,0 +1,122 @@
+{
+  "tags": ["web", "crawl", "scraping"],
+  "author": { "name": "Ryu", "url": "https://ryuhq.com" },
+  "repository": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/spidercloud",
+  "homepage": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/spidercloud",
+  "privacyPolicyUrl": "https://ryuhq.com/privacy",
+  "termsOfServiceUrl": "https://ryuhq.com/terms",
+  "id": "@ryu/spidercloud",
+  "name": "Spider Cloud",
+  "version": "0.1.14",
+  "stability": "experimental",
+  "description": "Hosted multi-page web crawling via the Spider Cloud API (https://spider.cloud), exposed as one declarative HTTP tool. Provides the swappable `web.crawl` layer as a SECOND provider alongside the local `spider` CLI, so selecting it re-points the stable `web.crawl` tool at a hosted crawler that needs no local binary. The crawl is synchronous — `run_in_background` defaults to false and one request returns every fetched page's content, so there is no job id to poll. The canonical `depth` argument is deliberately DROPPED: Spider Cloud documents `depth: 0` as \"no limit will be applied\", the exact inverse of the canonical contract's \"0 = the start page only\". Requires a BYOK Spider Cloud API key.",
+  "iconUrl": "https://avatars.githubusercontent.com/u/112983871?v=4",
+  "iconPadding": "md",
+  "iconDither": { "from": 335, "to": "transparent", "direction": "down" },
+  "tagline": "Hosted site crawling, no local binary",
+  "keywords": ["web", "crawl", "scraping"],
+  "category": "Search",
+  "surfaces": {
+    "gateway": { "support": "none" },
+    "core": { "support": "full" },
+    "desktop": { "support": "full" },
+    "island": { "support": "limited" },
+    "mobile": { "support": "limited" },
+    "extension": { "support": "limited" },
+    "web": { "support": "full" },
+    "cli": { "support": "full" }
+  },
+  "engines": {
+    "ryu": ">=0.1.0"
+  },
+  "runnables": [
+    {
+      "id": "tool-spidercloud-crawl",
+      "name": "Spider Cloud Crawl",
+      "kind": "tool",
+      "config": {
+        "slug": "spidercloud.crawl",
+        "backend": "http",
+        "method": "POST",
+        "url": "https://api.spider.cloud/crawl",
+        "secret_headers": {
+          "Authorization": "Bearer env:RYU_SPIDERCLOUD_API_KEY"
+        },
+        "fail_open": true,
+        "body_defaults": {
+          "limit": 10,
+          "return_format": "markdown",
+          "request": "smart",
+          "metadata": true,
+          "depth": 3
+        },
+        "description": "Crawl a site from a start URL with the hosted Spider Cloud crawler and return every fetched page as markdown, in a single request. Requires RYU_SPIDERCLOUD_API_KEY. Crawl depth is pinned to 3 hops: Spider Cloud's `depth` is a maximum where 0 means NO limit — the inverse of the canonical `web.crawl.depth`, where 0 means the start page only — so the canonical argument cannot be translated by a rename and is dropped. Without a pin an unqualified crawl would run at Spider Cloud's own default of 25.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "url": {
+              "type": "string",
+              "description": "The start URL to crawl from."
+            },
+            "limit": {
+              "type": "integer",
+              "description": "Maximum number of pages to fetch (default 10). Capped well below the canonical ceiling because the crawl is synchronous and the host HTTP tool aborts at 30s; the upstream API treats 0 as \"crawl every page on the site\", which is why this is never sent empty.",
+              "default": 10,
+              "minimum": 1,
+              "maximum": 25
+            }
+          },
+          "required": ["url"]
+        }
+      }
+    }
+  ],
+  "provides": [
+    {
+      "capability": "web.crawl",
+      "version": "1.0.0",
+      "title": "Crawl",
+      "selectable": true,
+      "tools": {
+        "web.crawl": {
+          "tool": "spidercloud.crawl",
+          "args": {
+            "depth": ""
+          },
+          "arg_clamp": {
+            "limit": {
+              "min": 1,
+              "max": 25
+            }
+          },
+          "response": {
+            "results": "body",
+            "fields": {
+              "title": "metadata.title",
+              "url": "url",
+              "content": "content"
+            }
+          }
+        }
+      }
+    }
+  ],
+  "permission_grants": ["tool:http-egress:api.spider.cloud"],
+  "contributes": {
+    "settings_tabs": [
+      {
+        "id": "spidercloud.settings",
+        "title": "Spider Cloud",
+        "scope": "node",
+        "fields": [
+          {
+            "type": "secret",
+            "pref_key": "RYU_SPIDERCLOUD_API_KEY",
+            "label": "Spider Cloud API key",
+            "description": "Create a key at https://spider.cloud/api-keys/ and paste it here. Stored encrypted on this node and never shown again — re-paste to change it. Without a key the Spider Cloud tool stays installed but returns nothing, so `web.crawl` falls back to whichever other provider you select."
+          }
+        ]
+      }
+    ]
+  }
+}

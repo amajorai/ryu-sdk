@@ -1,0 +1,37 @@
+{
+  "id": "@ryu/rag",
+  "name": "RAG (retrieval-augmented generation)",
+  "version": "1.0.0",
+  "mandatory": true,
+  "runnables": [],
+  "requires": {
+    "capabilities": [
+      {
+        "capability": "engines"
+      }
+    ]
+  },
+  "provides": [
+    {
+      "capability": "rag",
+      "version": "1.0.0"
+    }
+  ],
+  "description": "The default in-process RAG capability: embeds text (via the engines embed sidecar) and serves vector retrieval. A GraphRAG or third-party RAG provider app can bind the `rag` capability to swap the implementation.",
+  "keywords": ["rag", "retrieval", "embeddings", "search"],
+  "tagline": "Embeddings + retrieval",
+  "category": "Core",
+  "permission_grants": [],
+  "permission_levels": [
+    {
+      "id": "space.read",
+      "label": "Can search",
+      "description": "Search indexed Space content and receive retrieved passages as context."
+    },
+    {
+      "id": "space.write",
+      "label": "Can index",
+      "description": "Add content to the retrieval index, which becomes trusted context for everyone on the node."
+    }
+  ]
+}

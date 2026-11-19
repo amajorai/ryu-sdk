@@ -1,0 +1,48 @@
+{
+  "tags": ["security", "tools", "hooks", "example"],
+  "author": { "name": "Ryu", "url": "https://ryuhq.com" },
+  "repository": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/tool-firewall",
+  "homepage": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/tool-firewall",
+  "privacyPolicyUrl": "https://ryuhq.com/privacy",
+  "termsOfServiceUrl": "https://ryuhq.com/terms",
+  "id": "@ryu/tool-firewall",
+  "name": "Tool Firewall",
+  "version": "0.1.14",
+  "stability": "experimental",
+  "description": "A worked reference for pre- and post-tool hooks: the pre hook denies any tool call whose input matches a destructive pattern (`rm -rf`, `DROP TABLE`, `mkfs`), and the post hook notes what each tool returned. The pattern set is deliberately tiny — copy this directory as the starting point for your own tool policy.",
+  "tagline": "Reference plugin: block destructive tool calls",
+  "keywords": ["security", "tools", "hooks", "example"],
+  "category": "Security",
+  "icon": "shield-ban",
+  "iconDither": { "from": 14, "to": "transparent", "direction": "down" },
+  "surfaces": {
+    "gateway": { "support": "none" },
+    "core": { "support": "full" },
+    "desktop": { "support": "full" },
+    "island": { "support": "full" },
+    "mobile": { "support": "full" },
+    "extension": { "support": "full" },
+    "web": { "support": "full" },
+    "cli": { "support": "full" }
+  },
+  "engines": { "ryu": ">=0.1.0" },
+  "runnables": [],
+  "permission_grants": [],
+  "activation_events": ["*"],
+  "contributes": {
+    "turn_hooks": [
+      {
+        "id": "tool-firewall.pre",
+        "on": "pre_tool_use",
+        "match": { "tools": ["*"] },
+        "code_file": "hooks/pre.js"
+      },
+      {
+        "id": "tool-firewall.post",
+        "on": "post_tool_use",
+        "match": { "tools": ["*"] },
+        "code_file": "hooks/post.js"
+      }
+    ]
+  }
+}

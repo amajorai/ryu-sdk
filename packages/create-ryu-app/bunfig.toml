@@ -1,0 +1,6 @@
+[test]
+# Mock the native addon before the test module graph loads (see test-preload.ts).
+preload = ["./test-preload.ts"]
+# The services template imports @ryuhq/services, which this package does not
+# depend on; services-template.test.ts runs its suite inside a scaffolded project.
+pathIgnorePatterns = ["template/services/**"]

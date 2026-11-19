@@ -1,0 +1,31 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "ryu.cloudflare-browser-run",
+  "version": "0.1.0",
+  "description": "Hosted Browser Run quick actions over Cloudflare's remote OAuth MCP server. Adds URL-scoped navigate, snapshot, and screenshot verbs to Ryu's swappable browser.control layer; the full Browser Run MCP tool set remains available under cloudflare.*.",
+  "author": {
+    "name": "Cloudflare",
+    "url": "https://www.cloudflare.com"
+  },
+  "homepage": "https://developers.cloudflare.com/browser-run/",
+  "repository": "https://github.com/cloudflare/mcp-server-cloudflare",
+  "license": "Apache-2.0",
+  "keywords": [
+    "browser",
+    "automation",
+    "cloudflare",
+    "remote",
+    "web"
+  ],
+  "extensions": {
+    "com.ryuhq.ryu": {
+      "id": "@ryu/cloudflare-browser-run",
+      "displayName": "Cloudflare Browser Run",
+      "mcp": {
+        "cloudflare": {
+          "description": "Cloudflare Browser Run remote OAuth MCP server. Native tools include HTML, Markdown, PDF, snapshot, screenshot, JSON, links, crawl, and browser-session operations."
+        }
+      }
+    }
+  }
+}

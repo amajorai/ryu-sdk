@@ -1,0 +1,28 @@
+// Bun Snapshot v1, https://bun.sh/docs/test/snapshots
+
+exports[`createRyuServer: OpenAPI emits a concrete path per agent, workflow, and tool with their schemas 1`] = `
+[
+  "/api/agents",
+  "/api/agents/assistant/generate",
+  "/api/agents/assistant/stream",
+  "/api/approvals/{approvalId}",
+  "/api/tools",
+  "/api/tools/weather/execute",
+  "/api/traces",
+  "/api/workflows",
+  "/api/workflows/gated/runs",
+  "/api/workflows/gated/runs/{runId}",
+  "/api/workflows/gated/runs/{runId}/cancel",
+  "/api/workflows/gated/runs/{runId}/resume",
+  "/api/workflows/gated/runs/{runId}/resume/stream",
+  "/api/workflows/gated/start",
+  "/api/workflows/gated/stream",
+  "/api/workflows/shout/runs",
+  "/api/workflows/shout/runs/{runId}",
+  "/api/workflows/shout/runs/{runId}/cancel",
+  "/api/workflows/shout/runs/{runId}/resume",
+  "/api/workflows/shout/runs/{runId}/resume/stream",
+  "/api/workflows/shout/start",
+  "/api/workflows/shout/stream",
+]
+`;
