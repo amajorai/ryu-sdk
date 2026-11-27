@@ -1,0 +1,139 @@
+{
+  "tags": ["search", "web"],
+  "author": { "name": "Ryu", "url": "https://ryuhq.com" },
+  "repository": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/brave",
+  "homepage": "https://github.com/amajorai/ryu-marketplace/tree/main/plugins/plugins/brave",
+  "privacyPolicyUrl": "https://ryuhq.com/privacy",
+  "termsOfServiceUrl": "https://ryuhq.com/terms",
+  "id": "@ryu/brave",
+  "name": "Brave Search",
+  "version": "0.1.14",
+  "stability": "experimental",
+  "description": "Independent web search via the Brave Search API (https://brave.com/search/api/), exposed as one declarative HTTP tool. Provides the swappable `web.search` layer, so selecting it in the layer picker re-points the stable `web.search` tool at Brave's own crawled index without changing what agents call. Brave is search-only: it deliberately declares neither `web.extract` nor `web.crawl`. Requires a BYOK Brave Search API key.",
+  "icon": "svgl:brave",
+  "iconPadding": "md",
+  "iconDither": { "from": 300, "to": "transparent", "direction": "down" },
+  "tagline": "Search an index nobody else syndicates",
+  "keywords": ["search", "web"],
+  "category": "Search",
+  "surfaces": {
+    "gateway": { "support": "none" },
+    "core": { "support": "full" },
+    "desktop": { "support": "full" },
+    "island": { "support": "limited" },
+    "mobile": { "support": "limited" },
+    "extension": { "support": "limited" },
+    "web": { "support": "full" },
+    "cli": { "support": "full" }
+  },
+  "engines": {
+    "ryu": ">=0.1.0"
+  },
+  "runnables": [
+    {
+      "id": "tool-brave-search",
+      "name": "Brave Web Search",
+      "kind": "tool",
+      "config": {
+        "slug": "brave.search",
+        "backend": "http",
+        "method": "GET",
+        "url": "https://api.search.brave.com/res/v1/web/search",
+        "secret_headers": {
+          "X-Subscription-Token": "env:RYU_BRAVE_API_KEY"
+        },
+        "fail_open": true,
+        "unwrap_body": true,
+        "description": "Web search over Brave's own independent index. Returns ranked results with titles, URLs, and description snippets. This is a GET endpoint, so every argument is sent as a query parameter. Requires RYU_BRAVE_API_KEY.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "q": {
+              "type": "string",
+              "description": "The search query. Brave accepts at most 400 characters and 50 words."
+            },
+            "count": {
+              "type": "integer",
+              "description": "Results per page. Brave's own maximum is 20, which is also its default.",
+              "minimum": 1,
+              "maximum": 20
+            },
+            "offset": {
+              "type": "integer",
+              "description": "Zero-based page offset (Brave's maximum is 9).",
+              "minimum": 0,
+              "maximum": 9
+            },
+            "country": {
+              "type": "string",
+              "description": "Two-letter country code to target results at (Brave defaults to US)."
+            },
+            "search_lang": {
+              "type": "string",
+              "description": "Language code to filter result content by (Brave defaults to en)."
+            },
+            "safesearch": {
+              "type": "string",
+              "description": "Adult-content filter (Brave defaults to moderate).",
+              "enum": ["off", "moderate", "strict"]
+            },
+            "freshness": {
+              "type": "string",
+              "description": "Restrict results by age: pd (past 24h), pw (past 7 days), pm (past 31 days), py (past year), or an explicit YYYY-MM-DDtoYYYY-MM-DD range."
+            }
+          },
+          "required": ["q"]
+        }
+      }
+    }
+  ],
+  "provides": [
+    {
+      "capability": "web.search",
+      "version": "1.0.0",
+      "title": "Search",
+      "selectable": true,
+      "tools": {
+        "web.search": {
+          "tool": "brave.search",
+          "args": {
+            "query": "q",
+            "limit": "count"
+          },
+          "response": {
+            "results": "web.results",
+            "fields": {
+              "title": "title",
+              "url": "url",
+              "snippet": "description"
+            }
+          },
+          "arg_clamp": {
+            "limit": {
+              "min": 1,
+              "max": 20
+            }
+          }
+        }
+      }
+    }
+  ],
+  "permission_grants": ["tool:http-egress:api.search.brave.com"],
+  "contributes": {
+    "settings_tabs": [
+      {
+        "id": "brave.settings",
+        "title": "Brave Search",
+        "scope": "node",
+        "fields": [
+          {
+            "type": "secret",
+            "pref_key": "RYU_BRAVE_API_KEY",
+            "label": "Brave Search subscription token",
+            "description": "Create a subscription token at https://api-dashboard.search.brave.com/app/keys and paste it here. Stored encrypted on this node and never shown again — re-paste to change it. Without a token the Brave tool stays installed but returns nothing, so `web.search` falls back to whichever other provider you select."
+          }
+        ]
+      }
+    ]
+  }
+}
